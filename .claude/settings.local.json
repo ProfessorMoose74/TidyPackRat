@@ -4,7 +4,13 @@
       "Bash(mkdir:*)",
       "Bash(tree:*)",
       "Bash(git init:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git check-ignore:*)",
+      "Bash(git commit:*)",
+      "Bash(git branch:*)",
+      "Bash(git remote add:*)",
+      "Bash(git push:*)",
+      "Bash(git pull:*)"
     ],
     "deny": [],
     "ask": []
