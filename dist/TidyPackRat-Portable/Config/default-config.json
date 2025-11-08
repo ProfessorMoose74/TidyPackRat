@@ -1,0 +1,82 @@
+{
+  "appName": "TidyPackRat",
+  "version": "1.0.0",
+  "sourceFolder": "%USERPROFILE%\\Downloads",
+  "fileAgeThreshold": 24,
+  "fileSizeThreshold": 0,
+  "duplicateHandling": "rename",
+  "categories": [
+    {
+      "name": "Images",
+      "extensions": [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".svg", ".webp", ".ico", ".tiff", ".tif"],
+      "destination": "%USERPROFILE%\\Pictures",
+      "enabled": true
+    },
+    {
+      "name": "Documents",
+      "extensions": [".pdf", ".docx", ".doc", ".txt", ".rtf", ".odt", ".tex", ".wpd"],
+      "destination": "%USERPROFILE%\\Documents",
+      "enabled": true
+    },
+    {
+      "name": "Spreadsheets",
+      "extensions": [".xlsx", ".xls", ".csv", ".ods", ".xlsm"],
+      "destination": "%USERPROFILE%\\Documents\\Spreadsheets",
+      "enabled": true
+    },
+    {
+      "name": "Presentations",
+      "extensions": [".pptx", ".ppt", ".odp", ".key"],
+      "destination": "%USERPROFILE%\\Documents\\Presentations",
+      "enabled": true
+    },
+    {
+      "name": "Archives",
+      "extensions": [".zip", ".rar", ".7z", ".tar", ".gz", ".bz2", ".xz", ".iso"],
+      "destination": "%USERPROFILE%\\Documents\\Archives",
+      "enabled": true
+    },
+    {
+      "name": "Videos",
+      "extensions": [".mp4", ".avi", ".mkv", ".mov", ".wmv", ".flv", ".webm", ".m4v"],
+      "destination": "%USERPROFILE%\\Videos",
+      "enabled": true
+    },
+    {
+      "name": "Audio",
+      "extensions": [".mp3", ".wav", ".flac", ".m4a", ".ogg", ".aac", ".wma", ".opus"],
+      "destination": "%USERPROFILE%\\Music",
+      "enabled": true
+    },
+    {
+      "name": "Executables",
+      "extensions": [".exe", ".msi", ".bat", ".cmd", ".ps1"],
+      "destination": "%USERPROFILE%\\Downloads\\Executables",
+      "enabled": false
+    },
+    {
+      "name": "Code",
+      "extensions": [".py", ".js", ".html", ".css", ".cpp", ".cs", ".java", ".php", ".rb", ".go", ".rs", ".ts", ".jsx", ".tsx", ".vue", ".json", ".xml", ".yaml", ".yml"],
+      "destination": "%USERPROFILE%\\Documents\\Code",
+      "enabled": false
+    }
+  ],
+  "schedule": {
+    "enabled": false,
+    "frequency": "daily",
+    "time": "02:00",
+    "runOnStartup": false
+  },
+  "excludePatterns": [
+    "*.tmp",
+    "~*",
+    "*.crdownload",
+    "*.part"
+  ],
+  "logging": {
+    "enabled": true,
+    "logPath": "%PROGRAMDATA%\\TidyPackRat\\logs",
+    "logLevel": "info",
+    "maxLogFiles": 12
+  }
+}
