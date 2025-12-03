@@ -134,7 +134,7 @@ namespace TidyPackRat.Helpers
             return new AppConfiguration
             {
                 AppName = "TidyPackRat",
-                Version = "1.0.0",
+                Version = "1.1.0",
                 SourceFolder = downloads,
                 FileAgeThreshold = 24,
                 FileSizeThreshold = 0,

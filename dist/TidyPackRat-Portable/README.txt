@@ -1,5 +1,5 @@
 ================================================================================
-  TidyPackRat v1.0.1 - Portable Edition
+  TidyPackRat v1.1.0 - Portable Edition
   "Sorting your files, to clean up your mess."
 ================================================================================
 

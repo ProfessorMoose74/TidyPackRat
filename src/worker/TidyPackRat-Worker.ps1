@@ -23,7 +23,7 @@
     .\TidyPackRat-Worker.ps1 -ConfigPath "config.json" -DryRun -Verbose
 
 .NOTES
-    Version: 1.0.0
+    Version: 1.1.0
     Author: TidyPackRat Team
     License: MIT
 #>
@@ -94,7 +94,7 @@ function Initialize-Logging {
 
         Write-Log -Message "========================================" -Level "INFO"
         Write-Log -Message "TidyPackRat Worker Started" -Level "INFO"
-        Write-Log -Message "Version: 1.0.0" -Level "INFO"
+        Write-Log -Message "Version: 1.1.0" -Level "INFO"
         if ($DryRun) {
             Write-Log -Message "DRY RUN MODE - No files will be moved" -Level "WARN"
         }

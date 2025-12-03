@@ -34,7 +34,7 @@
                                Margin="0,5,0,0"/>
                 </StackPanel>
                 <TextBlock Grid.Column="1"
-                           Text="v1.0.0"
+                           Text="v1.1.0"
                            FontSize="12"
                            Foreground="#BDC3C7"
                            VerticalAlignment="Center"/>

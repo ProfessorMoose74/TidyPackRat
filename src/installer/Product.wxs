@@ -5,7 +5,7 @@
   <Product Id="*"
            Name="TidyPackRat File Organizer"
            Language="1033"
-           Version="1.0.0.0"
+           Version="1.1.0.0"
            Manufacturer="TidyPackRat"
            UpgradeCode="A1B2C3D4-E5F6-4A5B-8C9D-1E2F3A4B5C6D">
 

@@ -1,6 +1,6 @@
 {
   "appName": "TidyPackRat",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "sourceFolder": "%USERPROFILE%\\Downloads",
   "fileAgeThreshold": 24,
   "fileSizeThreshold": 0,

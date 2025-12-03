@@ -5,7 +5,7 @@ REM "Sorting your files, to clean up your mess."
 echo.
 echo ================================================================================
 echo   TidyPackRat Configuration Tool
-echo   Portable Edition v1.0.1
+echo   Portable Edition v1.1.0
 echo ================================================================================
 echo.
 
