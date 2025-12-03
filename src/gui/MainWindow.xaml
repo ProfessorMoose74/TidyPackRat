@@ -100,6 +100,7 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="200"/>
@@ -117,13 +118,25 @@
                                  Margin="0,0,0,10"
                                  Text="24"/>
 
-                        <!-- Duplicate Handling -->
+                        <!-- File Size Threshold -->
                         <TextBlock Grid.Row="1" Grid.Column="0"
+                                   Text="Skip files smaller than (KB):"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,10,10"/>
+                        <TextBox x:Name="txtFileSizeThreshold"
+                                 Grid.Row="1" Grid.Column="1"
+                                 Padding="8"
+                                 Margin="0,0,0,10"
+                                 Text="0"
+                                 ToolTip="Files smaller than this size (in KB) will be skipped. Set to 0 to process all files."/>
+
+                        <!-- Duplicate Handling -->
+                        <TextBlock Grid.Row="2" Grid.Column="0"
                                    Text="Duplicate file handling:"
                                    VerticalAlignment="Center"
                                    Margin="0,0,10,10"/>
                         <ComboBox x:Name="cmbDuplicateHandling"
-                                  Grid.Row="1" Grid.Column="1"
+                                  Grid.Row="2" Grid.Column="1"
                                   Padding="8"
                                   Margin="0,0,0,10">
                             <ComboBoxItem Content="Rename (add number)" IsSelected="True" Tag="rename"/>
@@ -131,12 +144,12 @@
                         </ComboBox>
 
                         <!-- Exclude Patterns -->
-                        <TextBlock Grid.Row="2" Grid.Column="0"
+                        <TextBlock Grid.Row="3" Grid.Column="0"
                                    Text="Exclude patterns:"
                                    VerticalAlignment="Top"
                                    Margin="0,8,10,0"/>
                         <TextBox x:Name="txtExcludePatterns"
-                                 Grid.Row="2" Grid.Column="1"
+                                 Grid.Row="3" Grid.Column="1"
                                  Padding="8"
                                  Height="60"
                                  AcceptsReturn="True"

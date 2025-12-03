@@ -215,12 +215,41 @@ Test-Path "C:\ProgramData\TidyPackRat\config.json"
    }
    ```
 
-3. Restore backup or default:
+3. Restore from automatic backup:
    ```powershell
-   # Restore default configuration
+   # TidyPackRat creates a backup before each save
+   Copy-Item "C:\ProgramData\TidyPackRat\config.json.backup" `
+             "C:\ProgramData\TidyPackRat\config.json" -Force
+   ```
+
+4. Restore default configuration:
+   ```powershell
+   # If backup is also corrupted, restore from default
    Copy-Item "C:\Program Files\TidyPackRat\config\default-config.json" `
              "C:\ProgramData\TidyPackRat\config.json" -Force
    ```
+
+### Validation Errors When Saving
+
+**Symptoms**:
+- Error message appears when clicking "Save Configuration"
+- Configuration not saved
+
+**Common Validation Errors and Solutions**:
+
+| Error Message | Solution |
+|---------------|----------|
+| "Source folder path cannot be empty" | Enter a valid folder path |
+| "Invalid source folder path" | Don't use system folders (Windows, Program Files, root drive) |
+| "File age threshold must be 0 or greater" | Enter 0 or a positive number |
+| "File size threshold must be 0 or greater" | Enter 0 or a positive number |
+| "Please enter a valid time in HH:mm format" | Use 24-hour format like 02:00 or 14:30 |
+
+**Time Format Requirements**:
+- Hours: 00-23 (24-hour format)
+- Minutes: 00-59
+- Format: HH:mm (e.g., 02:00, 14:30, 23:59)
+- Invalid examples: 2:00 AM, 25:00, 12:60
 
 ## File Organization Issues
 
@@ -564,6 +593,59 @@ powershell.exe -ExecutionPolicy Bypass -File "path\to\script.ps1"
 1. Verify all paths exist
 2. Reinstall if program files are missing
 3. Restore default configuration
+
+## Security Considerations
+
+### Protected Folder Restrictions
+
+TidyPackRat prevents you from using certain system-critical folders as the source folder to protect your system:
+
+**Blocked Source Folders**:
+- `C:\Windows` (and subfolders)
+- `C:\Windows\System32`
+- `C:\Program Files`
+- `C:\Program Files (x86)`
+- Root drives (e.g., `C:\`)
+
+**Why?** Organizing files in these locations could break Windows or installed applications.
+
+**Solution**: Use user folders like Downloads, Desktop, or custom folders in your user profile.
+
+### Administrator Requirements
+
+Some operations require administrator privileges:
+
+| Operation | Requires Admin? |
+|-----------|-----------------|
+| Installing TidyPackRat | Yes |
+| Creating scheduled tasks | Sometimes (depends on system policy) |
+| Running the worker script | No |
+| Editing configuration | No (unless file permissions restrict it) |
+
+**If you get "Access Denied" when creating a scheduled task**:
+1. Close TidyPackRat Configuration
+2. Right-click → Run as administrator
+3. Enable scheduling and save again
+
+### PowerShell Execution Policy
+
+TidyPackRat uses `-ExecutionPolicy Bypass` when running the worker script. This is necessary because:
+- The script is locally installed and trusted
+- It allows the scheduled task to run without policy restrictions
+
+**Note**: This only affects the TidyPackRat script execution, not your system-wide policy.
+
+### Configuration File Security
+
+Your configuration is stored at:
+```
+C:\ProgramData\TidyPackRat\config.json
+```
+
+**Best Practices**:
+- Don't store sensitive information in folder paths
+- The file is readable by all users on the system
+- A backup is automatically created before each save
 
 ## Getting Help
 

@@ -69,6 +69,20 @@ namespace TidyPackRat.Helpers
                     Directory.CreateDirectory(directory);
                 }
 
+                // Create backup of existing config before overwriting
+                if (File.Exists(filePath))
+                {
+                    string backupPath = filePath + ".backup";
+                    try
+                    {
+                        File.Copy(filePath, backupPath, overwrite: true);
+                    }
+                    catch
+                    {
+                        // Backup creation is not critical, continue with save
+                    }
+                }
+
                 // Serialize with formatting for readability
                 string jsonContent = JsonConvert.SerializeObject(config, Formatting.Indented);
                 File.WriteAllText(filePath, jsonContent);
@@ -76,6 +90,31 @@ namespace TidyPackRat.Helpers
             catch (Exception ex)
             {
                 throw new InvalidOperationException($"Failed to save configuration to {filePath}: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// Restores configuration from backup file if it exists
+        /// </summary>
+        /// <param name="filePath">Path to the configuration file</param>
+        /// <returns>True if backup was restored, false otherwise</returns>
+        public static bool RestoreFromBackup(string filePath = null)
+        {
+            filePath = filePath ?? DefaultConfigPath;
+            string backupPath = filePath + ".backup";
+
+            try
+            {
+                if (File.Exists(backupPath))
+                {
+                    File.Copy(backupPath, filePath, overwrite: true);
+                    return true;
+                }
+                return false;
+            }
+            catch
+            {
+                return false;
             }
         }
 

@@ -133,23 +133,30 @@ Each category represents a type of file and where it should go.
 
 **Purpose**: Ignore files smaller than a certain size.
 
-**Setting**: `fileSizeThreshold` in config.json (bytes)
+**Setting**: "Skip files smaller than (KB)" in the GUI, or `fileSizeThreshold` in config.json
 
 **Default**: 0 (no minimum size)
 
+**How to Change**:
+1. In the "Organization Rules" section, find "Skip files smaller than (KB)"
+2. Enter a value in kilobytes
+3. Click "Save Configuration"
+
 **Common Values**:
-```json
-{
-  "fileSizeThreshold": 0,        // No minimum (default)
-  "fileSizeThreshold": 1024,     // Skip files < 1 KB
-  "fileSizeThreshold": 1048576   // Skip files < 1 MB
-}
-```
+| GUI Value (KB) | JSON Value | Description |
+|----------------|------------|-------------|
+| 0 | 0 | No minimum (default) |
+| 1 | 1 | Skip files < 1 KB |
+| 10 | 10 | Skip files < 10 KB |
+| 100 | 100 | Skip files < 100 KB |
+| 1024 | 1024 | Skip files < 1 MB |
 
 **Use Cases**:
 - Skip tiny temp files
 - Avoid organizing thumbnails
 - Focus on substantial files only
+
+**Note**: The value must be 0 or greater. Negative values will display a validation error.
 
 ### Duplicate Handling
 
@@ -402,6 +409,70 @@ Currently, custom categories must be added by editing the JSON configuration fil
 - Automatically rotates monthly
 - Keeps last N months based on `maxLogFiles`
 - Old logs are automatically deleted
+
+## Input Validation
+
+TidyPackRat validates your configuration before saving to prevent errors.
+
+### Validated Fields
+
+| Field | Validation Rules |
+|-------|------------------|
+| Source Folder | Cannot be empty; cannot be system-critical paths (Windows, System32, Program Files, root drive) |
+| File Age Threshold | Must be 0 or greater |
+| File Size Threshold | Must be 0 or greater |
+| Schedule Time | Must be in HH:mm format (00:00 to 23:59) |
+
+### Validation Error Messages
+
+If validation fails, you'll see a message explaining the issue:
+
+- **"Source folder path cannot be empty"**: Enter a valid folder path
+- **"Invalid source folder path"**: The path is a protected system location
+- **"File age threshold must be 0 or greater"**: Enter a non-negative number
+- **"File size threshold must be 0 or greater"**: Enter a non-negative number
+- **"Please enter a valid time in HH:mm format"**: Use 24-hour time format (e.g., 02:00, 14:30)
+
+### Time Format Examples
+
+| Valid | Invalid |
+|-------|---------|
+| 02:00 | 2:00 AM |
+| 14:30 | 2:30 PM |
+| 00:00 | 24:00 |
+| 23:59 | 25:00 |
+
+## Configuration Backup
+
+TidyPackRat automatically creates a backup of your configuration file each time you save.
+
+### Backup Location
+
+```
+C:\ProgramData\TidyPackRat\config.json.backup
+```
+
+### Restoring from Backup
+
+If your configuration becomes corrupted, you can restore from the backup:
+
+**Method 1: Manual Copy**
+```powershell
+Copy-Item "C:\ProgramData\TidyPackRat\config.json.backup" `
+          "C:\ProgramData\TidyPackRat\config.json" -Force
+```
+
+**Method 2: If GUI Won't Load**
+1. Navigate to `C:\ProgramData\TidyPackRat\`
+2. Delete or rename `config.json`
+3. Rename `config.json.backup` to `config.json`
+4. Launch TidyPackRat Configuration
+
+### Backup Behavior
+
+- A backup is created before each save operation
+- Only the most recent backup is kept
+- Backup creation failure does not prevent saving (non-critical)
 
 ## Best Practices
 

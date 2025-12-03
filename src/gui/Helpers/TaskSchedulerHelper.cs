@@ -40,8 +40,8 @@ namespace TidyPackRat.Helpers
                 // Create task using schtasks.exe
                 string taskXml = BuildTaskXml(psCommand, trigger, config.Schedule.Time);
 
-                // Save XML to temp file
-                string tempXmlPath = Path.Combine(Path.GetTempPath(), "tidypackrat_task.xml");
+                // Save XML to temp file with unique name to prevent race conditions
+                string tempXmlPath = Path.Combine(Path.GetTempPath(), $"tidypackrat_task_{Guid.NewGuid():N}.xml");
                 File.WriteAllText(tempXmlPath, taskXml);
 
                 try
@@ -107,8 +107,9 @@ namespace TidyPackRat.Helpers
                     return process.ExitCode == 0 || process.ExitCode == 1;
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                Debug.WriteLine($"Failed to remove scheduled task: {ex.Message}");
                 return false;
             }
         }
@@ -137,8 +138,9 @@ namespace TidyPackRat.Helpers
                     return process.ExitCode == 0;
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                Debug.WriteLine($"Failed to query scheduled task: {ex.Message}");
                 return false;
             }
         }
@@ -167,17 +169,52 @@ namespace TidyPackRat.Helpers
                     return process.ExitCode == 0;
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                Debug.WriteLine($"Failed to run scheduled task: {ex.Message}");
                 return false;
             }
         }
 
+        /// <summary>
+        /// Validates and parses a time string in HH:mm format
+        /// </summary>
+        /// <param name="timeString">Time string to validate</param>
+        /// <param name="hour">Parsed hour (00-23)</param>
+        /// <param name="minute">Parsed minute (00-59)</param>
+        /// <returns>True if valid, false otherwise</returns>
+        public static bool TryParseTime(string timeString, out string hour, out string minute)
+        {
+            hour = "02";
+            minute = "00";
+
+            if (string.IsNullOrWhiteSpace(timeString))
+                return false;
+
+            string[] timeParts = timeString.Split(':');
+            if (timeParts.Length != 2)
+                return false;
+
+            if (!int.TryParse(timeParts[0], out int hourValue) || hourValue < 0 || hourValue > 23)
+                return false;
+
+            if (!int.TryParse(timeParts[1], out int minuteValue) || minuteValue < 0 || minuteValue > 59)
+                return false;
+
+            hour = hourValue.ToString("D2");
+            minute = minuteValue.ToString("D2");
+            return true;
+        }
+
         private static string GetTriggerXml(ScheduleSettings schedule)
         {
-            string[] timeParts = schedule.Time.Split(':');
-            string hour = timeParts.Length > 0 ? timeParts[0].PadLeft(2, '0') : "02";
-            string minute = timeParts.Length > 1 ? timeParts[1].PadLeft(2, '0') : "00";
+            // Validate and parse time with bounds checking
+            if (!TryParseTime(schedule.Time, out string hour, out string minute))
+            {
+                Debug.WriteLine($"Invalid time format '{schedule.Time}', using default 02:00");
+                hour = "02";
+                minute = "00";
+            }
 
             switch (schedule.Frequency.ToLower())
             {

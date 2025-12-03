@@ -26,6 +26,8 @@ TidyPackRat is an open-source automated file management system for Windows that 
 - **Comprehensive Logging**: Track every file movement with detailed logs
 - **User-Friendly GUI**: Easy-to-use WPF configuration interface
 - **Windows Integration**: MSI installer with Task Scheduler integration
+- **Input Validation**: Validates time formats, paths, and thresholds before saving
+- **Configuration Backup**: Automatic backup of your settings before each save
 
 ## Table of Contents
 
@@ -69,6 +71,7 @@ TidyPackRat is an open-source automated file management system for Windows that 
 
 4. **Configure Rules**:
    - **File Age**: Skip files newer than X hours (default: 24 hours)
+   - **File Size**: Skip files smaller than X KB (default: 0 = no minimum)
    - **Duplicates**: Choose to rename or skip duplicate files
    - **Exclude Patterns**: Wildcards to skip certain files (e.g., `*.tmp`)
 
@@ -97,6 +100,7 @@ TidyPackRat comes with pre-configured categories. You can:
 ### Organization Rules
 
 - **File Age Threshold**: Only move files older than X hours (prevents moving files still being downloaded)
+- **File Size Threshold**: Skip files smaller than X KB (useful for ignoring tiny temp files)
 - **Duplicate Handling**:
   - `Rename`: Adds a number to the filename (e.g., `photo.jpg` → `photo_1.jpg`)
   - `Skip`: Leaves the file in the source folder

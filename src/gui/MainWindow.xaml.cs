@@ -44,35 +44,97 @@ namespace TidyPackRat
 
         private string FindWorkerScript()
         {
-            // Check installed location first
-            string installedPath = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
-                "TidyPackRat",
-                "TidyPackRat-Worker.ps1");
+            // List of locations to check for the worker script
+            var searchPaths = new[]
+            {
+                // Installed location (Program Files)
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "TidyPackRat", "TidyPackRat-Worker.ps1"),
+                // ProgramData location
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "TidyPackRat", "TidyPackRat-Worker.ps1"),
+                // Same directory as executable
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TidyPackRat-Worker.ps1"),
+                // Worker subdirectory
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "worker", "TidyPackRat-Worker.ps1"),
+                // Development path (relative to GUI bin folder)
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "worker", "TidyPackRat-Worker.ps1"),
+                // Development path (relative to project root)
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..", "worker", "TidyPackRat-Worker.ps1")
+            };
 
-            if (File.Exists(installedPath))
-                return installedPath;
+            foreach (var path in searchPaths)
+            {
+                try
+                {
+                    string fullPath = Path.GetFullPath(path);
+                    if (File.Exists(fullPath))
+                    {
+                        Debug.WriteLine($"Found worker script at: {fullPath}");
+                        return fullPath;
+                    }
+                }
+                catch
+                {
+                    // Invalid path, skip
+                }
+            }
 
-            // Check ProgramData
-            string programDataPath = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
-                "TidyPackRat",
-                "TidyPackRat-Worker.ps1");
+            // Return first expected location for error messaging
+            Debug.WriteLine("Worker script not found in any expected location");
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "TidyPackRat", "TidyPackRat-Worker.ps1");
+        }
 
-            if (File.Exists(programDataPath))
-                return programDataPath;
+        /// <summary>
+        /// Validates a folder path for safety and correctness
+        /// </summary>
+        /// <param name="path">The path to validate</param>
+        /// <returns>True if the path is valid and safe, false otherwise</returns>
+        private bool IsValidFolderPath(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+                return false;
 
-            // Development path (relative to GUI)
-            string devPath = Path.Combine(
-                AppDomain.CurrentDomain.BaseDirectory,
-                "..", "..", "worker",
-                "TidyPackRat-Worker.ps1");
+            try
+            {
+                // Check for path traversal attempts
+                if (path.Contains(".."))
+                {
+                    // Normalize and check if it's still valid
+                    string normalized = Path.GetFullPath(path);
+                    path = normalized;
+                }
 
-            if (File.Exists(devPath))
-                return Path.GetFullPath(devPath);
+                // Check if it's a valid path format
+                Path.GetFullPath(path);
 
-            // Default fallback
-            return programDataPath;
+                // Warn against system-critical paths
+                string[] dangerousPaths = new[]
+                {
+                    Environment.GetFolderPath(Environment.SpecialFolder.Windows),
+                    Environment.GetFolderPath(Environment.SpecialFolder.System),
+                    Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
+                    Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
+                    Path.GetPathRoot(Environment.GetFolderPath(Environment.SpecialFolder.Windows)) // Root drive (C:\)
+                };
+
+                string normalizedPath = Path.GetFullPath(path).TrimEnd(Path.DirectorySeparatorChar);
+                foreach (var dangerous in dangerousPaths)
+                {
+                    if (!string.IsNullOrEmpty(dangerous))
+                    {
+                        string normalizedDangerous = Path.GetFullPath(dangerous).TrimEnd(Path.DirectorySeparatorChar);
+                        if (string.Equals(normalizedPath, normalizedDangerous, StringComparison.OrdinalIgnoreCase))
+                        {
+                            return false;
+                        }
+                    }
+                }
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         private void LoadConfiguration()
@@ -84,6 +146,7 @@ namespace TidyPackRat
                 // Populate UI from configuration
                 txtSourceFolder.Text = _currentConfig.SourceFolder;
                 txtFileAgeThreshold.Text = _currentConfig.FileAgeThreshold.ToString();
+                txtFileSizeThreshold.Text = _currentConfig.FileSizeThreshold.ToString();
 
                 // Set duplicate handling
                 foreach (ComboBoxItem item in cmbDuplicateHandling.Items)
@@ -176,12 +239,72 @@ namespace TidyPackRat
         {
             try
             {
-                // Update configuration from UI
-                _currentConfig.SourceFolder = txtSourceFolder.Text;
+                // Validate source folder path
+                string sourceFolder = txtSourceFolder.Text.Trim();
+                if (string.IsNullOrWhiteSpace(sourceFolder))
+                {
+                    MessageBox.Show("Source folder path cannot be empty.",
+                                  "Validation Error",
+                                  MessageBoxButton.OK,
+                                  MessageBoxImage.Warning);
+                    return;
+                }
 
+                // Check for potentially dangerous paths
+                if (!IsValidFolderPath(sourceFolder))
+                {
+                    MessageBox.Show("Invalid source folder path. Please select a valid folder.",
+                                  "Validation Error",
+                                  MessageBoxButton.OK,
+                                  MessageBoxImage.Warning);
+                    return;
+                }
+
+                // Update configuration from UI
+                _currentConfig.SourceFolder = sourceFolder;
+
+                // Validate file age threshold (must be >= 0)
                 if (int.TryParse(txtFileAgeThreshold.Text, out int ageThreshold))
                 {
+                    if (ageThreshold < 0)
+                    {
+                        MessageBox.Show("File age threshold must be 0 or greater.",
+                                      "Validation Error",
+                                      MessageBoxButton.OK,
+                                      MessageBoxImage.Warning);
+                        return;
+                    }
                     _currentConfig.FileAgeThreshold = ageThreshold;
+                }
+                else
+                {
+                    MessageBox.Show("Please enter a valid number for file age threshold.",
+                                  "Validation Error",
+                                  MessageBoxButton.OK,
+                                  MessageBoxImage.Warning);
+                    return;
+                }
+
+                // Validate and save file size threshold
+                if (int.TryParse(txtFileSizeThreshold.Text, out int sizeThreshold))
+                {
+                    if (sizeThreshold < 0)
+                    {
+                        MessageBox.Show("File size threshold must be 0 or greater.",
+                                      "Validation Error",
+                                      MessageBoxButton.OK,
+                                      MessageBoxImage.Warning);
+                        return;
+                    }
+                    _currentConfig.FileSizeThreshold = sizeThreshold;
+                }
+                else
+                {
+                    MessageBox.Show("Please enter a valid number for file size threshold.",
+                                  "Validation Error",
+                                  MessageBoxButton.OK,
+                                  MessageBoxImage.Warning);
+                    return;
                 }
 
                 var selectedDuplicateItem = cmbDuplicateHandling.SelectedItem as ComboBoxItem;
@@ -200,8 +323,22 @@ namespace TidyPackRat
 
                 // Update schedule settings
                 _currentConfig.Schedule.Enabled = chkScheduleEnabled.IsChecked ?? false;
-                _currentConfig.Schedule.Time = txtScheduleTime.Text;
                 _currentConfig.Schedule.RunOnStartup = chkRunOnStartup.IsChecked ?? false;
+
+                // Validate schedule time format if scheduling is enabled
+                string scheduleTime = txtScheduleTime.Text.Trim();
+                if (_currentConfig.Schedule.Enabled)
+                {
+                    if (!TaskSchedulerHelper.TryParseTime(scheduleTime, out _, out _))
+                    {
+                        MessageBox.Show("Please enter a valid time in HH:mm format (e.g., 02:00, 14:30).\nHours must be 0-23, minutes must be 0-59.",
+                                      "Validation Error",
+                                      MessageBoxButton.OK,
+                                      MessageBoxImage.Warning);
+                        return;
+                    }
+                }
+                _currentConfig.Schedule.Time = scheduleTime;
 
                 var selectedFreqItem = cmbFrequency.SelectedItem as ComboBoxItem;
                 if (selectedFreqItem != null)

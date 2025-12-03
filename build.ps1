@@ -64,8 +64,17 @@ if (-not $SkipGUI) {
 
     # Restore NuGet packages first
     Write-Host "Restoring NuGet packages..." -ForegroundColor Yellow
-    $nugetRestore = "nuget restore `"$guiProject`""
-    Invoke-Expression $nugetRestore
+    $nuget = Get-Command nuget -ErrorAction SilentlyContinue
+    if (-not $nuget) {
+        Write-Host "NuGet not found in PATH" -ForegroundColor Red
+        Write-Host "Please install NuGet CLI or add it to your PATH" -ForegroundColor Yellow
+        exit 1
+    }
+    & nuget restore "$guiProject"
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "NuGet restore failed!" -ForegroundColor Red
+        exit $LASTEXITCODE
+    }
 
     # Build the project
     $buildArgs = @(
@@ -143,12 +152,38 @@ Write-Host "`nBuild directory prepared: $buildDir" -ForegroundColor Green
 if ($BuildInstaller) {
     Write-Host "`nBuilding WiX installer..." -ForegroundColor Cyan
 
-    # Check for WiX
-    if (-not (Test-Path "C:\Program Files (x86)\WiX Toolset v3.11\bin\candle.exe")) {
+    # Check for WiX - search in common locations and PATH
+    $wixCandle = $null
+
+    # Check PATH first
+    $wixCandle = Get-Command candle.exe -ErrorAction SilentlyContinue
+
+    # Check common installation locations
+    if (-not $wixCandle) {
+        $wixPaths = @(
+            "C:\Program Files (x86)\WiX Toolset v3.14\bin\candle.exe",
+            "C:\Program Files (x86)\WiX Toolset v3.11\bin\candle.exe",
+            "C:\Program Files\WiX Toolset v3.14\bin\candle.exe",
+            "C:\Program Files\WiX Toolset v3.11\bin\candle.exe",
+            "${env:WIX}bin\candle.exe"
+        )
+
+        foreach ($path in $wixPaths) {
+            if (Test-Path $path) {
+                $wixCandle = $path
+                break
+            }
+        }
+    }
+
+    if (-not $wixCandle) {
         Write-Host "WiX Toolset not found!" -ForegroundColor Red
         Write-Host "Please install WiX Toolset from https://wixtoolset.org" -ForegroundColor Yellow
+        Write-Host "Or ensure WiX bin directory is in your PATH" -ForegroundColor Yellow
         exit 1
     }
+
+    Write-Host "Using WiX: $wixCandle" -ForegroundColor Green
 
     if (-not (Test-Path $installerProject)) {
         Write-Host "Installer project not found: $installerProject" -ForegroundColor Red
