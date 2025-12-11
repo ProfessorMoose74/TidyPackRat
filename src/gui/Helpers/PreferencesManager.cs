@@ -1,9 +1,9 @@
 using System;
 using System.IO;
 using Newtonsoft.Json;
-using TidyPackRat.Models;
+using TidyFlow.Models;
 
-namespace TidyPackRat.Helpers
+namespace TidyFlow.Helpers
 {
     /// <summary>
     /// Manages user preferences, statistics, and move history persistence
@@ -12,7 +12,7 @@ namespace TidyPackRat.Helpers
     {
         private static readonly string DataFolder = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
-            "TidyPackRat");
+            "TidyFlow");
 
         public static string PreferencesPath => Path.Combine(DataFolder, "preferences.json");
         public static string StatisticsPath => Path.Combine(DataFolder, "statistics.json");

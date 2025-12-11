@@ -1,17 +1,17 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using TidyPackRat.Models;
+using TidyFlow.Models;
 
-namespace TidyPackRat.Helpers
+namespace TidyFlow.Helpers
 {
     /// <summary>
     /// Helper class for managing Windows Task Scheduler integration
     /// </summary>
     public static class TaskSchedulerHelper
     {
-        private const string TaskName = "TidyPackRat-AutoOrganize";
-        private const string TaskDescription = "TidyPackRat - Automated file organization";
+        private const string TaskName = "TidyFlow-AutoOrganize";
+        private const string TaskDescription = "TidyFlow - Automated file organization";
 
         /// <summary>
         /// Creates or updates a scheduled task based on the configuration
@@ -41,7 +41,7 @@ namespace TidyPackRat.Helpers
                 string taskXml = BuildTaskXml(psCommand, trigger, config.Schedule.Time);
 
                 // Save XML to temp file with unique name to prevent race conditions
-                string tempXmlPath = Path.Combine(Path.GetTempPath(), $"tidypackrat_task_{Guid.NewGuid():N}.xml");
+                string tempXmlPath = Path.Combine(Path.GetTempPath(), $"tidyflow_task_{Guid.NewGuid():N}.xml");
                 File.WriteAllText(tempXmlPath, taskXml);
 
                 try
@@ -83,7 +83,7 @@ namespace TidyPackRat.Helpers
         }
 
         /// <summary>
-        /// Removes the TidyPackRat scheduled task if it exists
+        /// Removes the TidyFlow scheduled task if it exists
         /// </summary>
         /// <returns>True if successful or task doesn't exist, false on error</returns>
         public static bool RemoveScheduledTask()
@@ -115,7 +115,7 @@ namespace TidyPackRat.Helpers
         }
 
         /// <summary>
-        /// Checks if the TidyPackRat scheduled task exists
+        /// Checks if the TidyFlow scheduled task exists
         /// </summary>
         /// <returns>True if task exists, false otherwise</returns>
         public static bool TaskExists()

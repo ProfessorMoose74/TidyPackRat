@@ -1,7 +1,7 @@
 using System.Windows;
 using Forms = System.Windows.Forms;
 
-namespace TidyPackRat
+namespace TidyFlow
 {
     public partial class AddCategoryDialog : Window
     {

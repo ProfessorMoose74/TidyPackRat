@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/title-logo.png" alt="TidyPackRat" width="600"/>
+  <img src="assets/title-logo.png" alt="TidyFlow" width="600"/>
 </p>
 
 <p align="center">
@@ -7,14 +7,14 @@
 </p>
 
 <p align="center">
-  <img src="assets/logo.png" alt="TidyPackRat Mascot" width="150"/>
+  <img src="assets/logo.png" alt="TidyFlow Mascot" width="150"/>
 </p>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-1.2.0-green.svg)]()
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%2B-lightgrey.svg)]()
 
-TidyPackRat is an open-source automated file management system for Windows that intelligently organizes files from your Downloads folder (or any source folder) into categorized destination folders based on file type. Set it up once, and let TidyPackRat keep your files tidy!
+TidyFlow is an open-source automated file management system for Windows that intelligently organizes files from your Downloads folder (or any source folder) into categorized destination folders based on file type. Set it up once, and let TidyFlow keep your files tidy!
 
 ## What's New in v1.2.0
 
@@ -74,22 +74,22 @@ TidyPackRat is an open-source automated file management system for Windows that 
 
 ### Install Steps
 
-1. Download the latest `TidyPackRat-Setup.msi` from the [Releases](https://github.com/ProfessorMoose74/TidyPackRat/releases) page
+1. Download the latest `TidyFlow-Setup.msi` from the [Releases](https://github.com/ProfessorMoose74/TidyFlow/releases) page
 2. Run the installer and follow the setup wizard
-3. Launch "TidyPackRat" from the Start Menu
+3. Launch "TidyFlow" from the Start Menu
 4. Configure your file organization preferences
 5. Click "Save Configuration" to apply settings
 
 ### Portable Version
 
 A portable ZIP version is also available for users who prefer not to install:
-1. Download `TidyPackRat-Portable.zip`
+1. Download `TidyFlow-Portable.zip`
 2. Extract to any folder
-3. Run `Launch-TidyPackRat.bat`
+3. Run `Launch-TidyFlow.bat`
 
 ## Quick Start
 
-1. **Launch TidyPackRat**: Find it in your Start Menu or system tray
+1. **Launch TidyFlow**: Find it in your Start Menu or system tray
 
 2. **Check the Dashboard**: See your organization statistics at a glance
 
@@ -116,7 +116,7 @@ A portable ZIP version is also available for users who prefer not to install:
 
 ### Tabbed Interface
 
-TidyPackRat v1.2.0 features a modern tabbed interface:
+TidyFlow v1.2.0 features a modern tabbed interface:
 
 - **Dashboard**: Statistics, quick actions, recent activity
 - **Organization**: Source folder, file categories, rules
@@ -125,14 +125,14 @@ TidyPackRat v1.2.0 features a modern tabbed interface:
 
 ### Source Folder
 
-The folder TidyPackRat monitors for files to organize. Default is your Downloads folder:
+The folder TidyFlow monitors for files to organize. Default is your Downloads folder:
 ```
 C:\Users\YourName\Downloads
 ```
 
 ### File Categories
 
-TidyPackRat comes with 9 pre-configured categories. You can:
+TidyFlow comes with 9 pre-configured categories. You can:
 - Enable/disable any category
 - Change destination folders
 - **NEW**: Add custom categories via the GUI
@@ -198,8 +198,8 @@ The WPF application provides an intuitive interface for:
 
 ### System Tray
 
-When minimized to tray, right-click the TidyPackRat icon for quick access to:
-- Open TidyPackRat
+When minimized to tray, right-click the TidyFlow icon for quick access to:
+- Open TidyFlow
 - Run Now
 - Test Run
 - Exit
@@ -210,18 +210,18 @@ The worker script can also be run directly from PowerShell:
 
 ```powershell
 # Standard run
-.\TidyPackRat-Worker.ps1 -ConfigPath "C:\ProgramData\TidyPackRat\config.json"
+.\TidyFlow-Worker.ps1 -ConfigPath "C:\ProgramData\TidyFlow\config.json"
 
 # Dry run (test mode)
-.\TidyPackRat-Worker.ps1 -ConfigPath "C:\ProgramData\TidyPackRat\config.json" -DryRun -VerboseLogging
+.\TidyFlow-Worker.ps1 -ConfigPath "C:\ProgramData\TidyFlow\config.json" -DryRun -VerboseLogging
 
 # Custom config file
-.\TidyPackRat-Worker.ps1 -ConfigPath "C:\path\to\my-config.json"
+.\TidyFlow-Worker.ps1 -ConfigPath "C:\path\to\my-config.json"
 ```
 
 ### Task Scheduler Integration
 
-When scheduling is enabled, TidyPackRat creates a Windows scheduled task named `TidyPackRat-AutoOrganize`. You can also manage this task directly through Windows Task Scheduler if needed.
+When scheduling is enabled, TidyFlow creates a Windows scheduled task named `TidyFlow-AutoOrganize`. You can also manage this task directly through Windows Task Scheduler if needed.
 
 ## Documentation
 
@@ -245,13 +245,13 @@ Detailed documentation is available in the [`docs`](docs/) directory:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/ProfessorMoose74/TidyPackRat.git
-   cd TidyPackRat
+   git clone https://github.com/ProfessorMoose74/tidy-pack-rat.git
+   cd tidy-pack-rat
    ```
 
 2. Build the GUI application:
    ```bash
-   msbuild src\gui\TidyPackRat.csproj /p:Configuration=Release
+   msbuild src\gui\TidyFlow.csproj /p:Configuration=Release
    ```
 
 3. Prepare build directory:
@@ -264,12 +264,12 @@ Detailed documentation is available in the [`docs`](docs/) directory:
 
 4. Build the installer (optional):
    ```bash
-   msbuild src\installer\TidyPackRat.Installer.wixproj /p:Configuration=Release
+   msbuild src\installer\TidyFlow.Installer.wixproj /p:Configuration=Release
    ```
 
 5. Find the installer at:
    ```
-   src\installer\bin\Release\TidyPackRat-Setup.msi
+   src\installer\bin\Release\TidyFlow-Setup.msi
    ```
 
 ## Contributing
@@ -323,17 +323,17 @@ We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for deta
 
 ## Privacy
 
-TidyPackRat does not collect any data. No telemetry, no analytics, no cloud sync. Your files and settings stay on your computer. See [PRIVACY.md](PRIVACY.md) for details.
+TidyFlow does not collect any data. No telemetry, no analytics, no cloud sync. Your files and settings stay on your computer. See [PRIVACY.md](PRIVACY.md) for details.
 
 ## Uninstallation
 
-To uninstall TidyPackRat:
+To uninstall TidyFlow:
 
 1. Open Windows Settings → Apps → Apps & features
-2. Find "TidyPackRat File Organizer"
+2. Find "TidyFlow File Organizer"
 3. Click Uninstall
 
-Or use the Start Menu shortcut: Start → TidyPackRat → Uninstall TidyPackRat
+Or use the Start Menu shortcut: Start → TidyFlow → Uninstall TidyFlow
 
 **Note**: Your configuration file and logs will be removed. Files that have already been organized will remain in their destination folders.
 
@@ -344,7 +344,7 @@ Or use the Start Menu shortcut: Start → TidyPackRat → Uninstall TidyPackRat
 - Check that the category is enabled
 - Verify the file extension is in the category's list
 - Check the file age threshold setting
-- Review logs in `C:\ProgramData\TidyPackRat\logs`
+- Review logs in `C:\ProgramData\TidyFlow\logs`
 
 ### Scheduled task isn't running
 
@@ -359,7 +359,7 @@ Or use the Start Menu shortcut: Start → TidyPackRat → Uninstall TidyPackRat
 - Check that file watching is enabled in the Schedule tab
 - Look for errors in the Recent Activity panel
 
-For more help, see [Troubleshooting Guide](docs/troubleshooting.md) or [open an issue](https://github.com/ProfessorMoose74/TidyPackRat/issues).
+For more help, see [Troubleshooting Guide](docs/troubleshooting.md) or [open an issue](https://github.com/ProfessorMoose74/tidy-pack-rat/issues).
 
 ## License
 
@@ -373,12 +373,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Contact
 
-- **GitHub Issues**: [Report bugs or request features](https://github.com/ProfessorMoose74/TidyPackRat/issues)
-- **Discussions**: [Ask questions and share ideas](https://github.com/ProfessorMoose74/TidyPackRat/discussions)
+- **GitHub Issues**: [Report bugs or request features](https://github.com/ProfessorMoose74/tidy-pack-rat/issues)
+- **Discussions**: [Ask questions and share ideas](https://github.com/ProfessorMoose74/tidy-pack-rat/discussions)
 
 ---
 
 <p align="center">
-  <strong>TidyPackRat - Sorting your files, to clean up your mess.</strong><br>
+  <strong>TidyFlow - Sorting your files, to clean up your mess.</strong><br>
   Made with love for organized file systems
 </p>

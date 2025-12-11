@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using Newtonsoft.Json;
 
-namespace TidyPackRat.Models
+namespace TidyFlow.Models
 {
     /// <summary>
     /// Represents scheduling configuration for automated file organization

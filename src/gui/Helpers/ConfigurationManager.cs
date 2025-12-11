@@ -1,12 +1,12 @@
 using System;
 using System.IO;
 using Newtonsoft.Json;
-using TidyPackRat.Models;
+using TidyFlow.Models;
 
-namespace TidyPackRat.Helpers
+namespace TidyFlow.Helpers
 {
     /// <summary>
-    /// Manages loading and saving of TidyPackRat configuration files
+    /// Manages loading and saving of TidyFlow configuration files
     /// </summary>
     public static class ConfigurationManager
     {
@@ -15,7 +15,7 @@ namespace TidyPackRat.Helpers
         /// </summary>
         public static readonly string DefaultConfigPath =
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
-                        "TidyPackRat", "config.json");
+                        "TidyFlow", "config.json");
 
         /// <summary>
         /// Loads configuration from the specified file path
@@ -133,8 +133,8 @@ namespace TidyPackRat.Helpers
 
             return new AppConfiguration
             {
-                AppName = "TidyPackRat",
-                Version = "1.1.0",
+                AppName = "TidyFlow",
+                Version = "1.2.0",
                 SourceFolder = downloads,
                 FileAgeThreshold = 24,
                 FileSizeThreshold = 0,
@@ -233,7 +233,7 @@ namespace TidyPackRat.Helpers
                 {
                     Enabled = true,
                     LogPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
-                                          "TidyPackRat", "logs"),
+                                          "TidyFlow", "logs"),
                     LogLevel = "info",
                     MaxLogFiles = 12
                 }

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using Newtonsoft.Json;
 
-namespace TidyPackRat.Models
+namespace TidyFlow.Models
 {
     /// <summary>
     /// Represents a file category with associated extensions and destination folder

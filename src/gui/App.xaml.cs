@@ -1,6 +1,6 @@
 using System.Windows;
 
-namespace TidyPackRat
+namespace TidyFlow
 {
     /// <summary>
     /// Interaction logic for App.xaml

@@ -1,4 +1,4 @@
-# Microsoft Store Listing - TidyPackRat
+# Microsoft Store Listing - TidyFlow
 
 This document contains the content needed for Microsoft Store submission.
 
@@ -6,7 +6,7 @@ This document contains the content needed for Microsoft Store submission.
 
 ## App Identity
 
-- **App Name:** TidyPackRat
+- **App Name:** TidyFlow
 - **Publisher:** ProfessorMoose74
 - **Category:** Utilities & tools
 - **Sub-category:** File managers
@@ -24,12 +24,12 @@ Automatically organize your Downloads folder. Set it once, stay tidy forever.
 ## Description (10,000 characters max)
 
 ```
-TidyPackRat - Sorting your files, to clean up your mess.
+TidyFlow - Sorting your files, to clean up your mess.
 
-Tired of a cluttered Downloads folder? TidyPackRat is an automated file organizer that keeps your files tidy without any effort. Set it up once, and let TidyPackRat do the rest.
+Tired of a cluttered Downloads folder? TidyFlow is an automated file organizer that keeps your files tidy without any effort. Set it up once, and let TidyFlow do the rest.
 
 WHAT IT DOES
-TidyPackRat monitors your Downloads folder (or any folder you choose) and automatically moves files to organized destinations based on their type. Images go to Pictures, documents to Documents, music to Music - you get the idea.
+TidyFlow monitors your Downloads folder (or any folder you choose) and automatically moves files to organized destinations based on their type. Images go to Pictures, documents to Documents, music to Music - you get the idea.
 
 KEY FEATURES
 
@@ -54,7 +54,7 @@ KEY FEATURES
   Track every file movement with detailed logs. Know exactly what was moved and when.
 
 • Runs Locally
-  No cloud, no account needed, no data collection. TidyPackRat runs entirely on your PC and never connects to the internet.
+  No cloud, no account needed, no data collection. TidyFlow runs entirely on your PC and never connects to the internet.
 
 PRE-CONFIGURED CATEGORIES
 - Images: .jpg, .png, .gif, .bmp, .svg, .webp, and more
@@ -68,7 +68,7 @@ PRE-CONFIGURED CATEGORIES
 - Code: .py, .js, .html, .css, .java (disabled by default)
 
 GETTING STARTED
-1. Launch TidyPackRat from the Start Menu
+1. Launch TidyFlow from the Start Menu
 2. Review the default settings (most users won't need to change anything)
 3. Click "Test Run" to preview what would be moved
 4. Click "Save Configuration" to enable automatic organization
@@ -79,13 +79,13 @@ REQUIREMENTS
 - Windows 11 (fully supported)
 
 PRIVACY
-TidyPackRat does not collect any data. No telemetry, no analytics, no cloud sync. Your files and settings stay on your computer.
+TidyFlow does not collect any data. No telemetry, no analytics, no cloud sync. Your files and settings stay on your computer.
 
 OPEN SOURCE
-TidyPackRat is open source software licensed under the MIT License. View the source code, report issues, or contribute at:
-https://github.com/ProfessorMoose74/TidyPackRat
+TidyFlow is open source software licensed under the MIT License. View the source code, report issues, or contribute at:
+https://github.com/ProfessorMoose74/TidyFlow
 
-Stop wasting time organizing files manually. Let TidyPackRat handle it for you!
+Stop wasting time organizing files manually. Let TidyFlow handle it for you!
 ```
 
 ---
@@ -93,11 +93,16 @@ Stop wasting time organizing files manually. Let TidyPackRat handle it for you!
 ## What's New (Release Notes)
 
 ```
-Version 1.1.0
-• NEW: File size threshold - skip files smaller than a specified size
-• NEW: Automatic configuration backup before each save
-• IMPROVED: Better input validation for time format and thresholds
-• IMPROVED: Enhanced security with path validation
+Version 1.2.0
+• NEW: System tray integration - minimize to tray, run from tray menu
+• NEW: Dark mode - toggle between light and dark themes
+• NEW: Statistics dashboard - track files organized, space saved
+• NEW: Real-time file watching - auto-organize files as they appear
+• NEW: Undo/Rollback - reverse recent file moves with one click
+• NEW: Custom categories - create your own file categories in the GUI
+• NEW: Toast notifications - get notified when files are organized
+• NEW: Sound effects - optional audio feedback
+• NEW: Export/Import settings - share configurations between computers
 • IMPROVED: High DPI support for crisp display on all monitors
 • IMPROVED: Accessibility features for screen readers
 • IMPROVED: Keyboard shortcuts (Alt+T, Alt+R, Alt+V, Alt+S)
@@ -180,7 +185,7 @@ Content questionnaire answers:
 ## Privacy Policy URL
 
 ```
-https://github.com/ProfessorMoose74/TidyPackRat/blob/main/PRIVACY.md
+https://github.com/ProfessorMoose74/TidyFlow/blob/main/PRIVACY.md
 ```
 
 ---
@@ -188,7 +193,7 @@ https://github.com/ProfessorMoose74/TidyPackRat/blob/main/PRIVACY.md
 ## Support Contact
 
 ```
-https://github.com/ProfessorMoose74/TidyPackRat/issues
+https://github.com/ProfessorMoose74/TidyFlow/issues
 ```
 
 ---
@@ -196,7 +201,7 @@ https://github.com/ProfessorMoose74/TidyPackRat/issues
 ## Website
 
 ```
-https://github.com/ProfessorMoose74/TidyPackRat
+https://github.com/ProfessorMoose74/TidyFlow
 ```
 
 ---

@@ -7,13 +7,13 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Navigation;
-using TidyPackRat.Helpers;
-using TidyPackRat.Models;
-using TidyPackRat.Services;
+using TidyFlow.Helpers;
+using TidyFlow.Models;
+using TidyFlow.Services;
 using Microsoft.Win32;
 using Forms = System.Windows.Forms;
 
-namespace TidyPackRat
+namespace TidyFlow
 {
     public partial class MainWindow : Window
     {
@@ -105,7 +105,7 @@ namespace TidyPackRat
         {
             _notifyIcon = new Forms.NotifyIcon
             {
-                Text = "TidyPackRat",
+                Text = "TidyFlow",
                 Visible = true
             };
 
@@ -129,7 +129,7 @@ namespace TidyPackRat
 
             // Context menu
             var contextMenu = new Forms.ContextMenuStrip();
-            contextMenu.Items.Add("Open TidyPackRat", null, (s, e) => ShowWindow());
+            contextMenu.Items.Add("Open TidyFlow", null, (s, e) => ShowWindow());
             contextMenu.Items.Add("-");
             contextMenu.Items.Add("Run Now", null, (s, e) => RunWorkerScript(false));
             contextMenu.Items.Add("Test Run", null, (s, e) => RunWorkerScript(true));
@@ -220,12 +220,12 @@ namespace TidyPackRat
         {
             var searchPaths = new[]
             {
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "TidyPackRat", "TidyPackRat-Worker.ps1"),
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "TidyPackRat", "TidyPackRat-Worker.ps1"),
-                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TidyPackRat-Worker.ps1"),
-                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "worker", "TidyPackRat-Worker.ps1"),
-                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "worker", "TidyPackRat-Worker.ps1"),
-                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..", "worker", "TidyPackRat-Worker.ps1")
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "TidyFlow", "TidyFlow-Worker.ps1"),
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "TidyFlow", "TidyFlow-Worker.ps1"),
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TidyFlow-Worker.ps1"),
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "worker", "TidyFlow-Worker.ps1"),
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "worker", "TidyFlow-Worker.ps1"),
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..", "worker", "TidyFlow-Worker.ps1")
             };
 
             foreach (var path in searchPaths)
@@ -239,7 +239,7 @@ namespace TidyPackRat
                 catch { }
             }
 
-            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "TidyPackRat", "TidyPackRat-Worker.ps1");
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "TidyFlow", "TidyFlow-Worker.ps1");
         }
 
         private void LoadConfiguration()
@@ -354,7 +354,7 @@ namespace TidyPackRat
 
             if (_recentActivity.Count == 0)
             {
-                _recentActivity.Add("No recent activity. Run TidyPackRat to start organizing!");
+                _recentActivity.Add("No recent activity. Run TidyFlow to start organizing!");
             }
         }
 
@@ -526,9 +526,9 @@ namespace TidyPackRat
         {
             var dialog = new Microsoft.Win32.SaveFileDialog
             {
-                Filter = "TidyPackRat Settings|*.tprconfig",
-                DefaultExt = ".tprconfig",
-                FileName = "TidyPackRat-Settings"
+                Filter = "TidyFlow Settings|*.tfconfig",
+                DefaultExt = ".tfconfig",
+                FileName = "TidyFlow-Settings"
             };
 
             if (dialog.ShowDialog() == true)
@@ -549,8 +549,8 @@ namespace TidyPackRat
         {
             var dialog = new Microsoft.Win32.OpenFileDialog
             {
-                Filter = "TidyPackRat Settings|*.tprconfig",
-                DefaultExt = ".tprconfig"
+                Filter = "TidyFlow Settings|*.tfconfig",
+                DefaultExt = ".tfconfig"
             };
 
             if (dialog.ShowDialog() == true)
@@ -769,13 +769,13 @@ namespace TidyPackRat
 
                 string message = dryRun
                     ? "Test run started! Check the PowerShell window for results."
-                    : "TidyPackRat is organizing your files!";
+                    : "TidyFlow is organizing your files!";
 
                 AddRecentActivity(dryRun ? "Started test run" : "Started organization run");
 
                 if (_preferences.ShowNotifications && !dryRun)
                 {
-                    NotificationHelper.ShowNotification("TidyPackRat", message);
+                    NotificationHelper.ShowNotification("TidyFlow", message);
                 }
                 else
                 {
@@ -794,7 +794,7 @@ namespace TidyPackRat
             {
                 string logPath = _currentConfig.Logging?.LogPath ??
                                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
-                                          "TidyPackRat", "logs");
+                                          "TidyFlow", "logs");
 
                 logPath = Environment.ExpandEnvironmentVariables(logPath);
 

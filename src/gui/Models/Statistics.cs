@@ -2,7 +2,7 @@ using System;
 using System.ComponentModel;
 using Newtonsoft.Json;
 
-namespace TidyPackRat.Models
+namespace TidyFlow.Models
 {
     /// <summary>
     /// Tracks file organization statistics over time

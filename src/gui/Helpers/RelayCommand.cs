@@ -1,7 +1,7 @@
 using System;
 using System.Windows.Input;
 
-namespace TidyPackRat.Helpers
+namespace TidyFlow.Helpers
 {
     /// <summary>
     /// A command implementation for WPF MVVM pattern

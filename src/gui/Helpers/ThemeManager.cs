@@ -1,7 +1,7 @@
 using System;
 using System.Windows;
 
-namespace TidyPackRat.Helpers
+namespace TidyFlow.Helpers
 {
     /// <summary>
     /// Manages application themes (Light/Dark mode)

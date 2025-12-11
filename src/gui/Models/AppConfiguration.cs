@@ -2,10 +2,10 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using Newtonsoft.Json;
 
-namespace TidyPackRat.Models
+namespace TidyFlow.Models
 {
     /// <summary>
-    /// Main configuration class that represents the entire TidyPackRat configuration
+    /// Main configuration class that represents the entire TidyFlow configuration
     /// </summary>
     public class AppConfiguration : INotifyPropertyChanged
     {

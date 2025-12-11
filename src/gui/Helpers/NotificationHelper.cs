@@ -4,7 +4,7 @@ using System.Media;
 using System.Reflection;
 using System.Windows.Forms;
 
-namespace TidyPackRat.Helpers
+namespace TidyFlow.Helpers
 {
     /// <summary>
     /// Handles Windows notifications and sound effects
@@ -50,7 +50,7 @@ namespace TidyPackRat.Helpers
             if (fileCount == 0)
             {
                 ShowNotification(
-                    "TidyPackRat",
+                    "TidyFlow",
                     "No files to organize. Your folders are already tidy!",
                     ToolTipIcon.Info);
             }
@@ -59,7 +59,7 @@ namespace TidyPackRat.Helpers
                 string sizeStr = Models.Statistics.FormatBytes(totalBytes);
                 string fileWord = fileCount == 1 ? "file" : "files";
                 ShowNotification(
-                    "TidyPackRat - Files Organized!",
+                    "TidyFlow - Files Organized!",
                     $"Moved {fileCount} {fileWord} ({sizeStr})",
                     ToolTipIcon.Info);
 
@@ -76,7 +76,7 @@ namespace TidyPackRat.Helpers
         public static void ShowFileWatcherNotification(string fileName, string category)
         {
             ShowNotification(
-                "TidyPackRat",
+                "TidyFlow",
                 $"Moved '{fileName}' to {category}",
                 ToolTipIcon.Info,
                 2000);
@@ -93,7 +93,7 @@ namespace TidyPackRat.Helpers
         public static void ShowErrorNotification(string message)
         {
             ShowNotification(
-                "TidyPackRat - Error",
+                "TidyFlow - Error",
                 message,
                 ToolTipIcon.Error);
         }

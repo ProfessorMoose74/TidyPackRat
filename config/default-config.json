@@ -1,6 +1,6 @@
 {
-  "appName": "TidyPackRat",
-  "version": "1.1.0",
+  "appName": "TidyFlow",
+  "version": "1.2.0",
   "sourceFolder": "%USERPROFILE%\\Downloads",
   "fileAgeThreshold": 24,
   "fileSizeThreshold": 0,
@@ -75,7 +75,7 @@
   ],
   "logging": {
     "enabled": true,
-    "logPath": "%PROGRAMDATA%\\TidyPackRat\\logs",
+    "logPath": "%PROGRAMDATA%\\TidyFlow\\logs",
     "logLevel": "info",
     "maxLogFiles": 12
   }

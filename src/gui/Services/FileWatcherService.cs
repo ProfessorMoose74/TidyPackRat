@@ -4,10 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using TidyPackRat.Helpers;
-using TidyPackRat.Models;
+using TidyFlow.Helpers;
+using TidyFlow.Models;
 
-namespace TidyPackRat.Services
+namespace TidyFlow.Services
 {
     /// <summary>
     /// Watches source folders for new files and organizes them in real-time
