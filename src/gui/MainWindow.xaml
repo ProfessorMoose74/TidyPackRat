@@ -4,10 +4,104 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="TidyPackRat Configuration - Sorting your files, to clean up your mess."
-        Height="700" Width="950"
+        Title="TidyPackRat - File Organizer"
+        Height="750" Width="1000"
+        MinHeight="600" MinWidth="800"
         WindowStartupLocation="CenterScreen"
-        Background="{StaticResource BackgroundBrush}">
+        Background="{DynamicResource ThemeBackgroundBrush}"
+        Closing="Window_Closing"
+        StateChanged="Window_StateChanged"
+        AutomationProperties.Name="TidyPackRat Configuration Window"
+        AutomationProperties.HelpText="Configure automatic file organization settings">
+
+    <Window.Resources>
+        <!-- Tab Item Style -->
+        <Style x:Key="ModernTabItem" TargetType="TabItem">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeSecondaryTextBrush}"/>
+            <Setter Property="Padding" Value="20,12"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Border x:Name="Border" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter ContentSource="Header" HorizontalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Foreground" Value="{DynamicResource ThemeAccentBrush}"/>
+                                <Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource ThemeAccentBrush}"/>
+                                <Setter TargetName="Border" Property="BorderThickness" Value="0,0,0,3"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Foreground" Value="{DynamicResource ThemeTextBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Card Style -->
+        <Style x:Key="CardBorder" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource ThemeCardBackgroundBrush}"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="20"/>
+            <Setter Property="Margin" Value="0,0,0,15"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
+        <!-- Stat Card Style -->
+        <Style x:Key="StatCard" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource ThemeCardBackgroundBrush}"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="20"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
+        <!-- Modern TextBox Style -->
+        <Style TargetType="TextBox">
+            <Setter Property="Background" Value="{DynamicResource ThemeInputBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeTextBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderBrush}"/>
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+
+        <!-- Modern ComboBox Style -->
+        <Style TargetType="ComboBox">
+            <Setter Property="Background" Value="{DynamicResource ThemeInputBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeTextBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderBrush}"/>
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+
+        <!-- Modern CheckBox Style -->
+        <Style TargetType="CheckBox">
+            <Setter Property="Foreground" Value="{DynamicResource ThemeTextBrush}"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+
+        <!-- Section Header Style -->
+        <Style x:Key="SectionHeader" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeTextBrush}"/>
+            <Setter Property="Margin" Value="0,0,0,15"/>
+        </Style>
+
+        <!-- Label Style -->
+        <Style x:Key="FieldLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeSecondaryTextBrush}"/>
+            <Setter Property="Margin" Value="0,0,0,5"/>
+        </Style>
+    </Window.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -17,214 +111,441 @@
         </Grid.RowDefinitions>
 
         <!-- Header -->
-        <Border Grid.Row="0" Background="{StaticResource PrimaryBrush}" Padding="20,15">
+        <Border Grid.Row="0" Background="{DynamicResource ThemePrimaryBrush}" Padding="25,20">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
+
                 <StackPanel Grid.Column="0">
-                    <TextBlock Text="TidyPackRat Configuration"
-                               FontSize="24"
+                    <TextBlock Text="TidyPackRat"
+                               FontSize="28"
                                FontWeight="Bold"
-                               Foreground="White"/>
+                               Foreground="{DynamicResource ThemeHeaderTextBrush}"/>
                     <TextBlock Text="Sorting your files, to clean up your mess."
-                               FontSize="12"
+                               FontSize="13"
                                Foreground="#BDC3C7"
                                Margin="0,5,0,0"/>
                 </StackPanel>
-                <TextBlock Grid.Column="1"
-                           Text="v1.1.0"
-                           FontSize="12"
-                           Foreground="#BDC3C7"
-                           VerticalAlignment="Center"/>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <!-- File Watcher Status -->
+                    <Border x:Name="borderWatcherStatus"
+                            Background="#27AE60"
+                            CornerRadius="12"
+                            Padding="12,6"
+                            Margin="0,0,15,0"
+                            Visibility="Collapsed"
+                            ToolTip="Real-time file watching is active">
+                        <StackPanel Orientation="Horizontal">
+                            <Ellipse Width="8" Height="8" Fill="White" Margin="0,0,8,0"/>
+                            <TextBlock Text="Watching" Foreground="White" FontSize="12" FontWeight="SemiBold"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Dark Mode Toggle -->
+                    <Button x:Name="btnToggleTheme"
+                            Content="🌙"
+                            FontSize="18"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Foreground="White"
+                            Cursor="Hand"
+                            Padding="10,5"
+                            Click="ToggleTheme_Click"
+                            ToolTip="Toggle Dark/Light Mode"/>
+
+                    <!-- Version -->
+                    <TextBlock Text="v1.2.0"
+                               FontSize="12"
+                               Foreground="#BDC3C7"
+                               VerticalAlignment="Center"
+                               Margin="10,0,0,0"/>
+                </StackPanel>
             </Grid>
         </Border>
 
-        <!-- Main Content -->
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="20">
-            <StackPanel>
-                <!-- Source Folder Section -->
-                <GroupBox Header="Source Folder" Margin="0,0,0,15" Padding="10">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBox x:Name="txtSourceFolder"
-                                 Grid.Column="0"
-                                 Padding="8"
-                                 FontSize="13"
-                                 Margin="0,0,10,0"/>
-                        <Button x:Name="btnBrowseSource"
-                                Grid.Column="1"
-                                Content="Browse..."
-                                Style="{StaticResource PrimaryButton}"
-                                Click="BrowseSourceFolder_Click"/>
-                    </Grid>
-                </GroupBox>
+        <!-- Main Content with Tabs -->
+        <TabControl Grid.Row="1"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Padding="0">
+            <TabControl.Resources>
+                <Style TargetType="TabItem" BasedOn="{StaticResource ModernTabItem}"/>
+            </TabControl.Resources>
 
-                <!-- File Categories Section -->
-                <GroupBox Header="File Categories" Margin="0,0,0,15" Padding="10">
-                    <DataGrid x:Name="dgCategories"
-                              AutoGenerateColumns="False"
-                              CanUserAddRows="False"
-                              CanUserDeleteRows="False"
-                              GridLinesVisibility="Horizontal"
-                              HeadersVisibility="Column"
-                              RowHeight="35"
-                              SelectionMode="Single">
-                        <DataGrid.Columns>
-                            <DataGridCheckBoxColumn Header="Enabled" Binding="{Binding Enabled}" Width="70"/>
-                            <DataGridTextColumn Header="Category" Binding="{Binding Name}" Width="120" IsReadOnly="True"/>
-                            <DataGridTextColumn Header="Extensions" Binding="{Binding ExtensionsDisplay}" Width="*" IsReadOnly="True"/>
-                            <DataGridTextColumn Header="Destination" Binding="{Binding Destination}" Width="300"/>
-                            <DataGridTemplateColumn Width="80">
-                                <DataGridTemplateColumn.CellTemplate>
+            <!-- Dashboard Tab -->
+            <TabItem Header="📊 Dashboard">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="25">
+                    <StackPanel>
+                        <!-- Statistics Cards -->
+                        <TextBlock Text="Your Tidying Statistics" Style="{StaticResource SectionHeader}"/>
+                        <UniformGrid Columns="4" Margin="0,0,0,20">
+                            <Border Style="{StaticResource StatCard}">
+                                <StackPanel HorizontalAlignment="Center">
+                                    <TextBlock x:Name="txtStatTotalFiles"
+                                               Text="0"
+                                               FontSize="36"
+                                               FontWeight="Bold"
+                                               Foreground="{DynamicResource ThemeAccentBrush}"
+                                               HorizontalAlignment="Center"/>
+                                    <TextBlock Text="Files Organized"
+                                               Foreground="{DynamicResource ThemeSecondaryTextBrush}"
+                                               HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource StatCard}">
+                                <StackPanel HorizontalAlignment="Center">
+                                    <TextBlock x:Name="txtStatTotalSize"
+                                               Text="0 B"
+                                               FontSize="36"
+                                               FontWeight="Bold"
+                                               Foreground="{DynamicResource ThemeSuccessBrush}"
+                                               HorizontalAlignment="Center"/>
+                                    <TextBlock Text="Space Tidied"
+                                               Foreground="{DynamicResource ThemeSecondaryTextBrush}"
+                                               HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource StatCard}">
+                                <StackPanel HorizontalAlignment="Center">
+                                    <TextBlock x:Name="txtStatTodayFiles"
+                                               Text="0"
+                                               FontSize="36"
+                                               FontWeight="Bold"
+                                               Foreground="{DynamicResource ThemeWarningBrush}"
+                                               HorizontalAlignment="Center"/>
+                                    <TextBlock Text="Files Today"
+                                               Foreground="{DynamicResource ThemeSecondaryTextBrush}"
+                                               HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource StatCard}">
+                                <StackPanel HorizontalAlignment="Center">
+                                    <TextBlock x:Name="txtStatDaysActive"
+                                               Text="0"
+                                               FontSize="36"
+                                               FontWeight="Bold"
+                                               Foreground="{DynamicResource ThemeDangerBrush}"
+                                               HorizontalAlignment="Center"/>
+                                    <TextBlock Text="Days Active"
+                                               Foreground="{DynamicResource ThemeSecondaryTextBrush}"
+                                               HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+                        </UniformGrid>
+
+                        <!-- Quick Actions -->
+                        <TextBlock Text="Quick Actions" Style="{StaticResource SectionHeader}"/>
+                        <Border Style="{StaticResource CardBorder}">
+                            <StackPanel Orientation="Horizontal">
+                                <Button x:Name="btnDashRunNow"
+                                        Content="▶ Run Now"
+                                        Style="{StaticResource SuccessButton}"
+                                        Margin="0,0,10,0"
+                                        Click="RunNow_Click"/>
+                                <Button x:Name="btnDashTestRun"
+                                        Content="🔍 Preview Changes"
+                                        Style="{StaticResource PrimaryButton}"
+                                        Margin="0,0,10,0"
+                                        Click="TestRun_Click"/>
+                                <Button x:Name="btnDashUndo"
+                                        Content="↩ Undo Last"
+                                        Style="{StaticResource DangerButton}"
+                                        Click="UndoLast_Click"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Recent Activity -->
+                        <TextBlock Text="Recent Activity" Style="{StaticResource SectionHeader}"/>
+                        <Border Style="{StaticResource CardBorder}" MaxHeight="200">
+                            <ListBox x:Name="lstRecentActivity"
+                                     Background="Transparent"
+                                     BorderThickness="0"
+                                     ItemsSource="{Binding}"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                <ListBox.ItemTemplate>
                                     <DataTemplate>
-                                        <Button Content="Browse"
-                                                Click="BrowseCategoryDestination_Click"
-                                                Tag="{Binding}"
-                                                Padding="5,2"/>
+                                        <TextBlock Text="{Binding}"
+                                                   Foreground="{DynamicResource ThemeTextBrush}"
+                                                   Padding="5,3"/>
                                     </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </GroupBox>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
 
-                <!-- Rules Configuration Section -->
-                <GroupBox Header="Organization Rules" Margin="0,0,0,15" Padding="10">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="200"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+            <!-- Organization Tab -->
+            <TabItem Header="📁 Organization">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="25">
+                    <StackPanel>
+                        <!-- Source Folder -->
+                        <TextBlock Text="Source Folder" Style="{StaticResource SectionHeader}"/>
+                        <Border Style="{StaticResource CardBorder}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="txtSourceFolder"
+                                         Grid.Column="0"
+                                         Margin="0,0,10,0"
+                                         AutomationProperties.Name="Source folder path"
+                                         ToolTip="The folder TidyPackRat will organize files from"/>
+                                <Button x:Name="btnBrowseSource"
+                                        Grid.Column="1"
+                                        Content="Browse..."
+                                        Style="{StaticResource PrimaryButton}"
+                                        Click="BrowseSourceFolder_Click"/>
+                            </Grid>
+                        </Border>
 
-                        <!-- File Age Threshold -->
-                        <TextBlock Grid.Row="0" Grid.Column="0"
-                                   Text="Skip files newer than (hours):"
-                                   VerticalAlignment="Center"
-                                   Margin="0,0,10,10"/>
-                        <TextBox x:Name="txtFileAgeThreshold"
-                                 Grid.Row="0" Grid.Column="1"
-                                 Padding="8"
-                                 Margin="0,0,0,10"
-                                 Text="24"/>
+                        <!-- File Categories -->
+                        <TextBlock Text="File Categories" Style="{StaticResource SectionHeader}"/>
+                        <Border Style="{StaticResource CardBorder}">
+                            <StackPanel>
+                                <DataGrid x:Name="dgCategories"
+                                          AutoGenerateColumns="False"
+                                          CanUserAddRows="False"
+                                          CanUserDeleteRows="False"
+                                          GridLinesVisibility="Horizontal"
+                                          HeadersVisibility="Column"
+                                          RowHeight="40"
+                                          MaxHeight="300"
+                                          Background="Transparent"
+                                          BorderThickness="0"
+                                          Foreground="{DynamicResource ThemeTextBrush}"
+                                          AutomationProperties.Name="File categories list">
+                                    <DataGrid.Columns>
+                                        <DataGridCheckBoxColumn Header="Enabled" Binding="{Binding Enabled}" Width="70"/>
+                                        <DataGridTextColumn Header="Category" Binding="{Binding Name}" Width="120" IsReadOnly="True"/>
+                                        <DataGridTextColumn Header="Extensions" Binding="{Binding ExtensionsDisplay}" Width="*" IsReadOnly="True"/>
+                                        <DataGridTextColumn Header="Destination" Binding="{Binding Destination}" Width="250"/>
+                                        <DataGridTemplateColumn Width="80">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <Button Content="📂"
+                                                            Click="BrowseCategoryDestination_Click"
+                                                            Tag="{Binding}"
+                                                            Padding="8,4"
+                                                            ToolTip="Browse for destination folder"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                                <Button x:Name="btnAddCategory"
+                                        Content="+ Add Custom Category"
+                                        HorizontalAlignment="Left"
+                                        Margin="0,10,0,0"
+                                        Padding="15,8"
+                                        Click="AddCategory_Click"/>
+                            </StackPanel>
+                        </Border>
 
-                        <!-- File Size Threshold -->
-                        <TextBlock Grid.Row="1" Grid.Column="0"
-                                   Text="Skip files smaller than (KB):"
-                                   VerticalAlignment="Center"
-                                   Margin="0,0,10,10"/>
-                        <TextBox x:Name="txtFileSizeThreshold"
-                                 Grid.Row="1" Grid.Column="1"
-                                 Padding="8"
-                                 Margin="0,0,0,10"
-                                 Text="0"
-                                 ToolTip="Files smaller than this size (in KB) will be skipped. Set to 0 to process all files."/>
+                        <!-- Organization Rules -->
+                        <TextBlock Text="Organization Rules" Style="{StaticResource SectionHeader}"/>
+                        <Border Style="{StaticResource CardBorder}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="200"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
 
-                        <!-- Duplicate Handling -->
-                        <TextBlock Grid.Row="2" Grid.Column="0"
-                                   Text="Duplicate file handling:"
-                                   VerticalAlignment="Center"
-                                   Margin="0,0,10,10"/>
-                        <ComboBox x:Name="cmbDuplicateHandling"
-                                  Grid.Row="2" Grid.Column="1"
-                                  Padding="8"
-                                  Margin="0,0,0,10">
-                            <ComboBoxItem Content="Rename (add number)" IsSelected="True" Tag="rename"/>
-                            <ComboBoxItem Content="Skip duplicate files" Tag="skip"/>
-                        </ComboBox>
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Skip files newer than (hours):"
+                                           Style="{StaticResource FieldLabel}" VerticalAlignment="Center" Margin="0,0,10,15"/>
+                                <TextBox x:Name="txtFileAgeThreshold" Grid.Row="0" Grid.Column="1"
+                                         Text="24" Margin="0,0,0,15" Width="100" HorizontalAlignment="Left"
+                                         ToolTip="Files newer than this will be skipped"/>
 
-                        <!-- Exclude Patterns -->
-                        <TextBlock Grid.Row="3" Grid.Column="0"
-                                   Text="Exclude patterns:"
-                                   VerticalAlignment="Top"
-                                   Margin="0,8,10,0"/>
-                        <TextBox x:Name="txtExcludePatterns"
-                                 Grid.Row="3" Grid.Column="1"
-                                 Padding="8"
-                                 Height="60"
-                                 AcceptsReturn="True"
-                                 TextWrapping="Wrap"
-                                 VerticalScrollBarVisibility="Auto"
-                                 Text="*.tmp&#x0a;~*&#x0a;*.crdownload&#x0a;*.part"/>
-                    </Grid>
-                </GroupBox>
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Skip files smaller than (KB):"
+                                           Style="{StaticResource FieldLabel}" VerticalAlignment="Center" Margin="0,0,10,15"/>
+                                <TextBox x:Name="txtFileSizeThreshold" Grid.Row="1" Grid.Column="1"
+                                         Text="0" Margin="0,0,0,15" Width="100" HorizontalAlignment="Left"
+                                         ToolTip="Files smaller than this will be skipped (0 = no limit)"/>
 
-                <!-- Schedule Configuration Section -->
-                <GroupBox Header="Schedule" Margin="0,0,0,15" Padding="10">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="200"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="Duplicate handling:"
+                                           Style="{StaticResource FieldLabel}" VerticalAlignment="Center" Margin="0,0,10,15"/>
+                                <ComboBox x:Name="cmbDuplicateHandling" Grid.Row="2" Grid.Column="1"
+                                          Margin="0,0,0,15" Width="200" HorizontalAlignment="Left">
+                                    <ComboBoxItem Content="Rename (add number)" IsSelected="True" Tag="rename"/>
+                                    <ComboBoxItem Content="Skip duplicate files" Tag="skip"/>
+                                </ComboBox>
 
-                        <!-- Enable Schedule -->
-                        <CheckBox x:Name="chkScheduleEnabled"
-                                  Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
-                                  Content="Enable automatic scheduling"
-                                  Margin="0,0,0,10"
-                                  Checked="ScheduleEnabled_Changed"
-                                  Unchecked="ScheduleEnabled_Changed"/>
+                                <TextBlock Grid.Row="3" Grid.Column="0" Text="Exclude patterns:"
+                                           Style="{StaticResource FieldLabel}" VerticalAlignment="Top" Margin="0,8,10,0"/>
+                                <TextBox x:Name="txtExcludePatterns" Grid.Row="3" Grid.Column="1"
+                                         Height="80" AcceptsReturn="True" TextWrapping="Wrap"
+                                         VerticalScrollBarVisibility="Auto"
+                                         Text="*.tmp&#x0a;~*&#x0a;*.crdownload&#x0a;*.part"
+                                         ToolTip="Enter patterns to exclude (one per line)"/>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
 
-                        <!-- Frequency -->
-                        <TextBlock Grid.Row="1" Grid.Column="0"
-                                   Text="Frequency:"
-                                   VerticalAlignment="Center"
-                                   Margin="20,0,10,10"/>
-                        <ComboBox x:Name="cmbFrequency"
-                                  Grid.Row="1" Grid.Column="1"
-                                  Padding="8"
-                                  Margin="0,0,0,10"
-                                  IsEnabled="{Binding IsChecked, ElementName=chkScheduleEnabled}">
-                            <ComboBoxItem Content="Daily" IsSelected="True" Tag="daily"/>
-                            <ComboBoxItem Content="Weekly" Tag="weekly"/>
-                            <ComboBoxItem Content="Monthly" Tag="monthly"/>
-                        </ComboBox>
+            <!-- Schedule Tab -->
+            <TabItem Header="⏰ Schedule">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="25">
+                    <StackPanel>
+                        <TextBlock Text="Automatic Scheduling" Style="{StaticResource SectionHeader}"/>
+                        <Border Style="{StaticResource CardBorder}">
+                            <StackPanel>
+                                <CheckBox x:Name="chkScheduleEnabled"
+                                          Content="Enable automatic scheduling"
+                                          Margin="0,0,0,20"
+                                          FontSize="14"
+                                          Checked="ScheduleEnabled_Changed"
+                                          Unchecked="ScheduleEnabled_Changed"/>
 
-                        <!-- Time -->
-                        <TextBlock Grid.Row="2" Grid.Column="0"
-                                   Text="Run at:"
-                                   VerticalAlignment="Center"
-                                   Margin="20,0,10,10"/>
-                        <TextBox x:Name="txtScheduleTime"
-                                 Grid.Row="2" Grid.Column="1"
-                                 Padding="8"
-                                 Margin="0,0,0,10"
-                                 Text="02:00"
-                                 IsEnabled="{Binding IsChecked, ElementName=chkScheduleEnabled}"/>
+                                <Grid Margin="20,0,0,0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="150"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
 
-                        <!-- Run on Startup -->
-                        <CheckBox x:Name="chkRunOnStartup"
-                                  Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
-                                  Content="Run when I log in"
-                                  Margin="20,0,0,0"
-                                  IsEnabled="{Binding IsChecked, ElementName=chkScheduleEnabled}"/>
-                    </Grid>
-                </GroupBox>
-            </StackPanel>
-        </ScrollViewer>
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Frequency:"
+                                               VerticalAlignment="Center" Margin="0,0,10,15"/>
+                                    <ComboBox x:Name="cmbFrequency" Grid.Row="0" Grid.Column="1"
+                                              Width="150" HorizontalAlignment="Left" Margin="0,0,0,15"
+                                              IsEnabled="{Binding IsChecked, ElementName=chkScheduleEnabled}">
+                                        <ComboBoxItem Content="Daily" IsSelected="True" Tag="daily"/>
+                                        <ComboBoxItem Content="Weekly" Tag="weekly"/>
+                                        <ComboBoxItem Content="Monthly" Tag="monthly"/>
+                                    </ComboBox>
 
-        <!-- Footer / Action Buttons -->
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Run at:"
+                                               VerticalAlignment="Center" Margin="0,0,10,15"/>
+                                    <TextBox x:Name="txtScheduleTime" Grid.Row="1" Grid.Column="1"
+                                             Text="02:00" Width="100" HorizontalAlignment="Left" Margin="0,0,0,15"
+                                             IsEnabled="{Binding IsChecked, ElementName=chkScheduleEnabled}"
+                                             ToolTip="Time in 24-hour format (e.g., 02:00 for 2 AM)"/>
+
+                                    <CheckBox x:Name="chkRunOnStartup" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                                              Content="Also run when I log in to Windows"
+                                              IsEnabled="{Binding IsChecked, ElementName=chkScheduleEnabled}"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <TextBlock Text="Real-time File Watching" Style="{StaticResource SectionHeader}" Margin="0,10,0,0"/>
+                        <Border Style="{StaticResource CardBorder}">
+                            <StackPanel>
+                                <CheckBox x:Name="chkEnableWatcher"
+                                          Content="Enable real-time file watching"
+                                          Margin="0,0,0,10"
+                                          FontSize="14"
+                                          Checked="FileWatcher_Changed"
+                                          Unchecked="FileWatcher_Changed"/>
+                                <TextBlock Text="When enabled, TidyPackRat will automatically organize new files as they appear in your source folder."
+                                           TextWrapping="Wrap"
+                                           Foreground="{DynamicResource ThemeSecondaryTextBrush}"
+                                           FontSize="12"
+                                           Margin="20,0,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- Settings Tab -->
+            <TabItem Header="⚙ Settings">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="25">
+                    <StackPanel>
+                        <TextBlock Text="Appearance" Style="{StaticResource SectionHeader}"/>
+                        <Border Style="{StaticResource CardBorder}">
+                            <StackPanel>
+                                <CheckBox x:Name="chkDarkMode"
+                                          Content="Dark mode"
+                                          Margin="0,0,0,10"
+                                          Checked="DarkMode_Changed"
+                                          Unchecked="DarkMode_Changed"/>
+                            </StackPanel>
+                        </Border>
+
+                        <TextBlock Text="System Tray" Style="{StaticResource SectionHeader}"/>
+                        <Border Style="{StaticResource CardBorder}">
+                            <StackPanel>
+                                <CheckBox x:Name="chkMinimizeToTray"
+                                          Content="Minimize to system tray instead of taskbar"
+                                          Margin="0,0,0,10"/>
+                                <CheckBox x:Name="chkStartMinimized"
+                                          Content="Start minimized to system tray"
+                                          Margin="0,0,0,10"/>
+                            </StackPanel>
+                        </Border>
+
+                        <TextBlock Text="Notifications" Style="{StaticResource SectionHeader}"/>
+                        <Border Style="{StaticResource CardBorder}">
+                            <StackPanel>
+                                <CheckBox x:Name="chkShowNotifications"
+                                          Content="Show notifications when files are organized"
+                                          Margin="0,0,0,10"/>
+                                <CheckBox x:Name="chkPlaySounds"
+                                          Content="Play sound effects"
+                                          Margin="0,0,0,10"/>
+                            </StackPanel>
+                        </Border>
+
+                        <TextBlock Text="Data Management" Style="{StaticResource SectionHeader}"/>
+                        <Border Style="{StaticResource CardBorder}">
+                            <StackPanel Orientation="Horizontal">
+                                <Button Content="📤 Export Settings"
+                                        Style="{StaticResource PrimaryButton}"
+                                        Margin="0,0,10,0"
+                                        Click="ExportSettings_Click"/>
+                                <Button Content="📥 Import Settings"
+                                        Style="{StaticResource PrimaryButton}"
+                                        Margin="0,0,10,0"
+                                        Click="ImportSettings_Click"/>
+                                <Button Content="🗑 Clear Statistics"
+                                        Style="{StaticResource DangerButton}"
+                                        Click="ClearStats_Click"/>
+                            </StackPanel>
+                        </Border>
+
+                        <TextBlock Text="About" Style="{StaticResource SectionHeader}"/>
+                        <Border Style="{StaticResource CardBorder}">
+                            <StackPanel>
+                                <TextBlock Text="TidyPackRat v1.2.0" FontWeight="Bold" Margin="0,0,0,5"/>
+                                <TextBlock Text="Sorting your files, to clean up your mess."
+                                           Foreground="{DynamicResource ThemeSecondaryTextBrush}" Margin="0,0,0,10"/>
+                                <TextBlock Text="Open source file organizer for Windows"
+                                           Foreground="{DynamicResource ThemeSecondaryTextBrush}" Margin="0,0,0,5"/>
+                                <TextBlock Margin="0,10,0,0">
+                                    <Hyperlink NavigateUri="https://github.com/ProfessorMoose74/TidyPackRat"
+                                               RequestNavigate="Hyperlink_RequestNavigate">
+                                        View on GitHub
+                                    </Hyperlink>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
+
+        <!-- Footer -->
         <Border Grid.Row="2"
-                Background="White"
-                BorderBrush="#BDC3C7"
+                Background="{DynamicResource ThemeCardBackgroundBrush}"
+                BorderBrush="{DynamicResource ThemeBorderBrush}"
                 BorderThickness="0,1,0,0"
-                Padding="20,15">
+                Padding="25,15">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -234,27 +555,31 @@
 
                 <StackPanel Grid.Column="0" Orientation="Horizontal">
                     <Button x:Name="btnTestRun"
-                            Content="Test Run (Dry Run)"
+                            Content="_Test Run (Dry Run)"
                             Style="{StaticResource PrimaryButton}"
                             Margin="0,0,10,0"
-                            Click="TestRun_Click"/>
+                            Click="TestRun_Click"
+                            ToolTip="Preview changes without moving files (Alt+T)"/>
                     <Button x:Name="btnRunNow"
-                            Content="Run Now"
+                            Content="_Run Now"
                             Style="{StaticResource SuccessButton}"
                             Margin="0,0,10,0"
-                            Click="RunNow_Click"/>
+                            Click="RunNow_Click"
+                            ToolTip="Organize files now (Alt+R)"/>
                 </StackPanel>
 
                 <StackPanel Grid.Column="2" Orientation="Horizontal">
                     <Button x:Name="btnViewLog"
-                            Content="View Log"
+                            Content="_View Log"
                             Style="{StaticResource PrimaryButton}"
                             Margin="0,0,10,0"
-                            Click="ViewLog_Click"/>
+                            Click="ViewLog_Click"
+                            ToolTip="View log files (Alt+V)"/>
                     <Button x:Name="btnSave"
-                            Content="Save Configuration"
+                            Content="_Save Configuration"
                             Style="{StaticResource SuccessButton}"
-                            Click="SaveConfiguration_Click"/>
+                            Click="SaveConfiguration_Click"
+                            ToolTip="Save all settings (Alt+S)"/>
                 </StackPanel>
             </Grid>
         </Border>

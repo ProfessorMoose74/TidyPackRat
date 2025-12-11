@@ -11,23 +11,45 @@
 </p>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.1.0-green.svg)]()
+[![Version](https://img.shields.io/badge/version-1.2.0-green.svg)]()
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%2B-lightgrey.svg)]()
 
 TidyPackRat is an open-source automated file management system for Windows that intelligently organizes files from your Downloads folder (or any source folder) into categorized destination folders based on file type. Set it up once, and let TidyPackRat keep your files tidy!
 
+## What's New in v1.2.0
+
+- **System Tray Integration** - Minimize to tray, run from tray menu
+- **Dark Mode** - Toggle between light and dark themes
+- **Statistics Dashboard** - Track files organized, space saved, and more
+- **Real-time File Watching** - Auto-organize files as they appear
+- **Undo/Rollback** - Reverse recent file moves with one click
+- **Custom Categories** - Create your own file categories in the GUI
+- **Toast Notifications** - Get notified when files are organized
+- **Sound Effects** - Optional audio feedback
+- **Export/Import Settings** - Share configurations between computers
+- **High DPI Support** - Crisp display on all monitors
+- **Accessibility** - Screen reader support and keyboard shortcuts
+
 ## Features
 
+### Core Features
 - **Automatic File Organization**: Moves files from a source folder to categorized destinations based on file extensions
 - **Smart Rules**: Configure file age thresholds, size filters, and exclude patterns
 - **Flexible Scheduling**: Run manually, on a schedule (daily/weekly/monthly), or on system startup
 - **Safe Operation**: Test mode (dry run) to preview what will be moved before committing
-- **Duplicate Handling**: Configurable strategies for handling duplicate files
+- **Duplicate Handling**: Configurable strategies for handling duplicate files (rename or skip)
 - **Comprehensive Logging**: Track every file movement with detailed logs
-- **User-Friendly GUI**: Easy-to-use WPF configuration interface
-- **Windows Integration**: MSI installer with Task Scheduler integration
-- **Input Validation**: Validates time formats, paths, and thresholds before saving
-- **Configuration Backup**: Automatic backup of your settings before each save
+
+### v1.2.0 Features
+- **System Tray**: Runs in the background, accessible from the system tray
+- **Dark Mode**: Modern dark theme for comfortable viewing
+- **Statistics Dashboard**: See how many files you've organized and space saved
+- **Real-time Watching**: Automatically organize new files as they arrive
+- **Undo Functionality**: Made a mistake? Undo recent file moves instantly
+- **Custom Categories**: Add your own file types and destinations
+- **Notifications**: Windows toast notifications when files are organized
+- **Sound Effects**: Satisfying audio feedback (can be disabled)
+- **Settings Export/Import**: Backup and share your configuration
 
 ## Table of Contents
 
@@ -46,7 +68,7 @@ TidyPackRat is an open-source automated file management system for Windows that 
 
 ### Prerequisites
 
-- Windows 10 or later
+- Windows 10 or later (Windows 11 recommended)
 - PowerShell 5.1 or later (included in Windows 10)
 - .NET Framework 4.8 (included in Windows 10 version 1903+)
 
@@ -54,34 +76,52 @@ TidyPackRat is an open-source automated file management system for Windows that 
 
 1. Download the latest `TidyPackRat-Setup.msi` from the [Releases](https://github.com/ProfessorMoose74/TidyPackRat/releases) page
 2. Run the installer and follow the setup wizard
-3. Launch "TidyPackRat Configuration" from the Start Menu
+3. Launch "TidyPackRat" from the Start Menu
 4. Configure your file organization preferences
 5. Click "Save Configuration" to apply settings
 
+### Portable Version
+
+A portable ZIP version is also available for users who prefer not to install:
+1. Download `TidyPackRat-Portable.zip`
+2. Extract to any folder
+3. Run `Launch-TidyPackRat.bat`
+
 ## Quick Start
 
-1. **Launch the Configuration Tool**: Find "TidyPackRat Configuration" in your Start Menu
+1. **Launch TidyPackRat**: Find it in your Start Menu or system tray
 
-2. **Set Your Source Folder**: The default is your Downloads folder, but you can choose any folder
+2. **Check the Dashboard**: See your organization statistics at a glance
 
-3. **Review File Categories**: Each category (Images, Documents, Videos, etc.) has:
+3. **Go to Organization Tab**: Configure your source folder and categories
+
+4. **Set Your Source Folder**: The default is your Downloads folder
+
+5. **Review File Categories**: Each category has:
    - A list of file extensions
    - A destination folder
    - An enable/disable toggle
 
-4. **Configure Rules**:
+6. **Configure Rules**:
    - **File Age**: Skip files newer than X hours (default: 24 hours)
    - **File Size**: Skip files smaller than X KB (default: 0 = no minimum)
    - **Duplicates**: Choose to rename or skip duplicate files
    - **Exclude Patterns**: Wildcards to skip certain files (e.g., `*.tmp`)
 
-5. **Test First**: Click "Test Run (Dry Run)" to see what would be moved without actually moving files
+7. **Test First**: Click "Test Run (Dry Run)" to preview changes
 
-6. **Run or Schedule**:
-   - Click "Run Now" to organize files immediately
-   - Enable scheduling to run automatically
+8. **Enable Real-time Watching**: Toggle in the Schedule tab for automatic organization
 
 ## Configuration
+
+### Tabbed Interface
+
+TidyPackRat v1.2.0 features a modern tabbed interface:
+
+- **Dashboard**: Statistics, quick actions, recent activity
+- **Organization**: Source folder, file categories, rules
+- **Schedule**: Scheduling options, real-time file watching
+- **Settings**: Theme, notifications, sounds, export/import
 
 ### Source Folder
 
@@ -92,10 +132,10 @@ C:\Users\YourName\Downloads
 
 ### File Categories
 
-TidyPackRat comes with pre-configured categories. You can:
+TidyPackRat comes with 9 pre-configured categories. You can:
 - Enable/disable any category
 - Change destination folders
-- Add custom extensions (by editing the config file)
+- **NEW**: Add custom categories via the GUI
 
 ### Organization Rules
 
@@ -111,11 +151,12 @@ TidyPackRat comes with pre-configured categories. You can:
 
 ### Scheduling
 
-Enable automatic scheduling to keep your folders organized without manual intervention:
+Enable automatic scheduling to keep your folders organized:
 
 - **Frequency**: Daily, Weekly, or Monthly
 - **Time**: Specify what time to run (e.g., 2:00 AM)
 - **Run on Startup**: Optionally run when you log in to Windows
+- **Real-time Watching**: Organize files immediately as they appear
 
 ## Default File Categories
 
@@ -135,15 +176,33 @@ Enable automatic scheduling to keep your folders organized without manual interv
 
 ## Usage
 
-### GUI Configuration Tool
+### GUI Application
 
 The WPF application provides an intuitive interface for:
+- Viewing organization statistics
 - Configuring source and destination folders
 - Enabling/disabling file categories
+- Creating custom categories
 - Setting organization rules
-- Managing schedules
+- Managing schedules and real-time watching
 - Running test/actual operations
+- Undoing recent moves
 - Viewing logs
+
+### Keyboard Shortcuts
+
+- `Alt+T` - Test Run (Dry Run)
+- `Alt+R` - Run Now
+- `Alt+V` - View Log
+- `Alt+S` - Save Configuration
+
+### System Tray
+
+When minimized to tray, right-click the TidyPackRat icon for quick access to:
+- Open TidyPackRat
+- Run Now
+- Test Run
+- Exit
 
 ### PowerShell Worker Script
 
@@ -171,14 +230,15 @@ Detailed documentation is available in the [`docs`](docs/) directory:
 - [Installation Guide](docs/installation-guide.md) - Step-by-step installation instructions
 - [Configuration Guide](docs/configuration-guide.md) - Detailed configuration options
 - [Troubleshooting](docs/troubleshooting.md) - Common issues and solutions
+- [MSIX Packaging](docs/msix-packaging.md) - Microsoft Store packaging guide
 
 ## Building from Source
 
 ### Prerequisites
 
-- Visual Studio 2017 or newer
+- Visual Studio 2019 or newer
 - .NET Framework 4.8 SDK
-- WiX Toolset v3.11+
+- WiX Toolset v3.11+ (for installer)
 - PowerShell 5.1+
 
 ### Build Steps
@@ -202,7 +262,7 @@ Detailed documentation is available in the [`docs`](docs/) directory:
    copy config\*.json build\config\
    ```
 
-4. Build the installer:
+4. Build the installer (optional):
    ```bash
    msbuild src\installer\TidyPackRat.Installer.wixproj /p:Configuration=Release
    ```
@@ -223,38 +283,47 @@ We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for deta
 
 ## Roadmap
 
-### Phase 1: Windows Individual Users (Current - v1.0.0)
+### Phase 1: Windows Individual Users (v1.0.0) ✅
 - [x] Core file organization engine
 - [x] WPF configuration GUI
 - [x] MSI installer
 - [x] Task Scheduler integration
 - [x] Comprehensive logging
 
-### Phase 2: Enhanced Features (v1.1.0 - v1.2.0)
-- [ ] Custom category creation in GUI
-- [ ] Advanced filtering (regex patterns)
-- [ ] Undo/rollback functionality
-- [ ] File preview before moving
-- [ ] Statistics and reporting dashboard
+### Phase 2: Enhanced Features (v1.1.0 - v1.2.0) ✅
+- [x] Custom category creation in GUI
+- [x] Undo/rollback functionality
+- [x] Statistics and reporting dashboard
+- [x] System tray integration
+- [x] Dark mode theme
+- [x] Real-time file watching
+- [x] Toast notifications
+- [x] Export/import settings
+- [x] High DPI and accessibility support
 
-### Phase 3: Linux Version (v2.0.0)
+### Phase 3: Microsoft Store & Polish (v1.3.0)
+- [ ] MSIX packaging for Microsoft Store
+- [ ] First-run setup wizard
+- [ ] File preview before moving
+- [ ] Advanced filtering (regex patterns)
+- [ ] Multi-folder source support
+
+### Phase 4: Linux Version (v2.0.0)
 - [ ] Bash/Python worker script
 - [ ] GTK or Qt GUI
 - [ ] Cron integration
 - [ ] Package for major distros (deb, rpm)
 
-### Phase 4: Enterprise Features (v3.0.0)
+### Phase 5: Enterprise Features (v3.0.0)
 - [ ] Multi-user deployment
 - [ ] Centralized configuration management
 - [ ] Network share support
 - [ ] Active Directory integration
 - [ ] Group Policy templates
 
-### Phase 5: Cloud Integration (v4.0.0)
-- [ ] OneDrive integration
-- [ ] Google Drive integration
-- [ ] Dropbox support
-- [ ] Custom cloud storage providers
+## Privacy
+
+TidyPackRat does not collect any data. No telemetry, no analytics, no cloud sync. Your files and settings stay on your computer. See [PRIVACY.md](PRIVACY.md) for details.
 
 ## Uninstallation
 
@@ -284,6 +353,12 @@ Or use the Start Menu shortcut: Start → TidyPackRat → Uninstall TidyPackRat
 - Check Task Scheduler logs
 - Run the configuration tool as Administrator
 
+### Real-time watching not working
+
+- Ensure the source folder exists
+- Check that file watching is enabled in the Schedule tab
+- Look for errors in the Recent Activity panel
+
 For more help, see [Troubleshooting Guide](docs/troubleshooting.md) or [open an issue](https://github.com/ProfessorMoose74/TidyPackRat/issues).
 
 ## License
@@ -292,7 +367,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Acknowledgments
 
-- Built with ❤️ for the community
+- Built with love for the community
 - Inspired by the need to keep Downloads folders tidy
 - Thanks to all contributors and users
 
@@ -305,5 +380,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <p align="center">
   <strong>TidyPackRat - Sorting your files, to clean up your mess.</strong><br>
-  Made with ❤️ for organized file systems
+  Made with love for organized file systems
 </p>

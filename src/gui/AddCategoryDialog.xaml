@@ -1,0 +1,48 @@
+<Window x:Class="TidyPackRat.AddCategoryDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Add Custom Category"
+        Height="300" Width="450"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="{DynamicResource ThemeBackgroundBrush}">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="100"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="Name:" VerticalAlignment="Center" Margin="0,0,10,10"/>
+        <TextBox x:Name="txtName" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,0,0,10"
+                 ToolTip="Enter a name for this category (e.g., 'eBooks')"/>
+
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="Extensions:" VerticalAlignment="Center" Margin="0,0,10,10"/>
+        <TextBox x:Name="txtExtensions" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,0,0,10"
+                 ToolTip="Enter file extensions separated by commas (e.g., .epub, .mobi, .azw3)"/>
+
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="Destination:" VerticalAlignment="Center" Margin="0,0,10,10"/>
+        <TextBox x:Name="txtDestination" Grid.Row="2" Grid.Column="1" Margin="0,0,10,10"/>
+        <Button x:Name="btnBrowse" Grid.Row="2" Grid.Column="2" Content="Browse..." Padding="10,5" Click="BrowseDestination_Click"/>
+
+        <TextBlock Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3"
+                   Text="Example: Name 'eBooks', Extensions '.epub, .mobi, .pdf', Destination 'Documents\eBooks'"
+                   TextWrapping="Wrap"
+                   Foreground="{DynamicResource ThemeSecondaryTextBrush}"
+                   FontSize="11"
+                   Margin="0,10,0,0"/>
+
+        <StackPanel Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+            <Button Content="Cancel" Padding="20,8" Margin="0,0,10,0" Click="Cancel_Click"/>
+            <Button Content="Add Category" Padding="20,8" Style="{StaticResource SuccessButton}" Click="Add_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

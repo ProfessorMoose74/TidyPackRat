@@ -1,36 +1,93 @@
 using System;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Navigation;
 using TidyPackRat.Helpers;
 using TidyPackRat.Models;
+using TidyPackRat.Services;
 using Microsoft.Win32;
-using System.Windows.Forms;
-using MessageBox = System.Windows.MessageBox;
+using Forms = System.Windows.Forms;
 
 namespace TidyPackRat
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         private AppConfiguration _currentConfig;
+        private UserPreferences _preferences;
+        private Statistics _statistics;
+        private MoveHistory _history;
         private readonly string _workerScriptPath;
+
+        // System tray
+        private Forms.NotifyIcon _notifyIcon;
+        private bool _isExiting;
+
+        // File watcher
+        private FileWatcherService _fileWatcher;
+
+        // Recent activity
+        private ObservableCollection<string> _recentActivity;
 
         public MainWindow()
         {
             InitializeComponent();
 
-            // Determine worker script path (installed location or development location)
+            // Load preferences first to apply theme
+            _preferences = PreferencesManager.LoadPreferences();
+            _statistics = PreferencesManager.LoadStatistics();
+            _history = PreferencesManager.LoadHistory();
+
+            // Apply theme
+            ThemeManager.ApplyTheme(_preferences.DarkMode);
+            UpdateThemeButton();
+
+            // Determine worker script path
             _workerScriptPath = FindWorkerScript();
 
-            // Load existing configuration or create default
+            // Initialize system tray
+            InitializeSystemTray();
+
+            // Initialize recent activity
+            _recentActivity = new ObservableCollection<string>();
+            lstRecentActivity.ItemsSource = _recentActivity;
+            LoadRecentActivity();
+
+            // Initialize file watcher
+            _fileWatcher = new FileWatcherService();
+            _fileWatcher.FileOrganized += FileWatcher_FileOrganized;
+            _fileWatcher.Error += FileWatcher_Error;
+
+            // Load configuration
             LoadConfiguration();
 
-            // Set window icon (if exists)
+            // Load preferences into UI
+            LoadPreferencesUI();
+
+            // Update statistics display
+            UpdateStatisticsDisplay();
+
+            // Check if should start minimized
+            if (_preferences.StartMinimized)
+            {
+                WindowState = WindowState.Minimized;
+                if (_preferences.MinimizeToTray)
+                {
+                    Hide();
+                }
+            }
+
+            // Start file watcher if enabled
+            if (_preferences.EnableFileWatcher)
+            {
+                StartFileWatcher();
+            }
+
+            // Set window icon
             try
             {
                 var iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "icon.ico");
@@ -39,25 +96,135 @@ namespace TidyPackRat
                     Icon = new System.Windows.Media.Imaging.BitmapImage(new Uri(iconPath));
                 }
             }
-            catch { /* Icon loading is not critical */ }
+            catch { }
         }
+
+        #region System Tray
+
+        private void InitializeSystemTray()
+        {
+            _notifyIcon = new Forms.NotifyIcon
+            {
+                Text = "TidyPackRat",
+                Visible = true
+            };
+
+            // Try to load icon
+            try
+            {
+                var iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "icon.ico");
+                if (File.Exists(iconPath))
+                {
+                    _notifyIcon.Icon = new System.Drawing.Icon(iconPath);
+                }
+                else
+                {
+                    _notifyIcon.Icon = System.Drawing.SystemIcons.Application;
+                }
+            }
+            catch
+            {
+                _notifyIcon.Icon = System.Drawing.SystemIcons.Application;
+            }
+
+            // Context menu
+            var contextMenu = new Forms.ContextMenuStrip();
+            contextMenu.Items.Add("Open TidyPackRat", null, (s, e) => ShowWindow());
+            contextMenu.Items.Add("-");
+            contextMenu.Items.Add("Run Now", null, (s, e) => RunWorkerScript(false));
+            contextMenu.Items.Add("Test Run", null, (s, e) => RunWorkerScript(true));
+            contextMenu.Items.Add("-");
+            contextMenu.Items.Add("Exit", null, (s, e) => ExitApplication());
+
+            _notifyIcon.ContextMenuStrip = contextMenu;
+            _notifyIcon.DoubleClick += (s, e) => ShowWindow();
+
+            // Initialize notification helper
+            NotificationHelper.Initialize(_notifyIcon);
+        }
+
+        private void ShowWindow()
+        {
+            Show();
+            WindowState = WindowState.Normal;
+            Activate();
+        }
+
+        private void ExitApplication()
+        {
+            _isExiting = true;
+            _notifyIcon?.Dispose();
+            _fileWatcher?.Dispose();
+            Application.Current.Shutdown();
+        }
+
+        #endregion
+
+        #region File Watcher
+
+        private void StartFileWatcher()
+        {
+            if (_currentConfig != null)
+            {
+                _fileWatcher.Start(_currentConfig, _statistics, _history);
+                borderWatcherStatus.Visibility = Visibility.Visible;
+            }
+        }
+
+        private void StopFileWatcher()
+        {
+            _fileWatcher.Stop();
+            borderWatcherStatus.Visibility = Visibility.Collapsed;
+        }
+
+        private void FileWatcher_FileOrganized(object sender, FileOrganizedEventArgs e)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                AddRecentActivity($"Moved '{e.FileName}' to {e.Category}");
+                UpdateStatisticsDisplay();
+
+                if (_preferences.ShowNotifications)
+                {
+                    NotificationHelper.ShowFileWatcherNotification(e.FileName, e.Category);
+                }
+            });
+        }
+
+        private void FileWatcher_Error(object sender, string e)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                AddRecentActivity($"Error: {e}");
+            });
+        }
+
+        private void FileWatcher_Changed(object sender, RoutedEventArgs e)
+        {
+            if (chkEnableWatcher.IsChecked == true)
+            {
+                StartFileWatcher();
+            }
+            else
+            {
+                StopFileWatcher();
+            }
+            _preferences.EnableFileWatcher = chkEnableWatcher.IsChecked ?? false;
+        }
+
+        #endregion
+
+        #region Configuration
 
         private string FindWorkerScript()
         {
-            // List of locations to check for the worker script
             var searchPaths = new[]
             {
-                // Installed location (Program Files)
                 Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "TidyPackRat", "TidyPackRat-Worker.ps1"),
-                // ProgramData location
                 Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "TidyPackRat", "TidyPackRat-Worker.ps1"),
-                // Same directory as executable
                 Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TidyPackRat-Worker.ps1"),
-                // Worker subdirectory
                 Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "worker", "TidyPackRat-Worker.ps1"),
-                // Development path (relative to GUI bin folder)
                 Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "worker", "TidyPackRat-Worker.ps1"),
-                // Development path (relative to project root)
                 Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..", "worker", "TidyPackRat-Worker.ps1")
             };
 
@@ -67,74 +234,12 @@ namespace TidyPackRat
                 {
                     string fullPath = Path.GetFullPath(path);
                     if (File.Exists(fullPath))
-                    {
-                        Debug.WriteLine($"Found worker script at: {fullPath}");
                         return fullPath;
-                    }
                 }
-                catch
-                {
-                    // Invalid path, skip
-                }
+                catch { }
             }
 
-            // Return first expected location for error messaging
-            Debug.WriteLine("Worker script not found in any expected location");
             return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "TidyPackRat", "TidyPackRat-Worker.ps1");
-        }
-
-        /// <summary>
-        /// Validates a folder path for safety and correctness
-        /// </summary>
-        /// <param name="path">The path to validate</param>
-        /// <returns>True if the path is valid and safe, false otherwise</returns>
-        private bool IsValidFolderPath(string path)
-        {
-            if (string.IsNullOrWhiteSpace(path))
-                return false;
-
-            try
-            {
-                // Check for path traversal attempts
-                if (path.Contains(".."))
-                {
-                    // Normalize and check if it's still valid
-                    string normalized = Path.GetFullPath(path);
-                    path = normalized;
-                }
-
-                // Check if it's a valid path format
-                Path.GetFullPath(path);
-
-                // Warn against system-critical paths
-                string[] dangerousPaths = new[]
-                {
-                    Environment.GetFolderPath(Environment.SpecialFolder.Windows),
-                    Environment.GetFolderPath(Environment.SpecialFolder.System),
-                    Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
-                    Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
-                    Path.GetPathRoot(Environment.GetFolderPath(Environment.SpecialFolder.Windows)) // Root drive (C:\)
-                };
-
-                string normalizedPath = Path.GetFullPath(path).TrimEnd(Path.DirectorySeparatorChar);
-                foreach (var dangerous in dangerousPaths)
-                {
-                    if (!string.IsNullOrEmpty(dangerous))
-                    {
-                        string normalizedDangerous = Path.GetFullPath(dangerous).TrimEnd(Path.DirectorySeparatorChar);
-                        if (string.Equals(normalizedPath, normalizedDangerous, StringComparison.OrdinalIgnoreCase))
-                        {
-                            return false;
-                        }
-                    }
-                }
-
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
         }
 
         private void LoadConfiguration()
@@ -143,12 +248,10 @@ namespace TidyPackRat
             {
                 _currentConfig = ConfigurationManager.LoadConfiguration();
 
-                // Populate UI from configuration
                 txtSourceFolder.Text = _currentConfig.SourceFolder;
                 txtFileAgeThreshold.Text = _currentConfig.FileAgeThreshold.ToString();
                 txtFileSizeThreshold.Text = _currentConfig.FileSizeThreshold.ToString();
 
-                // Set duplicate handling
                 foreach (ComboBoxItem item in cmbDuplicateHandling.Items)
                 {
                     if (item.Tag.ToString() == _currentConfig.DuplicateHandling)
@@ -158,23 +261,19 @@ namespace TidyPackRat
                     }
                 }
 
-                // Set exclude patterns
                 if (_currentConfig.ExcludePatterns != null && _currentConfig.ExcludePatterns.Count > 0)
                 {
                     txtExcludePatterns.Text = string.Join(Environment.NewLine, _currentConfig.ExcludePatterns);
                 }
 
-                // Bind categories to DataGrid
                 dgCategories.ItemsSource = _currentConfig.Categories;
 
-                // Set schedule settings
                 if (_currentConfig.Schedule != null)
                 {
                     chkScheduleEnabled.IsChecked = _currentConfig.Schedule.Enabled;
                     txtScheduleTime.Text = _currentConfig.Schedule.Time ?? "02:00";
                     chkRunOnStartup.IsChecked = _currentConfig.Schedule.RunOnStartup;
 
-                    // Set frequency
                     foreach (ComboBoxItem item in cmbFrequency.Items)
                     {
                         if (item.Tag.ToString() == _currentConfig.Schedule.Frequency)
@@ -188,22 +287,147 @@ namespace TidyPackRat
             catch (Exception ex)
             {
                 MessageBox.Show($"Error loading configuration: {ex.Message}\n\nA default configuration will be used.",
-                              "Configuration Error",
-                              MessageBoxButton.OK,
-                              MessageBoxImage.Warning);
-
+                              "Configuration Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                 _currentConfig = ConfigurationManager.CreateDefaultConfiguration();
             }
         }
 
+        private void LoadPreferencesUI()
+        {
+            chkDarkMode.IsChecked = _preferences.DarkMode;
+            chkMinimizeToTray.IsChecked = _preferences.MinimizeToTray;
+            chkStartMinimized.IsChecked = _preferences.StartMinimized;
+            chkShowNotifications.IsChecked = _preferences.ShowNotifications;
+            chkPlaySounds.IsChecked = _preferences.PlaySounds;
+            chkEnableWatcher.IsChecked = _preferences.EnableFileWatcher;
+
+            NotificationHelper.SoundEnabled = _preferences.PlaySounds;
+        }
+
+        private void SavePreferencesFromUI()
+        {
+            _preferences.DarkMode = chkDarkMode.IsChecked ?? false;
+            _preferences.MinimizeToTray = chkMinimizeToTray.IsChecked ?? false;
+            _preferences.StartMinimized = chkStartMinimized.IsChecked ?? false;
+            _preferences.ShowNotifications = chkShowNotifications.IsChecked ?? true;
+            _preferences.PlaySounds = chkPlaySounds.IsChecked ?? true;
+            _preferences.EnableFileWatcher = chkEnableWatcher.IsChecked ?? false;
+
+            NotificationHelper.SoundEnabled = _preferences.PlaySounds;
+            PreferencesManager.SavePreferences(_preferences);
+        }
+
+        #endregion
+
+        #region Statistics
+
+        private void UpdateStatisticsDisplay()
+        {
+            _statistics.CheckAndResetDailyCounters();
+
+            txtStatTotalFiles.Text = _statistics.TotalFilesMoved.ToString("N0");
+            txtStatTotalSize.Text = _statistics.TotalBytesMovedFormatted;
+            txtStatTodayFiles.Text = _statistics.FilesMovedToday.ToString("N0");
+            txtStatDaysActive.Text = _statistics.DaysSinceFirstUse.ToString("N0");
+        }
+
+        private void LoadRecentActivity()
+        {
+            _recentActivity.Clear();
+
+            if (_history.Batches != null && _history.Batches.Count > 0)
+            {
+                int count = 0;
+                foreach (var batch in _history.Batches)
+                {
+                    if (batch.Moves != null)
+                    {
+                        foreach (var move in batch.Moves)
+                        {
+                            _recentActivity.Add($"{move.MovedAt:g} - Moved '{move.FileName}' to {move.Category}");
+                            count++;
+                            if (count >= 20) return;
+                        }
+                    }
+                }
+            }
+
+            if (_recentActivity.Count == 0)
+            {
+                _recentActivity.Add("No recent activity. Run TidyPackRat to start organizing!");
+            }
+        }
+
+        private void AddRecentActivity(string message)
+        {
+            _recentActivity.Insert(0, $"{DateTime.Now:g} - {message}");
+            while (_recentActivity.Count > 20)
+            {
+                _recentActivity.RemoveAt(_recentActivity.Count - 1);
+            }
+        }
+
+        #endregion
+
+        #region Event Handlers
+
+        private void Window_StateChanged(object sender, EventArgs e)
+        {
+            if (WindowState == WindowState.Minimized && _preferences.MinimizeToTray)
+            {
+                Hide();
+            }
+        }
+
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {
+            if (!_isExiting && _preferences.MinimizeToTray)
+            {
+                e.Cancel = true;
+                Hide();
+            }
+            else
+            {
+                SavePreferencesFromUI();
+                _notifyIcon?.Dispose();
+                _fileWatcher?.Dispose();
+            }
+        }
+
+        private void ToggleTheme_Click(object sender, RoutedEventArgs e)
+        {
+            _preferences.DarkMode = !_preferences.DarkMode;
+            ThemeManager.ApplyTheme(_preferences.DarkMode);
+            chkDarkMode.IsChecked = _preferences.DarkMode;
+            UpdateThemeButton();
+            PreferencesManager.SavePreferences(_preferences);
+        }
+
+        private void UpdateThemeButton()
+        {
+            btnToggleTheme.Content = _preferences.DarkMode ? "☀" : "🌙";
+        }
+
+        private void DarkMode_Changed(object sender, RoutedEventArgs e)
+        {
+            _preferences.DarkMode = chkDarkMode.IsChecked ?? false;
+            ThemeManager.ApplyTheme(_preferences.DarkMode);
+            UpdateThemeButton();
+        }
+
+        private void ScheduleEnabled_Changed(object sender, RoutedEventArgs e)
+        {
+            // UI binding handles enable/disable
+        }
+
         private void BrowseSourceFolder_Click(object sender, RoutedEventArgs e)
         {
-            using (var dialog = new FolderBrowserDialog())
+            using (var dialog = new Forms.FolderBrowserDialog())
             {
                 dialog.Description = "Select the source folder to organize";
                 dialog.SelectedPath = txtSourceFolder.Text;
 
-                if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                if (dialog.ShowDialog() == Forms.DialogResult.OK)
                 {
                     txtSourceFolder.Text = dialog.SelectedPath;
                 }
@@ -212,17 +436,16 @@ namespace TidyPackRat
 
         private void BrowseCategoryDestination_Click(object sender, RoutedEventArgs e)
         {
-            var button = sender as System.Windows.Controls.Button;
+            var button = sender as Button;
             var category = button?.Tag as FileCategory;
-
             if (category == null) return;
 
-            using (var dialog = new FolderBrowserDialog())
+            using (var dialog = new Forms.FolderBrowserDialog())
             {
                 dialog.Description = $"Select destination folder for {category.Name}";
                 dialog.SelectedPath = category.Destination;
 
-                if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                if (dialog.ShowDialog() == Forms.DialogResult.OK)
                 {
                     category.Destination = dialog.SelectedPath;
                     dgCategories.Items.Refresh();
@@ -230,167 +453,279 @@ namespace TidyPackRat
             }
         }
 
-        private void ScheduleEnabled_Changed(object sender, RoutedEventArgs e)
+        private void AddCategory_Click(object sender, RoutedEventArgs e)
         {
-            // UI binding handles enable/disable of child controls
+            // Simple dialog for adding a category
+            var inputDialog = new AddCategoryDialog();
+            if (inputDialog.ShowDialog() == true)
+            {
+                var newCategory = new FileCategory
+                {
+                    Name = inputDialog.CategoryName,
+                    Extensions = inputDialog.Extensions.Split(',').Select(x => x.Trim().ToLower()).ToList(),
+                    Destination = inputDialog.Destination,
+                    Enabled = true
+                };
+                _currentConfig.Categories.Add(newCategory);
+                dgCategories.Items.Refresh();
+            }
+        }
+
+        private void UndoLast_Click(object sender, RoutedEventArgs e)
+        {
+            var batch = _history.GetLastUndoableBatch();
+            if (batch == null)
+            {
+                MessageBox.Show("No recent operations to undo.", "Undo", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var result = MessageBox.Show(
+                $"Undo {batch.FileCount} file move(s) from {batch.StartTime:g}?\n\nThis will move files back to their original locations.",
+                "Confirm Undo",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result != MessageBoxResult.Yes) return;
+
+            int successCount = 0;
+            int failCount = 0;
+
+            foreach (var move in batch.Moves)
+            {
+                try
+                {
+                    if (File.Exists(move.DestinationPath) && !File.Exists(move.SourcePath))
+                    {
+                        File.Move(move.DestinationPath, move.SourcePath);
+                        successCount++;
+                    }
+                    else
+                    {
+                        failCount++;
+                    }
+                }
+                catch
+                {
+                    failCount++;
+                }
+            }
+
+            batch.WasUndone = true;
+            PreferencesManager.SaveHistory(_history);
+
+            string message = $"Undo complete: {successCount} file(s) restored.";
+            if (failCount > 0)
+                message += $"\n{failCount} file(s) could not be restored.";
+
+            MessageBox.Show(message, "Undo Complete", MessageBoxButton.OK, MessageBoxImage.Information);
+            AddRecentActivity($"Undid {successCount} file move(s)");
+        }
+
+        private void ExportSettings_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new Microsoft.Win32.SaveFileDialog
+            {
+                Filter = "TidyPackRat Settings|*.tprconfig",
+                DefaultExt = ".tprconfig",
+                FileName = "TidyPackRat-Settings"
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                try
+                {
+                    PreferencesManager.ExportSettings(dialog.FileName, _currentConfig, _preferences);
+                    MessageBox.Show("Settings exported successfully!", "Export", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error exporting settings: {ex.Message}", "Export Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private void ImportSettings_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Filter = "TidyPackRat Settings|*.tprconfig",
+                DefaultExt = ".tprconfig"
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                try
+                {
+                    var (config, prefs) = PreferencesManager.ImportSettings(dialog.FileName);
+
+                    if (config != null)
+                    {
+                        _currentConfig = config;
+                        LoadConfiguration();
+                    }
+
+                    if (prefs != null)
+                    {
+                        _preferences = prefs;
+                        LoadPreferencesUI();
+                        ThemeManager.ApplyTheme(_preferences.DarkMode);
+                    }
+
+                    MessageBox.Show("Settings imported successfully!", "Import", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error importing settings: {ex.Message}", "Import Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private void ClearStats_Click(object sender, RoutedEventArgs e)
+        {
+            var result = MessageBox.Show(
+                "Are you sure you want to clear all statistics?\nThis cannot be undone.",
+                "Clear Statistics",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                _statistics = new Statistics();
+                PreferencesManager.SaveStatistics(_statistics);
+                UpdateStatisticsDisplay();
+                MessageBox.Show("Statistics cleared.", "Clear Statistics", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true });
+            e.Handled = true;
+        }
+
+        #endregion
+
+        #region Save and Run
+
+        private bool IsValidFolderPath(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path)) return false;
+
+            try
+            {
+                if (path.Contains(".."))
+                    path = Path.GetFullPath(path);
+
+                Path.GetFullPath(path);
+
+                string[] dangerousPaths = new[]
+                {
+                    Environment.GetFolderPath(Environment.SpecialFolder.Windows),
+                    Environment.GetFolderPath(Environment.SpecialFolder.System),
+                    Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
+                    Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
+                    Path.GetPathRoot(Environment.GetFolderPath(Environment.SpecialFolder.Windows))
+                };
+
+                string normalizedPath = Path.GetFullPath(path).TrimEnd(Path.DirectorySeparatorChar);
+                foreach (var dangerous in dangerousPaths)
+                {
+                    if (!string.IsNullOrEmpty(dangerous))
+                    {
+                        string normalizedDangerous = Path.GetFullPath(dangerous).TrimEnd(Path.DirectorySeparatorChar);
+                        if (string.Equals(normalizedPath, normalizedDangerous, StringComparison.OrdinalIgnoreCase))
+                            return false;
+                    }
+                }
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         private void SaveConfiguration_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                // Validate source folder path
                 string sourceFolder = txtSourceFolder.Text.Trim();
-                if (string.IsNullOrWhiteSpace(sourceFolder))
-                {
-                    MessageBox.Show("Source folder path cannot be empty.",
-                                  "Validation Error",
-                                  MessageBoxButton.OK,
-                                  MessageBoxImage.Warning);
-                    return;
-                }
-
-                // Check for potentially dangerous paths
                 if (!IsValidFolderPath(sourceFolder))
                 {
-                    MessageBox.Show("Invalid source folder path. Please select a valid folder.",
-                                  "Validation Error",
-                                  MessageBoxButton.OK,
-                                  MessageBoxImage.Warning);
+                    MessageBox.Show("Invalid source folder path.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
-                // Update configuration from UI
                 _currentConfig.SourceFolder = sourceFolder;
 
-                // Validate file age threshold (must be >= 0)
-                if (int.TryParse(txtFileAgeThreshold.Text, out int ageThreshold))
-                {
-                    if (ageThreshold < 0)
-                    {
-                        MessageBox.Show("File age threshold must be 0 or greater.",
-                                      "Validation Error",
-                                      MessageBoxButton.OK,
-                                      MessageBoxImage.Warning);
-                        return;
-                    }
+                if (int.TryParse(txtFileAgeThreshold.Text, out int ageThreshold) && ageThreshold >= 0)
                     _currentConfig.FileAgeThreshold = ageThreshold;
-                }
                 else
                 {
-                    MessageBox.Show("Please enter a valid number for file age threshold.",
-                                  "Validation Error",
-                                  MessageBoxButton.OK,
-                                  MessageBoxImage.Warning);
+                    MessageBox.Show("Please enter a valid file age threshold.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
-                // Validate and save file size threshold
-                if (int.TryParse(txtFileSizeThreshold.Text, out int sizeThreshold))
-                {
-                    if (sizeThreshold < 0)
-                    {
-                        MessageBox.Show("File size threshold must be 0 or greater.",
-                                      "Validation Error",
-                                      MessageBoxButton.OK,
-                                      MessageBoxImage.Warning);
-                        return;
-                    }
+                if (int.TryParse(txtFileSizeThreshold.Text, out int sizeThreshold) && sizeThreshold >= 0)
                     _currentConfig.FileSizeThreshold = sizeThreshold;
-                }
                 else
                 {
-                    MessageBox.Show("Please enter a valid number for file size threshold.",
-                                  "Validation Error",
-                                  MessageBoxButton.OK,
-                                  MessageBoxImage.Warning);
+                    MessageBox.Show("Please enter a valid file size threshold.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
                 var selectedDuplicateItem = cmbDuplicateHandling.SelectedItem as ComboBoxItem;
                 if (selectedDuplicateItem != null)
-                {
                     _currentConfig.DuplicateHandling = selectedDuplicateItem.Tag.ToString();
-                }
 
-                // Update exclude patterns
-                var patterns = txtExcludePatterns.Text
+                _currentConfig.ExcludePatterns = txtExcludePatterns.Text
                     .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
                     .Select(p => p.Trim())
                     .Where(p => !string.IsNullOrWhiteSpace(p))
                     .ToList();
-                _currentConfig.ExcludePatterns = patterns;
 
-                // Update schedule settings
                 _currentConfig.Schedule.Enabled = chkScheduleEnabled.IsChecked ?? false;
                 _currentConfig.Schedule.RunOnStartup = chkRunOnStartup.IsChecked ?? false;
-
-                // Validate schedule time format if scheduling is enabled
-                string scheduleTime = txtScheduleTime.Text.Trim();
-                if (_currentConfig.Schedule.Enabled)
-                {
-                    if (!TaskSchedulerHelper.TryParseTime(scheduleTime, out _, out _))
-                    {
-                        MessageBox.Show("Please enter a valid time in HH:mm format (e.g., 02:00, 14:30).\nHours must be 0-23, minutes must be 0-59.",
-                                      "Validation Error",
-                                      MessageBoxButton.OK,
-                                      MessageBoxImage.Warning);
-                        return;
-                    }
-                }
-                _currentConfig.Schedule.Time = scheduleTime;
+                _currentConfig.Schedule.Time = txtScheduleTime.Text.Trim();
 
                 var selectedFreqItem = cmbFrequency.SelectedItem as ComboBoxItem;
                 if (selectedFreqItem != null)
-                {
                     _currentConfig.Schedule.Frequency = selectedFreqItem.Tag.ToString();
-                }
 
-                // Save configuration
                 ConfigurationManager.SaveConfiguration(_currentConfig);
+                SavePreferencesFromUI();
 
-                // Update scheduled task if scheduling is enabled
+                // Update scheduled task
                 if (_currentConfig.Schedule.Enabled)
                 {
                     if (!File.Exists(_workerScriptPath))
                     {
-                        MessageBox.Show($"Worker script not found at: {_workerScriptPath}\n\nScheduling cannot be configured.",
-                                      "Worker Script Missing",
-                                      MessageBoxButton.OK,
-                                      MessageBoxImage.Warning);
-                    }
-                    else if (TaskSchedulerHelper.CreateOrUpdateScheduledTask(_currentConfig, _workerScriptPath))
-                    {
-                        MessageBox.Show("Configuration saved and scheduled task updated successfully!",
-                                      "Success",
-                                      MessageBoxButton.OK,
-                                      MessageBoxImage.Information);
+                        MessageBox.Show($"Worker script not found at: {_workerScriptPath}", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
                     }
                     else
                     {
-                        MessageBox.Show("Configuration saved, but failed to update scheduled task.\nYou may need to run this application as Administrator.",
-                                      "Partial Success",
-                                      MessageBoxButton.OK,
-                                      MessageBoxImage.Warning);
+                        TaskSchedulerHelper.CreateOrUpdateScheduledTask(_currentConfig, _workerScriptPath);
                     }
                 }
                 else
                 {
-                    // Remove scheduled task if scheduling is disabled
                     TaskSchedulerHelper.RemoveScheduledTask();
-
-                    MessageBox.Show("Configuration saved successfully!",
-                                  "Success",
-                                  MessageBoxButton.OK,
-                                  MessageBoxImage.Information);
                 }
+
+                // Restart file watcher with new config
+                if (_preferences.EnableFileWatcher)
+                {
+                    StopFileWatcher();
+                    StartFileWatcher();
+                }
+
+                MessageBox.Show("Configuration saved successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error saving configuration: {ex.Message}",
-                              "Save Error",
-                              MessageBoxButton.OK,
-                              MessageBoxImage.Error);
+                MessageBox.Show($"Error saving configuration: {ex.Message}", "Save Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -408,26 +743,19 @@ namespace TidyPackRat
         {
             try
             {
-                // Save current configuration first
                 ConfigurationManager.SaveConfiguration(_currentConfig);
 
                 if (!File.Exists(_workerScriptPath))
                 {
-                    MessageBox.Show($"Worker script not found at: {_workerScriptPath}\n\nPlease ensure TidyPackRat is properly installed.",
-                                  "Worker Script Missing",
-                                  MessageBoxButton.OK,
-                                  MessageBoxImage.Error);
+                    MessageBox.Show($"Worker script not found at: {_workerScriptPath}", "Worker Script Missing", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
-                // Build PowerShell command
                 string configPath = ConfigurationManager.DefaultConfigPath;
                 string arguments = $"-ExecutionPolicy Bypass -File \"{_workerScriptPath}\" -ConfigPath \"{configPath}\"";
 
                 if (dryRun)
-                {
                     arguments += " -DryRun -VerboseLogging";
-                }
 
                 var psi = new ProcessStartInfo
                 {
@@ -440,20 +768,23 @@ namespace TidyPackRat
                 Process.Start(psi);
 
                 string message = dryRun
-                    ? "Test run started! A PowerShell window will show what would be moved without actually moving files."
-                    : "TidyPackRat is now organizing your files! Check the log for details.";
+                    ? "Test run started! Check the PowerShell window for results."
+                    : "TidyPackRat is organizing your files!";
 
-                MessageBox.Show(message,
-                              "Running",
-                              MessageBoxButton.OK,
-                              MessageBoxImage.Information);
+                AddRecentActivity(dryRun ? "Started test run" : "Started organization run");
+
+                if (_preferences.ShowNotifications && !dryRun)
+                {
+                    NotificationHelper.ShowNotification("TidyPackRat", message);
+                }
+                else
+                {
+                    MessageBox.Show(message, "Running", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error running worker script: {ex.Message}",
-                              "Execution Error",
-                              MessageBoxButton.OK,
-                              MessageBoxImage.Error);
+                MessageBox.Show($"Error running worker script: {ex.Message}", "Execution Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -465,29 +796,24 @@ namespace TidyPackRat
                                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
                                           "TidyPackRat", "logs");
 
-                // Expand environment variables
                 logPath = Environment.ExpandEnvironmentVariables(logPath);
 
                 if (Directory.Exists(logPath))
                 {
-                    // Open log directory in Explorer
                     Process.Start("explorer.exe", logPath);
                 }
                 else
                 {
                     MessageBox.Show($"Log directory not found: {logPath}\n\nLogs will be created after the first run.",
-                                  "Log Directory Not Found",
-                                  MessageBoxButton.OK,
-                                  MessageBoxImage.Information);
+                                  "Log Directory Not Found", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error opening log directory: {ex.Message}",
-                              "Error",
-                              MessageBoxButton.OK,
-                              MessageBoxImage.Error);
+                MessageBox.Show($"Error opening log directory: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+        #endregion
     }
 }
