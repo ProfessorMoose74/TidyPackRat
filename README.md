@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/title-logo.png" alt="TidyFlow" width="600"/>
+  <img src="assets/TidyFlow-logo.png" alt="TidyFlow" width="600"/>
 </p>
 
 <p align="center">
