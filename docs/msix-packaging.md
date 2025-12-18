@@ -1,6 +1,6 @@
-# MSIX Packaging Guide for TidyPackRat
+# MSIX Packaging Guide for TidyFlow
 
-This guide explains how to package TidyPackRat as an MSIX for Microsoft Store distribution.
+This guide explains how to package TidyFlow as an MSIX for Microsoft Store distribution.
 
 ## Why MSIX?
 
@@ -12,173 +12,111 @@ Microsoft Store requires MSIX format for desktop app submissions. Benefits inclu
 
 ## Prerequisites
 
-1. **Windows 10 SDK** (10.0.17763.0 or later)
-2. **MSIX Packaging Tool** (free from Microsoft Store)
-3. **Visual Studio 2019/2022** with:
+1. **Windows 10 SDK** (10.0.26100.0 or later recommended)
+2. **Visual Studio 2022** with:
    - .NET desktop development workload
    - Windows application packaging project template
-4. **Code signing certificate** (for non-Store testing)
+3. **Code signing certificate** (for non-Store testing)
 
-## Option 1: Windows Application Packaging Project (Recommended)
+## Quick Build (Command Line)
 
-### Step 1: Add Packaging Project
+The project includes a pre-configured packaging project. To build the MSIX:
 
-1. In Visual Studio, right-click the solution
-2. Add → New Project → Windows Application Packaging Project
-3. Name it `TidyPackRat.Package`
-4. Set target version: Windows 10 version 1903 (10.0.18362.0)
-5. Set minimum version: Windows 10 version 1903 (10.0.18362.0)
+```bash
+# Restore and build the solution
+msbuild TidyFlow.sln -p:Configuration=Release -p:Platform=x64 -t:Restore
+msbuild TidyFlow.sln -p:Configuration=Release -p:Platform=x64
 
-### Step 2: Configure Package
-
-1. Right-click the packaging project → Add Reference
-2. Select TidyPackRat GUI project
-3. In Applications, right-click TidyPackRat → Set as Entry Point
-
-### Step 3: Edit Package.appxmanifest
-
-```xml
-<?xml version="1.0" encoding="utf-8"?>
-<Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
-         xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
-         xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities">
-
-  <Identity Name="TidyPackRat"
-            Publisher="CN=YourPublisher"
-            Version="1.1.0.0"
-            ProcessorArchitecture="x64" />
-
-  <Properties>
-    <DisplayName>TidyPackRat</DisplayName>
-    <PublisherDisplayName>ProfessorMoose74</PublisherDisplayName>
-    <Logo>Assets\StoreLogo.png</Logo>
-    <Description>Automatically organize your Downloads folder. Set it once, stay tidy forever.</Description>
-  </Properties>
-
-  <Dependencies>
-    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.18362.0" MaxVersionTested="10.0.22621.0" />
-  </Dependencies>
-
-  <Resources>
-    <Resource Language="en-us" />
-  </Resources>
-
-  <Applications>
-    <Application Id="TidyPackRat"
-                 Executable="TidyPackRat.exe"
-                 EntryPoint="Windows.FullTrustApplication">
-      <uap:VisualElements
-        DisplayName="TidyPackRat"
-        Description="Automatic file organizer for Windows"
-        BackgroundColor="#2C3E50"
-        Square150x150Logo="Assets\Square150x150Logo.png"
-        Square44x44Logo="Assets\Square44x44Logo.png">
-        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" Square71x71Logo="Assets\SmallTile.png" Square310x310Logo="Assets\LargeTile.png">
-          <uap:ShowNameOnTiles>
-            <uap:ShowOn Tile="square150x150Logo" />
-            <uap:ShowOn Tile="wide310x150Logo" />
-            <uap:ShowOn Tile="square310x310Logo" />
-          </uap:ShowNameOnTiles>
-        </uap:DefaultTile>
-      </uap:VisualElements>
-    </Application>
-  </Applications>
-
-  <Capabilities>
-    <rescap:Capability Name="runFullTrust" />
-  </Capabilities>
-</Package>
+# Output will be at:
+# dist\msix\TidyFlow.Package_1.2.0.0_x64_Test\TidyFlow.Package_1.2.0.0_x64.msix
 ```
 
-### Step 4: Include Required Files
+## Project Structure
 
-The package needs to include:
-- TidyPackRat.exe (GUI)
-- Newtonsoft.Json.dll
-- TidyPackRat-Worker.ps1
-- default-config.json
+The MSIX packaging is handled by the `TidyFlow.Package` project:
 
-Add a post-build event or manual copy:
-```xml
-<ItemGroup>
-  <Content Include="..\src\worker\TidyPackRat-Worker.ps1">
-    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-  </Content>
-  <Content Include="..\config\default-config.json">
-    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-  </Content>
-</ItemGroup>
+```
+src/TidyFlow.Package/
+├── Package.appxmanifest    # App identity, capabilities, visual elements
+├── TidyFlow.Package.wapproj # MSBuild packaging project
+└── Images/                  # MSIX tile and icon assets
+    ├── StoreLogo.png        # 50x50 - Store listing
+    ├── Square44x44Logo.png  # App list, taskbar
+    ├── Square150x150Logo.png # Medium tile
+    ├── Wide310x150Logo.png  # Wide tile
+    ├── LargeTile.png        # 310x310 - Large tile
+    ├── SmallTile.png        # 71x71 - Small tile
+    ├── SplashScreen.png     # 620x300 - Splash screen
+    └── BadgeLogo.png        # 24x24 - Badge notifications
 ```
 
-### Step 5: Generate Package
+## Regenerating Image Assets
 
-1. Right-click packaging project → Publish → Create App Packages
-2. Select "Sideloading" for testing or "Microsoft Store" for submission
-3. Choose architectures (x64 recommended, optionally x86 and ARM64)
-4. Configure signing certificate
-5. Build and validate
+If you need to regenerate the MSIX image assets from the source logo:
 
-## Option 2: MSIX Packaging Tool (Convert Existing MSI)
-
-### Step 1: Install MSIX Packaging Tool
-
-Download from Microsoft Store (free)
-
-### Step 2: Prepare Clean VM
-
-- Create a clean Windows 10/11 VM or restore a snapshot
-- Don't install TidyPackRat on this machine yet
-
-### Step 3: Convert MSI to MSIX
-
-1. Launch MSIX Packaging Tool
-2. Select "Application package"
-3. Choose "Create package on this computer"
-4. Browse to TidyPackRat-Setup.msi
-5. Enter package information:
-   - Package name: TidyPackRat
-   - Publisher: CN=YourPublisher
-   - Version: 1.1.0.0
-6. Let the tool capture the installation
-7. Review captured files and registry entries
-8. Generate the MSIX package
-
-## Required Package Assets
-
-Create these images from the logo:
-
-| Asset | Size | Purpose |
-|-------|------|---------|
-| Square44x44Logo.png | 44x44 | App list, taskbar |
-| Square44x44Logo.targetsize-24.png | 24x24 | Small icon |
-| Square44x44Logo.targetsize-48.png | 48x48 | Medium icon |
-| Square44x44Logo.altform-unplated.png | 44x44 | Unplated icon |
-| Square71x71Logo.png | 71x71 | Small tile |
-| Square150x150Logo.png | 150x150 | Medium tile |
-| Wide310x150Logo.png | 310x150 | Wide tile |
-| Square310x310Logo.png | 310x310 | Large tile |
-| StoreLogo.png | 50x50 | Store listing |
-| SplashScreen.png | 620x300 | Splash screen (optional) |
-
-**Tip:** Use the [Windows App Assets Generator](https://www.microsoft.com/store/apps/9nblggh4r3c1) to generate all sizes from a single source image.
-
-## Special Considerations for TidyPackRat
-
-### Task Scheduler Access
-
-MSIX apps run in a sandboxed environment. Task Scheduler operations may require:
-1. Use `runFullTrust` capability (already included)
-2. Create scheduled task using PowerShell from within the package context
-
-### ProgramData Access
-
-The app stores config in `C:\ProgramData\TidyPackRat\`. This works with `runFullTrust` capability.
-
-### PowerShell Script Execution
-
-The Worker script requires PowerShell. Ensure execution policy allows running scripts, or use:
 ```powershell
-powershell.exe -ExecutionPolicy Bypass -File "TidyPackRat-Worker.ps1"
+.\tools\Generate-MsixAssets.ps1
+```
+
+This creates all required sizes from `assets/logo.png`.
+
+## Package Configuration
+
+### Package.appxmanifest
+
+The manifest defines the app identity and capabilities:
+
+```xml
+<Identity Name="TidyFlow"
+          Publisher="CN=ProfessorMoose74"
+          Version="1.2.0.0"
+          ProcessorArchitecture="x64" />
+```
+
+Key capabilities:
+- `runFullTrust` - Required for Task Scheduler access and ProgramData storage
+- File type association for `.tfconfig` files
+- Startup task registration for "run on startup" feature
+
+### Included Files
+
+The package automatically includes:
+- `TidyFlow.exe` - Main GUI application
+- `Newtonsoft.Json.dll` - JSON library
+- `TidyFlow-Worker.ps1` - PowerShell worker script
+- `default-config.json` - Default configuration
+
+## Building in Visual Studio
+
+1. Open `TidyFlow.sln` in Visual Studio 2022
+2. Set configuration to **Release** and platform to **x64**
+3. Right-click `TidyFlow.Package` → **Publish** → **Create App Packages**
+4. Select **Sideloading** for testing or **Microsoft Store** for submission
+5. Configure signing (see below)
+6. Build and validate
+
+## Code Signing
+
+### For Local Testing (Sideload)
+
+1. Enable Developer Mode in Windows Settings → For developers
+2. The package is built without signing (`AppxPackageSigningEnabled=false`)
+3. Install using the `Install.ps1` script in the output folder
+
+### For Microsoft Store
+
+1. Associate with your Store identity in Visual Studio
+2. The Store will sign the package automatically during submission
+3. No local certificate needed
+
+### For Enterprise Distribution
+
+Create a self-signed certificate:
+```powershell
+New-SelfSignedCertificate -Type Custom -Subject "CN=YourCompany" `
+  -KeyUsage DigitalSignature -FriendlyName "TidyFlow Signing" `
+  -CertStoreLocation "Cert:\CurrentUser\My" `
+  -TextExtension @("2.5.29.37={text}1.3.6.1.5.5.7.3.3")
 ```
 
 ## Testing the MSIX Package
@@ -186,70 +124,114 @@ powershell.exe -ExecutionPolicy Bypass -File "TidyPackRat-Worker.ps1"
 ### Local Testing (Sideload)
 
 1. Enable Developer Mode in Windows Settings
-2. Double-click the .msix file to install
-3. Or use PowerShell:
+2. Navigate to the output folder: `dist\msix\TidyFlow.Package_1.2.0.0_x64_Test\`
+3. Run `Install.ps1` or double-click the `.msix` file
+4. Or use PowerShell:
    ```powershell
-   Add-AppPackage -Path "TidyPackRat_1.1.0.0_x64.msix"
+   Add-AppPackage -Path "TidyFlow.Package_1.2.0.0_x64.msix"
    ```
 
 ### Verify Installation
 
-1. App appears in Start Menu
-2. Settings are saved to ProgramData
+1. App appears in Start Menu as "TidyFlow"
+2. Settings are saved to `C:\ProgramData\TidyFlow\`
 3. Scheduled tasks can be created
 4. Worker script runs correctly
-5. Logs are written properly
+5. Logs are written to `C:\ProgramData\TidyFlow\logs\`
 
 ### Test Uninstallation
 
 1. Uninstall via Settings → Apps
-2. Verify ProgramData folder handling (may need cleanup note for users)
+2. Configuration and logs in ProgramData remain (user data)
 
-## Store Submission Process
+## Microsoft Store Submission
 
-1. **Create Developer Account**
-   - Go to [Partner Center](https://partner.microsoft.com/dashboard)
-   - One-time registration fee (~$19 for individuals)
+### 1. Create Developer Account
 
-2. **Reserve App Name**
-   - Create new app submission
-   - Reserve "TidyPackRat"
+- Go to [Partner Center](https://partner.microsoft.com/dashboard)
+- One-time registration fee (~$19 for individuals)
 
-3. **Upload Package**
-   - Upload the signed MSIX
-   - Store validates the package
+### 2. Reserve App Name
 
-4. **Complete Listing**
-   - Add screenshots (use STORE_LISTING.md content)
-   - Add description and keywords
-   - Set pricing (Free)
-   - Link privacy policy
+- Create new app submission
+- Reserve "TidyFlow"
 
-5. **Submit for Certification**
-   - Microsoft reviews the app
-   - Typically takes 1-3 business days
-   - May require fixes if issues found
+### 3. Associate Package with Store
+
+In Visual Studio:
+1. Right-click `TidyFlow.Package` → **Publish** → **Associate App with the Store**
+2. Sign in with your Partner Center account
+3. Select the reserved app name
+4. This updates the manifest with Store identity
+
+### 4. Create Store Package
+
+1. Right-click `TidyFlow.Package` → **Publish** → **Create App Packages**
+2. Select **Microsoft Store** (not Sideloading)
+3. Choose architectures (x64)
+4. Build the package
+
+### 5. Upload and Submit
+
+1. Upload the `.msixupload` file to Partner Center
+2. Complete the Store listing:
+   - Add screenshots
+   - Add description (see `STORE_LISTING.md`)
+   - Set pricing: **Free with ads**
+   - Link privacy policy (see `PRIVACY.md`)
+3. Submit for certification
+
+### 6. Certification
+
+- Microsoft reviews the app
+- Typically takes 1-3 business days
+- You'll receive email notification of approval or required fixes
+
+## Special Considerations
+
+### Task Scheduler Access
+
+MSIX apps run in a sandboxed environment. Task Scheduler operations work because:
+- `runFullTrust` capability is declared
+- The app creates tasks using COM interfaces
+- Tasks run under the user's context
+
+### ProgramData Access
+
+The app stores config in `C:\ProgramData\TidyFlow\`. This works with `runFullTrust` capability and persists across app updates.
+
+### PowerShell Script Execution
+
+The Worker script is executed with:
+```powershell
+powershell.exe -ExecutionPolicy Bypass -File "TidyFlow-Worker.ps1"
+```
 
 ## Troubleshooting
 
 ### Package fails to install
-- Check Windows version meets minimum requirements
-- Verify certificate is trusted or enable Developer Mode
-- Check Event Viewer for detailed errors
+- Check Windows version meets minimum requirements (Windows 10 1903+)
+- Enable Developer Mode for unsigned packages
+- Check Event Viewer → Applications and Services Logs → Microsoft → Windows → AppxDeployment-Server
 
 ### App crashes on launch
 - Run from command line to see errors
-- Check that all dependencies are included
+- Check that all dependencies are included in the package
 - Verify paths work from packaged location
 
 ### Task Scheduler not working
 - Ensure `runFullTrust` capability is declared
-- Check task runs under correct user context
-- Verify PowerShell execution policy
+- Run the app as the user who needs the scheduled task
+- Check Task Scheduler for errors
+
+### Store certification fails
+- Run Windows App Certification Kit (WACK) locally first
+- Check for prohibited API calls
+- Ensure privacy policy is accessible
 
 ## Resources
 
 - [MSIX Documentation](https://docs.microsoft.com/en-us/windows/msix/)
-- [Package a desktop app from source code](https://docs.microsoft.com/en-us/windows/msix/desktop/desktop-to-uwp-packaging-dot-net)
-- [MSIX Packaging Tool](https://docs.microsoft.com/en-us/windows/msix/packaging-tool/tool-overview)
+- [Package a desktop app](https://docs.microsoft.com/en-us/windows/msix/desktop/desktop-to-uwp-packaging-dot-net)
 - [Partner Center](https://partner.microsoft.com/dashboard)
+- [Windows App Certification Kit](https://docs.microsoft.com/en-us/windows/uwp/debug-test-perf/windows-app-certification-kit)

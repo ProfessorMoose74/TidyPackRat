@@ -1,5 +1,6 @@
-# Visual Studio
+# Visual Studio / VS Code
 .vs/
+.vscode/
 *.user
 *.suo
 *.userosscache
@@ -103,9 +104,14 @@ $RECYCLE.BIN/
 
 # Windows Installer files
 *.cab
-*.msix
 *.msm
 *.msp
+
+# MSIX packaging
+*.msix
+*.msixupload
+*.appxsym
+dist/msix/
 
 # Windows shortcuts
 *.lnk

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+         xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest"
+         xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+         xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+         xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
+         IgnorableNamespaces="uap mp rescap desktop">
+
+  <Identity Name="TidyFlow"
+            Publisher="CN=ProfessorMoose74"
+            Version="1.2.0.0"
+            ProcessorArchitecture="x64" />
+
+  <mp:PhoneIdentity PhoneProductId="00000000-0000-0000-0000-000000000000" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
+
+  <Properties>
+    <DisplayName>TidyFlow</DisplayName>
+    <PublisherDisplayName>ProfessorMoose74</PublisherDisplayName>
+    <Logo>Images\StoreLogo.png</Logo>
+    <Description>Automatically organize your Downloads folder. Set it once, stay tidy forever.</Description>
+  </Properties>
+
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.18362.0" MaxVersionTested="10.0.26100.0" />
+  </Dependencies>
+
+  <Resources>
+    <Resource Language="en-us" />
+  </Resources>
+
+  <Applications>
+    <Application Id="TidyFlow"
+                 Executable="TidyFlow.exe"
+                 EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements
+        DisplayName="TidyFlow"
+        Description="Automatic file organizer for Windows. Keeps your Downloads folder tidy with smart categorization, scheduling, and real-time file watching."
+        BackgroundColor="#2C3E50"
+        Square150x150Logo="Images\Square150x150Logo.png"
+        Square44x44Logo="Images\Square44x44Logo.png">
+        <uap:DefaultTile
+          Wide310x150Logo="Images\Wide310x150Logo.png"
+          Square71x71Logo="Images\SmallTile.png"
+          Square310x310Logo="Images\LargeTile.png"
+          ShortName="TidyFlow">
+          <uap:ShowNameOnTiles>
+            <uap:ShowOn Tile="square150x150Logo" />
+            <uap:ShowOn Tile="wide310x150Logo" />
+            <uap:ShowOn Tile="square310x310Logo" />
+          </uap:ShowNameOnTiles>
+        </uap:DefaultTile>
+        <uap:SplashScreen Image="Images\SplashScreen.png" BackgroundColor="#2C3E50" />
+        <uap:LockScreen BadgeLogo="Images\BadgeLogo.png" Notification="badge" />
+      </uap:VisualElements>
+      <Extensions>
+        <!-- File type associations for config import/export -->
+        <uap:Extension Category="windows.fileTypeAssociation">
+          <uap:FileTypeAssociation Name="tidyflowconfig">
+            <uap:SupportedFileTypes>
+              <uap:FileType>.tfconfig</uap:FileType>
+            </uap:SupportedFileTypes>
+            <uap:DisplayName>TidyFlow Configuration</uap:DisplayName>
+            <uap:Logo>Images\Square44x44Logo.png</uap:Logo>
+          </uap:FileTypeAssociation>
+        </uap:Extension>
+        <!-- Startup task for run at startup feature -->
+        <desktop:Extension Category="windows.startupTask">
+          <desktop:StartupTask TaskId="TidyFlowStartup" Enabled="false" DisplayName="TidyFlow" />
+        </desktop:Extension>
+      </Extensions>
+    </Application>
+  </Applications>
+
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust" />
+  </Capabilities>
+</Package>

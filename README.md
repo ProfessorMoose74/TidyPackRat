@@ -262,14 +262,21 @@ Detailed documentation is available in the [`docs`](docs/) directory:
    copy config\*.json build\config\
    ```
 
-4. Build the installer (optional):
+4. Build the MSI installer (optional):
    ```bash
    msbuild src\installer\TidyFlow.Installer.wixproj /p:Configuration=Release
    ```
 
-5. Find the installer at:
+5. Build the MSIX package (optional):
+   ```bash
+   msbuild TidyFlow.sln /p:Configuration=Release /p:Platform=x64
+   ```
+   The MSIX package will be at `dist\msix\TidyFlow.Package_x.x.x.x_x64_Test\`
+
+6. Find the installers at:
    ```
    src\installer\bin\Release\TidyFlow-Setup.msi
+   dist\msix\TidyFlow.Package_x.x.x.x_x64_Test\TidyFlow.Package_x.x.x.x_x64.msix
    ```
 
 ## Contributing
@@ -302,7 +309,7 @@ We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for deta
 - [x] High DPI and accessibility support
 
 ### Phase 3: Microsoft Store & Polish (v1.3.0)
-- [ ] MSIX packaging for Microsoft Store
+- [x] MSIX packaging for Microsoft Store
 - [ ] First-run setup wizard
 - [ ] File preview before moving
 - [ ] Advanced filtering (regex patterns)
