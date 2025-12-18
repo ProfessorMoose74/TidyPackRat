@@ -6,8 +6,8 @@
          xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
          IgnorableNamespaces="uap mp rescap desktop">
 
-  <Identity Name="TidyFlow"
-            Publisher="CN=ProfessorMoose74"
+  <Identity Name="ElementalGeniusLLC.TidyFlow"
+            Publisher="CN=29741907-368C-452F-B311-240CE1EF415D"
             Version="1.2.0.0"
             ProcessorArchitecture="x64" />
 
@@ -15,7 +15,7 @@
 
   <Properties>
     <DisplayName>TidyFlow</DisplayName>
-    <PublisherDisplayName>ProfessorMoose74</PublisherDisplayName>
+    <PublisherDisplayName>Elemental Genius LLC</PublisherDisplayName>
     <Logo>Images\StoreLogo.png</Logo>
     <Description>Automatically organize your Downloads folder. Set it once, stay tidy forever.</Description>
   </Properties>
