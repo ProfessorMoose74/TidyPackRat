@@ -23,7 +23,7 @@
     .\TidyFlow-Worker.ps1 -ConfigPath "config.json" -DryRun -Verbose
 
 .NOTES
-    Version: 1.2.0
+    Version: 1.2.1
     Author: TidyFlow Team
     License: MIT
 #>
@@ -94,7 +94,7 @@ function Initialize-Logging {
 
         Write-Log -Message "========================================" -Level "INFO"
         Write-Log -Message "TidyFlow Worker Started" -Level "INFO"
-        Write-Log -Message "Version: 1.2.0" -Level "INFO"
+        Write-Log -Message "Version: 1.2.1" -Level "INFO"
         if ($DryRun) {
             Write-Log -Message "DRY RUN MODE - No files will be moved" -Level "WARN"
         }

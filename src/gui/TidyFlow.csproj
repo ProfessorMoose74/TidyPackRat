@@ -105,6 +105,7 @@
     <!-- Helpers -->
     <Compile Include="Helpers\ConfigurationManager.cs" />
     <Compile Include="Helpers\TaskSchedulerHelper.cs" />
+    <Compile Include="Helpers\WorkerScriptDeployer.cs" />
     <Compile Include="Helpers\RelayCommand.cs" />
     <Compile Include="Helpers\PreferencesManager.cs" />
     <Compile Include="Helpers\NotificationHelper.cs" />

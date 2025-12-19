@@ -157,7 +157,7 @@
                             ToolTip="Toggle Dark/Light Mode"/>
 
                     <!-- Version -->
-                    <TextBlock Text="v1.2.0"
+                    <TextBlock Text="v1.2.1"
                                FontSize="12"
                                Foreground="#BDC3C7"
                                VerticalAlignment="Center"
@@ -522,7 +522,7 @@
                         <TextBlock Text="About" Style="{StaticResource SectionHeader}"/>
                         <Border Style="{StaticResource CardBorder}">
                             <StackPanel>
-                                <TextBlock Text="TidyFlow v1.2.0" FontWeight="Bold" Margin="0,0,0,5"/>
+                                <TextBlock Text="TidyFlow v1.2.1" FontWeight="Bold" Margin="0,0,0,5"/>
                                 <TextBlock Text="Sorting your files, to clean up your mess."
                                            Foreground="{DynamicResource ThemeSecondaryTextBrush}" Margin="0,0,0,10"/>
                                 <TextBlock Text="Open source file organizer for Windows"

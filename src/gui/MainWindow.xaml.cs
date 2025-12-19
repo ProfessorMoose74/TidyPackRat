@@ -46,7 +46,19 @@ namespace TidyFlow
             ThemeManager.ApplyTheme(_preferences.DarkMode);
             UpdateThemeButton();
 
-            // Determine worker script path
+            // Deploy worker script to stable location (required for MSIX/Store apps)
+            // This ensures the script survives app updates
+            var deployResult = WorkerScriptDeployer.DeployWorkerScript();
+            if (!deployResult.Success)
+            {
+                Debug.WriteLine($"[MainWindow] Worker script deployment warning: {deployResult.ErrorMessage}");
+            }
+            else if (deployResult.WasUpdated)
+            {
+                Debug.WriteLine("[MainWindow] Worker script was updated to latest version");
+            }
+
+            // Determine worker script path (uses deployed path if available)
             _workerScriptPath = FindWorkerScript();
 
             // Initialize system tray
@@ -70,6 +82,17 @@ namespace TidyFlow
 
             // Update statistics display
             UpdateStatisticsDisplay();
+
+            // Validate and repair scheduled task if needed (self-healing after app updates)
+            if (_currentConfig?.Schedule?.Enabled == true)
+            {
+                var taskResult = TaskSchedulerHelper.ValidateAndRepairTask(_currentConfig);
+                if (taskResult.WasRepaired)
+                {
+                    Debug.WriteLine($"[MainWindow] Scheduled task was repaired: {taskResult.Message}");
+                    AddRecentActivity("Scheduled task repaired after update");
+                }
+            }
 
             // Check if should start minimized
             if (_preferences.StartMinimized)
@@ -218,28 +241,29 @@ namespace TidyFlow
 
         private string FindWorkerScript()
         {
-            var searchPaths = new[]
-            {
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "TidyFlow", "TidyFlow-Worker.ps1"),
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "TidyFlow", "TidyFlow-Worker.ps1"),
-                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TidyFlow-Worker.ps1"),
-                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "worker", "TidyFlow-Worker.ps1"),
-                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "worker", "TidyFlow-Worker.ps1"),
-                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..", "worker", "TidyFlow-Worker.ps1")
-            };
+            // Use the WorkerScriptDeployer to get the best available execution path.
+            // This handles MSIX, MSI, and development scenarios automatically.
+            // The deployer prefers the stable deployed path (ProgramData) which survives updates,
+            // falling back to the packaged path if deployment hasn't occurred yet.
+            string path = WorkerScriptDeployer.GetExecutionPath();
 
-            foreach (var path in searchPaths)
+            if (!string.IsNullOrEmpty(path) && File.Exists(path))
             {
-                try
-                {
-                    string fullPath = Path.GetFullPath(path);
-                    if (File.Exists(fullPath))
-                        return fullPath;
-                }
-                catch { }
+                Debug.WriteLine($"[MainWindow] Using worker script at: {path}");
+                return path;
             }
 
-            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "TidyFlow", "TidyFlow-Worker.ps1");
+            // If GetExecutionPath returned nothing usable, try to deploy and get the path
+            var deployResult = WorkerScriptDeployer.DeployWorkerScript();
+            if (deployResult.Success)
+            {
+                Debug.WriteLine($"[MainWindow] Deployed worker script to: {deployResult.DeployedPath}");
+                return deployResult.DeployedPath;
+            }
+
+            // Last resort fallback
+            Debug.WriteLine($"[MainWindow] Worker script not found, using fallback path");
+            return WorkerScriptDeployer.StableWorkerPath;
         }
 
         private void LoadConfiguration()
@@ -697,21 +721,11 @@ namespace TidyFlow
                 ConfigurationManager.SaveConfiguration(_currentConfig);
                 SavePreferencesFromUI();
 
-                // Update scheduled task
-                if (_currentConfig.Schedule.Enabled)
+                // Update scheduled task (uses stable deployed path automatically)
+                var taskResult = TaskSchedulerHelper.CreateOrUpdateScheduledTask(_currentConfig);
+                if (!taskResult.Success)
                 {
-                    if (!File.Exists(_workerScriptPath))
-                    {
-                        MessageBox.Show($"Worker script not found at: {_workerScriptPath}", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    }
-                    else
-                    {
-                        TaskSchedulerHelper.CreateOrUpdateScheduledTask(_currentConfig, _workerScriptPath);
-                    }
-                }
-                else
-                {
-                    TaskSchedulerHelper.RemoveScheduledTask();
+                    MessageBox.Show($"Warning: {taskResult.Message}", "Scheduler Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
                 }
 
                 // Restart file watcher with new config
