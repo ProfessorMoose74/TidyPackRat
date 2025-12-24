@@ -51,7 +51,10 @@ namespace TidyFlow.Helpers
         {
             var searchPaths = new[]
             {
-                // MSIX/Store: Script is in app package root directory
+                // MSIX/Store: Script is in package root (parent of TidyFlow subdirectory where exe runs)
+                // Package structure: PackageRoot\TidyFlow-Worker.ps1 and PackageRoot\TidyFlow\TidyFlow.exe
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", WorkerScriptName),
+                // Fallback: Script alongside the executable
                 Path.Combine(AppDomain.CurrentDomain.BaseDirectory, WorkerScriptName),
                 // Development: Script in worker subdirectory
                 Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "worker", WorkerScriptName),
