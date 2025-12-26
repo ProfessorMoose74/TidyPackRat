@@ -17,10 +17,9 @@ x86/
 build/
 bld/
 
-# MSI Installer build outputs
-src/installer/bin/
-src/installer/obj/
+# Release artifacts - never commit these
 *.msi
+*.zip
 *.wixpdb
 *.wixobj
 
@@ -111,10 +110,16 @@ $RECYCLE.BIN/
 *.msix
 *.msixupload
 *.appxsym
-dist/msix/
+dist/
+
+# GIMP source files
+*.xcf
 
 # Windows shortcuts
 *.lnk
+
+# Windows null device artifact
+nul
 
 # Test files
 TestSource/
