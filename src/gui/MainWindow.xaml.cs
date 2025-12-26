@@ -807,7 +807,7 @@ namespace TidyFlow
             try
             {
                 string logPath = _currentConfig.Logging?.LogPath ??
-                               Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+                               Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                                           "TidyFlow", "logs");
 
                 logPath = Environment.ExpandEnvironmentVariables(logPath);

@@ -11,10 +11,13 @@ namespace TidyFlow.Helpers
     public static class ConfigurationManager
     {
         /// <summary>
-        /// Default configuration file path
+        /// Default configuration file path.
+        /// Uses LocalApplicationData (AppData\Local) instead of CommonApplicationData (ProgramData)
+        /// because MSIX apps virtualize ProgramData writes, making them invisible to external
+        /// processes like the PowerShell worker script.
         /// </summary>
         public static readonly string DefaultConfigPath =
-            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                         "TidyFlow", "config.json");
 
         /// <summary>
@@ -134,7 +137,7 @@ namespace TidyFlow.Helpers
             return new AppConfiguration
             {
                 AppName = "TidyFlow",
-                Version = "1.2.1",
+                Version = "1.2.3",
                 SourceFolder = downloads,
                 FileAgeThreshold = 24,
                 FileSizeThreshold = 0,
@@ -232,7 +235,7 @@ namespace TidyFlow.Helpers
                 Logging = new LoggingSettings
                 {
                     Enabled = true,
-                    LogPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+                    LogPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                                           "TidyFlow", "logs"),
                     LogLevel = "info",
                     MaxLogFiles = 12

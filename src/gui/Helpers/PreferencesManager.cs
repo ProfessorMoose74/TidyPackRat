@@ -6,12 +6,15 @@ using TidyFlow.Models;
 namespace TidyFlow.Helpers
 {
     /// <summary>
-    /// Manages user preferences, statistics, and move history persistence
+    /// Manages user preferences, statistics, and move history persistence.
+    /// Uses LocalApplicationData (AppData\Local) instead of CommonApplicationData (ProgramData)
+    /// because MSIX apps virtualize ProgramData writes, making them invisible to external
+    /// processes like the PowerShell worker script.
     /// </summary>
     public static class PreferencesManager
     {
         private static readonly string DataFolder = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "TidyFlow");
 
         public static string PreferencesPath => Path.Combine(DataFolder, "preferences.json");

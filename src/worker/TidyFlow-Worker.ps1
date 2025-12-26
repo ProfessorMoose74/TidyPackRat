@@ -23,7 +23,7 @@
     .\TidyFlow-Worker.ps1 -ConfigPath "config.json" -DryRun -Verbose
 
 .NOTES
-    Version: 1.2.1
+    Version: 1.2.3
     Author: TidyFlow Team
     License: MIT
 #>
@@ -31,7 +31,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory=$false)]
-    [string]$ConfigPath = "$env:PROGRAMDATA\TidyFlow\config.json",
+    [string]$ConfigPath = "$env:LOCALAPPDATA\TidyFlow\config.json",
 
     [Parameter(Mandatory=$false)]
     [switch]$DryRun,
@@ -94,7 +94,7 @@ function Initialize-Logging {
 
         Write-Log -Message "========================================" -Level "INFO"
         Write-Log -Message "TidyFlow Worker Started" -Level "INFO"
-        Write-Log -Message "Version: 1.2.1" -Level "INFO"
+        Write-Log -Message "Version: 1.2.3" -Level "INFO"
         if ($DryRun) {
             Write-Log -Message "DRY RUN MODE - No files will be moved" -Level "WARN"
         }
@@ -478,7 +478,7 @@ try {
     }
     else {
         # Fallback logging
-        Initialize-Logging -LogPath "$env:PROGRAMDATA\TidyFlow\logs"
+        Initialize-Logging -LogPath "$env:LOCALAPPDATA\TidyFlow\logs"
     }
 
     # Run file organization

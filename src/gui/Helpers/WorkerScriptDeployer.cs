@@ -24,9 +24,12 @@ namespace TidyFlow.Helpers
         /// <summary>
         /// The stable path where the worker script is deployed for scheduling.
         /// This path never changes across app updates.
+        /// Uses LocalApplicationData (AppData\Local) instead of CommonApplicationData (ProgramData)
+        /// because MSIX apps virtualize ProgramData writes, making them invisible to external
+        /// processes like the PowerShell worker script.
         /// </summary>
         public static readonly string StableWorkerPath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "TidyFlow",
             WorkerScriptName);
 
@@ -34,7 +37,7 @@ namespace TidyFlow.Helpers
         /// Directory containing deployed files
         /// </summary>
         public static readonly string DeploymentDirectory = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "TidyFlow");
 
         /// <summary>
