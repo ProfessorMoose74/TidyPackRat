@@ -23,7 +23,7 @@
     .\TidyFlow-Worker.ps1 -ConfigPath "config.json" -DryRun -Verbose
 
 .NOTES
-    Version: 1.2.3
+    Version: 1.2.4
     Author: TidyFlow Team
     License: MIT
 #>
@@ -94,7 +94,7 @@ function Initialize-Logging {
 
         Write-Log -Message "========================================" -Level "INFO"
         Write-Log -Message "TidyFlow Worker Started" -Level "INFO"
-        Write-Log -Message "Version: 1.2.3" -Level "INFO"
+        Write-Log -Message "Version: 1.2.4" -Level "INFO"
         if ($DryRun) {
             Write-Log -Message "DRY RUN MODE - No files will be moved" -Level "WARN"
         }
@@ -469,6 +469,20 @@ function Show-Summary {
 #region Main Execution
 
 try {
+    # Display startup banner so users know script is running
+    Write-Host ""
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host "  TidyFlow Worker v1.2.4" -ForegroundColor Cyan
+    Write-Host "  Starting file organization..." -ForegroundColor Cyan
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host ""
+
+    # Verify config file exists before proceeding
+    $expandedConfigPath = [System.Environment]::ExpandEnvironmentVariables($ConfigPath)
+    if (-not (Test-Path -Path $expandedConfigPath)) {
+        throw "Configuration file not found at: $expandedConfigPath`n`nPlease run TidyFlow and save your settings first."
+    }
+
     # Load configuration
     $config = Get-Configuration -Path $ConfigPath
 
@@ -488,11 +502,46 @@ try {
     Show-Summary -Stats $statistics
 
     Write-Log -Message "TidyFlow Worker completed successfully" -Level "SUCCESS"
+
+    # In DryRun mode, pause so user can review the results
+    if ($DryRun) {
+        Write-Host ""
+        Write-Host "Press any key to close this window..." -ForegroundColor Yellow
+        $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    }
+
     exit 0
 }
 catch {
-    Write-Log -Message "TidyFlow Worker failed: $_" -Level "ERROR"
-    Write-Log -Message "Stack trace: $($_.ScriptStackTrace)" -Level "ERROR"
+    # Display error prominently before exiting
+    Write-Host ""
+    Write-Host "========================================" -ForegroundColor Red
+    Write-Host "  TidyFlow Worker FAILED" -ForegroundColor Red
+    Write-Host "========================================" -ForegroundColor Red
+    Write-Host ""
+    Write-Host "Error: $_" -ForegroundColor Red
+    Write-Host ""
+    Write-Host "Stack Trace:" -ForegroundColor Yellow
+    Write-Host $_.ScriptStackTrace -ForegroundColor Gray
+    Write-Host ""
+    Write-Host "Config Path: $ConfigPath" -ForegroundColor Gray
+    Write-Host ""
+
+    # Try to write to log file if possible
+    try {
+        if ($script:LogFile) {
+            Write-Log -Message "TidyFlow Worker failed: $_" -Level "ERROR"
+            Write-Log -Message "Stack trace: $($_.ScriptStackTrace)" -Level "ERROR"
+        }
+    }
+    catch {
+        # Logging failed, just continue to show the error
+    }
+
+    # Always pause on error so user can see what went wrong
+    Write-Host "Press any key to close this window..." -ForegroundColor Yellow
+    $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+
     exit 1
 }
 

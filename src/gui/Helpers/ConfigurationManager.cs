@@ -137,7 +137,7 @@ namespace TidyFlow.Helpers
             return new AppConfiguration
             {
                 AppName = "TidyFlow",
-                Version = "1.2.3",
+                Version = "1.2.4",
                 SourceFolder = downloads,
                 FileAgeThreshold = 24,
                 FileSizeThreshold = 0,

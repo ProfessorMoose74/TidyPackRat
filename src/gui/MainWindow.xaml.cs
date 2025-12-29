@@ -765,15 +765,36 @@ namespace TidyFlow
                     return;
                 }
 
+                // Verify config file exists before launching
                 string configPath = ConfigurationManager.DefaultConfigPath;
-                string arguments = $"-ExecutionPolicy Bypass -File \"{_workerScriptPath}\" -ConfigPath \"{configPath}\"";
+                if (!File.Exists(configPath))
+                {
+                    MessageBox.Show($"Configuration file not found at: {configPath}\n\nPlease save your configuration first.",
+                        "Configuration Missing", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                // Use full path to PowerShell to avoid PATH issues in MSIX context
+                // Add -NoProfile to prevent user profile scripts from interfering
+                // Add -NoLogo for cleaner output
+                string powershellPath = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.System),
+                    "WindowsPowerShell", "v1.0", "powershell.exe");
+
+                // Fallback to just powershell.exe if full path doesn't exist
+                if (!File.Exists(powershellPath))
+                {
+                    powershellPath = "powershell.exe";
+                }
+
+                string arguments = $"-NoProfile -NoLogo -ExecutionPolicy Bypass -File \"{_workerScriptPath}\" -ConfigPath \"{configPath}\"";
 
                 if (dryRun)
                     arguments += " -DryRun -VerboseLogging";
 
                 var psi = new ProcessStartInfo
                 {
-                    FileName = "powershell.exe",
+                    FileName = powershellPath,
                     Arguments = arguments,
                     UseShellExecute = true,
                     WindowStyle = ProcessWindowStyle.Normal
