@@ -86,7 +86,28 @@ namespace TidyFlow.Services
         /// </summary>
         public void Stop()
         {
-            _isRunning = false;
+            lock (_lock)
+            {
+                if (!_isRunning)
+                    return;
+                _isRunning = false;
+            }
+
+            // Unsubscribe from events first to prevent callbacks during disposal
+            if (_watcher != null)
+            {
+                try
+                {
+                    _watcher.EnableRaisingEvents = false;
+                    _watcher.Created -= OnFileCreated;
+                    _watcher.Renamed -= OnFileRenamed;
+                }
+                catch (ObjectDisposedException)
+                {
+                    // Already disposed, ignore
+                }
+            }
+
             _processTimer?.Dispose();
             _processTimer = null;
             _watcher?.Dispose();
@@ -216,18 +237,40 @@ namespace TidyFlow.Services
                 if (_config.DuplicateHandling == "skip")
                     return;
 
-                // Rename with number
+                // Rename with number (with safety limit to prevent infinite loop)
                 int counter = 1;
+                const int maxAttempts = 10000;
                 string nameWithoutExt = Path.GetFileNameWithoutExtension(fileName);
-                while (File.Exists(destPath))
+                while (File.Exists(destPath) && counter < maxAttempts)
                 {
                     destPath = Path.Combine(destFolder, $"{nameWithoutExt}_{counter}{extension}");
                     counter++;
                 }
+
+                if (counter >= maxAttempts)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Could not find unique filename for: {fileName}");
+                    return;
+                }
             }
 
-            // Perform the move
-            File.Move(filePath, destPath);
+            // Perform the move with error handling
+            try
+            {
+                File.Move(filePath, destPath);
+            }
+            catch (IOException ex)
+            {
+                // File is likely locked (still being downloaded or in use)
+                System.Diagnostics.Debug.WriteLine($"File locked, will retry later: {filePath} - {ex.Message}");
+                QueueFile(filePath); // Re-queue for later processing
+                return;
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Access denied for file: {filePath} - {ex.Message}");
+                return;
+            }
 
             // Record in history
             var batch = MoveBatch.CreateNew();

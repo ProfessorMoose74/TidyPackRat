@@ -23,7 +23,7 @@
     .\TidyFlow-Worker.ps1 -ConfigPath "config.json" -DryRun -Verbose
 
 .NOTES
-    Version: 1.2.4
+    Version: 1.2.5
     Author: TidyFlow Team
     License: MIT
 #>
@@ -45,6 +45,53 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 #region Helper Functions
+
+<#
+.SYNOPSIS
+    Pauses script execution waiting for user input.
+    Uses multiple fallback methods for compatibility across different PowerShell hosts.
+#>
+function Wait-ForKeyPress {
+    param(
+        [string]$Message = "Press any key to continue..."
+    )
+
+    Write-Host ""
+    Write-Host $Message -ForegroundColor Yellow
+
+    # Try multiple methods for maximum compatibility
+    # Method 1: Use cmd /c pause (most reliable, works in all Windows environments)
+    try {
+        cmd /c pause 2>$null | Out-Null
+        return
+    }
+    catch {
+        # Method 1 failed, try next
+    }
+
+    # Method 2: Use Read-Host (works in most PowerShell hosts)
+    try {
+        Read-Host "Press Enter to continue" | Out-Null
+        return
+    }
+    catch {
+        # Method 2 failed, try next
+    }
+
+    # Method 3: Try RawUI.ReadKey (may not work in constrained environments)
+    try {
+        if ($Host.UI.RawUI -and $Host.UI.RawUI.KeyAvailable -ne $null) {
+            $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+            return
+        }
+    }
+    catch {
+        # Method 3 failed, just wait briefly
+    }
+
+    # Fallback: Just wait a moment so user can see output
+    Start-Sleep -Seconds 5
+}
 
 <#
 .SYNOPSIS
@@ -94,7 +141,7 @@ function Initialize-Logging {
 
         Write-Log -Message "========================================" -Level "INFO"
         Write-Log -Message "TidyFlow Worker Started" -Level "INFO"
-        Write-Log -Message "Version: 1.2.4" -Level "INFO"
+        Write-Log -Message "Version: 1.2.5" -Level "INFO"
         if ($DryRun) {
             Write-Log -Message "DRY RUN MODE - No files will be moved" -Level "WARN"
         }
@@ -252,11 +299,16 @@ function Get-UniqueFileName {
             $baseName = [System.IO.Path]::GetFileNameWithoutExtension($FileName)
             $extension = [System.IO.Path]::GetExtension($FileName)
             $counter = 1
+            $maxAttempts = 10000
 
             do {
                 $newName = "${baseName}_${counter}${extension}"
                 $fullPath = Join-Path -Path $DestinationPath -ChildPath $newName
                 $counter++
+                if ($counter -gt $maxAttempts) {
+                    Write-Log -Message "Could not find unique filename after $maxAttempts attempts for: $FileName" -Level "ERROR"
+                    return $null
+                }
             } while (Test-Path -Path $fullPath)
 
             return $newName
@@ -472,7 +524,7 @@ try {
     # Display startup banner so users know script is running
     Write-Host ""
     Write-Host "========================================" -ForegroundColor Cyan
-    Write-Host "  TidyFlow Worker v1.2.4" -ForegroundColor Cyan
+    Write-Host "  TidyFlow Worker v1.2.5" -ForegroundColor Cyan
     Write-Host "  Starting file organization..." -ForegroundColor Cyan
     Write-Host "========================================" -ForegroundColor Cyan
     Write-Host ""
@@ -505,9 +557,7 @@ try {
 
     # In DryRun mode, pause so user can review the results
     if ($DryRun) {
-        Write-Host ""
-        Write-Host "Press any key to close this window..." -ForegroundColor Yellow
-        $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+        Wait-ForKeyPress -Message "Press any key to close this window..."
     }
 
     exit 0
@@ -539,8 +589,7 @@ catch {
     }
 
     # Always pause on error so user can see what went wrong
-    Write-Host "Press any key to close this window..." -ForegroundColor Yellow
-    $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    Wait-ForKeyPress -Message "Press any key to close this window..."
 
     exit 1
 }

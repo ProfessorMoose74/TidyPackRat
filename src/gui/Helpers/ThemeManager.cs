@@ -77,9 +77,9 @@ namespace TidyFlow.Helpers
                     if (key != null)
                     {
                         var value = key.GetValue("AppsUseLightTheme");
-                        if (value != null)
+                        if (value is int intValue)
                         {
-                            return (int)value == 0; // 0 = dark mode
+                            return intValue == 0; // 0 = dark mode
                         }
                     }
                 }

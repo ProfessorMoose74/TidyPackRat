@@ -343,7 +343,18 @@ namespace TidyFlow.Helpers
                 RedirectStandardError = true
             };
 
-            using (var process = Process.Start(psi))
+            var process = Process.Start(psi);
+            if (process == null)
+            {
+                return new SchtasksResult
+                {
+                    ExitCode = -1,
+                    Output = string.Empty,
+                    Error = "Failed to start schtasks.exe"
+                };
+            }
+
+            using (process)
             {
                 string output = process.StandardOutput.ReadToEnd();
                 string error = process.StandardError.ReadToEnd();
