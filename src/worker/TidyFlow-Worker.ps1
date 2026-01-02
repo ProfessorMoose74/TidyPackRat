@@ -23,7 +23,7 @@
     .\TidyFlow-Worker.ps1 -ConfigPath "config.json" -DryRun -Verbose
 
 .NOTES
-    Version: 1.2.5
+    Version: 1.2.6
     Author: TidyFlow Team
     License: MIT
 #>
@@ -49,48 +49,35 @@ $ErrorActionPreference = "Stop"
 <#
 .SYNOPSIS
     Pauses script execution waiting for user input.
-    Uses multiple fallback methods for compatibility across different PowerShell hosts.
+    Uses Read-Host which is the most reliable method across all PowerShell hosts
+    and Windows versions including Windows 11 24H2 in MSIX context.
 #>
 function Wait-ForKeyPress {
     param(
-        [string]$Message = "Press any key to continue..."
+        [string]$Message = "Press Enter to continue..."
     )
 
-    Write-Host ""
-    Write-Host $Message -ForegroundColor Yellow
-
-    # Try multiple methods for maximum compatibility
-    # Method 1: Use cmd /c pause (most reliable, works in all Windows environments)
     try {
-        cmd /c pause 2>$null | Out-Null
-        return
+        Write-Host ""
+        Write-Host $Message -ForegroundColor Yellow
     }
     catch {
-        # Method 1 failed, try next
+        # Color output failed, try plain output
+        Write-Host ""
+        Write-Host $Message
     }
 
-    # Method 2: Use Read-Host (works in most PowerShell hosts)
+    # Use Read-Host exclusively - it's the most reliable pure PowerShell method
+    # that works across all Windows versions, PowerShell hosts, and MSIX contexts.
+    # Note: CMD has known issues on Windows 11 24H2, and $Host.UI.RawUI can crash
+    # on certain console hosts, so we avoid both entirely.
     try {
-        Read-Host "Press Enter to continue" | Out-Null
-        return
+        Read-Host | Out-Null
     }
     catch {
-        # Method 2 failed, try next
+        # If Read-Host fails (extremely rare), just wait so user can see output
+        Start-Sleep -Seconds 10
     }
-
-    # Method 3: Try RawUI.ReadKey (may not work in constrained environments)
-    try {
-        if ($Host.UI.RawUI -and $Host.UI.RawUI.KeyAvailable -ne $null) {
-            $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-            return
-        }
-    }
-    catch {
-        # Method 3 failed, just wait briefly
-    }
-
-    # Fallback: Just wait a moment so user can see output
-    Start-Sleep -Seconds 5
 }
 
 <#
@@ -141,7 +128,7 @@ function Initialize-Logging {
 
         Write-Log -Message "========================================" -Level "INFO"
         Write-Log -Message "TidyFlow Worker Started" -Level "INFO"
-        Write-Log -Message "Version: 1.2.5" -Level "INFO"
+        Write-Log -Message "Version: 1.2.6" -Level "INFO"
         if ($DryRun) {
             Write-Log -Message "DRY RUN MODE - No files will be moved" -Level "WARN"
         }
@@ -522,12 +509,24 @@ function Show-Summary {
 
 try {
     # Display startup banner so users know script is running
-    Write-Host ""
-    Write-Host "========================================" -ForegroundColor Cyan
-    Write-Host "  TidyFlow Worker v1.2.5" -ForegroundColor Cyan
-    Write-Host "  Starting file organization..." -ForegroundColor Cyan
-    Write-Host "========================================" -ForegroundColor Cyan
-    Write-Host ""
+    # Wrap in try/catch as color output can fail on some console hosts
+    try {
+        Write-Host ""
+        Write-Host "========================================" -ForegroundColor Cyan
+        Write-Host "  TidyFlow Worker v1.2.6" -ForegroundColor Cyan
+        Write-Host "  Starting file organization..." -ForegroundColor Cyan
+        Write-Host "========================================" -ForegroundColor Cyan
+        Write-Host ""
+    }
+    catch {
+        # Fallback to plain output if colors fail
+        Write-Host ""
+        Write-Host "========================================"
+        Write-Host "  TidyFlow Worker v1.2.6"
+        Write-Host "  Starting file organization..."
+        Write-Host "========================================"
+        Write-Host ""
+    }
 
     # Verify config file exists before proceeding
     $expandedConfigPath = [System.Environment]::ExpandEnvironmentVariables($ConfigPath)
@@ -564,18 +563,36 @@ try {
 }
 catch {
     # Display error prominently before exiting
-    Write-Host ""
-    Write-Host "========================================" -ForegroundColor Red
-    Write-Host "  TidyFlow Worker FAILED" -ForegroundColor Red
-    Write-Host "========================================" -ForegroundColor Red
-    Write-Host ""
-    Write-Host "Error: $_" -ForegroundColor Red
-    Write-Host ""
-    Write-Host "Stack Trace:" -ForegroundColor Yellow
-    Write-Host $_.ScriptStackTrace -ForegroundColor Gray
-    Write-Host ""
-    Write-Host "Config Path: $ConfigPath" -ForegroundColor Gray
-    Write-Host ""
+    # Wrap in try/catch as color output can fail on some console hosts
+    try {
+        Write-Host ""
+        Write-Host "========================================" -ForegroundColor Red
+        Write-Host "  TidyFlow Worker FAILED" -ForegroundColor Red
+        Write-Host "========================================" -ForegroundColor Red
+        Write-Host ""
+        Write-Host "Error: $_" -ForegroundColor Red
+        Write-Host ""
+        Write-Host "Stack Trace:" -ForegroundColor Yellow
+        Write-Host $_.ScriptStackTrace -ForegroundColor Gray
+        Write-Host ""
+        Write-Host "Config Path: $ConfigPath" -ForegroundColor Gray
+        Write-Host ""
+    }
+    catch {
+        # Fallback to plain output if colors fail
+        Write-Host ""
+        Write-Host "========================================"
+        Write-Host "  TidyFlow Worker FAILED"
+        Write-Host "========================================"
+        Write-Host ""
+        Write-Host "Error: $_"
+        Write-Host ""
+        Write-Host "Stack Trace:"
+        Write-Host $_.ScriptStackTrace
+        Write-Host ""
+        Write-Host "Config Path: $ConfigPath"
+        Write-Host ""
+    }
 
     # Try to write to log file if possible
     try {
@@ -589,7 +606,7 @@ catch {
     }
 
     # Always pause on error so user can see what went wrong
-    Wait-ForKeyPress -Message "Press any key to close this window..."
+    Wait-ForKeyPress -Message "Press Enter to close this window..."
 
     exit 1
 }
