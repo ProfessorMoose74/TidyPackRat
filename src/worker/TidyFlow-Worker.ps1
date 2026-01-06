@@ -23,7 +23,7 @@
     .\TidyFlow-Worker.ps1 -ConfigPath "config.json" -DryRun -Verbose
 
 .NOTES
-    Version: 1.2.6
+    Version: 1.2.7
     Author: TidyFlow Team
     License: MIT
 #>
@@ -40,9 +40,13 @@ param(
     [switch]$VerboseLogging
 )
 
-# Set strict mode for better error detection
-Set-StrictMode -Version Latest
-$ErrorActionPreference = "Stop"
+# Immediate output to confirm script started (before any initialization)
+# This helps diagnose crashes on Windows 11 Insider builds
+Write-Host "TidyFlow Worker starting..."
+
+# Use Continue initially - we'll handle errors explicitly
+# Note: Removed Set-StrictMode as it causes crashes on Windows 11 Insider builds (26200.x)
+$ErrorActionPreference = "Continue"
 
 #region Helper Functions
 
@@ -50,27 +54,18 @@ $ErrorActionPreference = "Stop"
 .SYNOPSIS
     Pauses script execution waiting for user input.
     Uses Read-Host which is the most reliable method across all PowerShell hosts
-    and Windows versions including Windows 11 24H2 in MSIX context.
+    and Windows versions including Windows 11 24H2/26H2 in MSIX context.
 #>
 function Wait-ForKeyPress {
     param(
         [string]$Message = "Press Enter to continue..."
     )
 
-    try {
-        Write-Host ""
-        Write-Host $Message -ForegroundColor Yellow
-    }
-    catch {
-        # Color output failed, try plain output
-        Write-Host ""
-        Write-Host $Message
-    }
+    Write-Host ""
+    Write-Host $Message
 
     # Use Read-Host exclusively - it's the most reliable pure PowerShell method
     # that works across all Windows versions, PowerShell hosts, and MSIX contexts.
-    # Note: CMD has known issues on Windows 11 24H2, and $Host.UI.RawUI can crash
-    # on certain console hosts, so we avoid both entirely.
     try {
         Read-Host | Out-Null
     }
@@ -128,7 +123,7 @@ function Initialize-Logging {
 
         Write-Log -Message "========================================" -Level "INFO"
         Write-Log -Message "TidyFlow Worker Started" -Level "INFO"
-        Write-Log -Message "Version: 1.2.6" -Level "INFO"
+        Write-Log -Message "Version: 1.2.7" -Level "INFO"
         if ($DryRun) {
             Write-Log -Message "DRY RUN MODE - No files will be moved" -Level "WARN"
         }
@@ -159,14 +154,9 @@ function Write-Log {
         Add-Content -Path $script:LogFile -Value $logEntry
     }
 
-    # Write to console with color
+    # Write to console (no colors - they can crash on Windows 11 Insider builds)
     if ($VerboseLogging -or $DryRun) {
-        switch ($Level) {
-            "ERROR"   { Write-Host $logEntry -ForegroundColor Red }
-            "WARN"    { Write-Host $logEntry -ForegroundColor Yellow }
-            "SUCCESS" { Write-Host $logEntry -ForegroundColor Green }
-            default   { Write-Host $logEntry -ForegroundColor Gray }
-        }
+        Write-Host $logEntry
     }
 }
 
@@ -508,25 +498,13 @@ function Show-Summary {
 #region Main Execution
 
 try {
-    # Display startup banner so users know script is running
-    # Wrap in try/catch as color output can fail on some console hosts
-    try {
-        Write-Host ""
-        Write-Host "========================================" -ForegroundColor Cyan
-        Write-Host "  TidyFlow Worker v1.2.6" -ForegroundColor Cyan
-        Write-Host "  Starting file organization..." -ForegroundColor Cyan
-        Write-Host "========================================" -ForegroundColor Cyan
-        Write-Host ""
-    }
-    catch {
-        # Fallback to plain output if colors fail
-        Write-Host ""
-        Write-Host "========================================"
-        Write-Host "  TidyFlow Worker v1.2.6"
-        Write-Host "  Starting file organization..."
-        Write-Host "========================================"
-        Write-Host ""
-    }
+    # Display startup banner (no colors - they crash on Windows 11 Insider builds)
+    Write-Host ""
+    Write-Host "========================================"
+    Write-Host "  TidyFlow Worker v1.2.7"
+    Write-Host "  Starting file organization..."
+    Write-Host "========================================"
+    Write-Host ""
 
     # Verify config file exists before proceeding
     $expandedConfigPath = [System.Environment]::ExpandEnvironmentVariables($ConfigPath)
@@ -562,37 +540,19 @@ try {
     exit 0
 }
 catch {
-    # Display error prominently before exiting
-    # Wrap in try/catch as color output can fail on some console hosts
-    try {
-        Write-Host ""
-        Write-Host "========================================" -ForegroundColor Red
-        Write-Host "  TidyFlow Worker FAILED" -ForegroundColor Red
-        Write-Host "========================================" -ForegroundColor Red
-        Write-Host ""
-        Write-Host "Error: $_" -ForegroundColor Red
-        Write-Host ""
-        Write-Host "Stack Trace:" -ForegroundColor Yellow
-        Write-Host $_.ScriptStackTrace -ForegroundColor Gray
-        Write-Host ""
-        Write-Host "Config Path: $ConfigPath" -ForegroundColor Gray
-        Write-Host ""
-    }
-    catch {
-        # Fallback to plain output if colors fail
-        Write-Host ""
-        Write-Host "========================================"
-        Write-Host "  TidyFlow Worker FAILED"
-        Write-Host "========================================"
-        Write-Host ""
-        Write-Host "Error: $_"
-        Write-Host ""
-        Write-Host "Stack Trace:"
-        Write-Host $_.ScriptStackTrace
-        Write-Host ""
-        Write-Host "Config Path: $ConfigPath"
-        Write-Host ""
-    }
+    # Display error prominently (no colors - they crash on Windows 11 Insider builds)
+    Write-Host ""
+    Write-Host "========================================"
+    Write-Host "  TidyFlow Worker FAILED"
+    Write-Host "========================================"
+    Write-Host ""
+    Write-Host "Error: $_"
+    Write-Host ""
+    Write-Host "Stack Trace:"
+    Write-Host $_.ScriptStackTrace
+    Write-Host ""
+    Write-Host "Config Path: $ConfigPath"
+    Write-Host ""
 
     # Try to write to log file if possible
     try {
