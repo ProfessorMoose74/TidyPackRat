@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Updates TidyPackRat project files to use the application icon
+    Updates TidyFlow project files to use the application icon
 
 .DESCRIPTION
     Modifies the GUI project file to reference the icon.ico file
@@ -8,9 +8,9 @@
 
 $ErrorActionPreference = "Stop"
 
-Write-Host "Updating TidyPackRat project to use icon..." -ForegroundColor Cyan
+Write-Host "Updating TidyFlow project to use icon..." -ForegroundColor Cyan
 
-$projectFile = Join-Path $PSScriptRoot "..\src\gui\TidyPackRat.csproj"
+$projectFile = Join-Path $PSScriptRoot "..\src\gui\TidyFlow.csproj"
 $iconFile = Join-Path $PSScriptRoot "..\src\gui\Assets\icon.ico"
 
 # Check if icon exists
@@ -71,5 +71,5 @@ Write-Host "========================================" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "Next steps:" -ForegroundColor Yellow
 Write-Host "1. Rebuild the project: .\build.ps1" -ForegroundColor White
-Write-Host "2. The application icon will appear on TidyPackRat.exe" -ForegroundColor White
+Write-Host "2. The application icon will appear on TidyFlow.exe" -ForegroundColor White
 Write-Host "3. The icon will show in the title bar when running" -ForegroundColor White

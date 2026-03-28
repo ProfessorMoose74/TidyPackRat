@@ -1,6 +1,6 @@
-# TidyPackRat Configuration Guide
+# TidyFlow Configuration Guide
 
-This guide provides detailed information about configuring TidyPackRat to meet your specific file organization needs.
+This guide provides detailed information about configuring TidyFlow to meet your specific file organization needs.
 
 ## Table of Contents
 
@@ -14,16 +14,16 @@ This guide provides detailed information about configuring TidyPackRat to meet y
 
 ## Configuration File
 
-TidyPackRat stores its configuration in JSON format at:
+TidyFlow stores its configuration in JSON format at:
 ```
-C:\ProgramData\TidyPackRat\config.json
+C:\ProgramData\TidyFlow\config.json
 ```
 
 ### Configuration Structure
 
 ```json
 {
-  "appName": "TidyPackRat",
+  "appName": "TidyFlow",
   "version": "1.0.0",
   "sourceFolder": "C:\\Users\\YourName\\Downloads",
   "fileAgeThreshold": 24,
@@ -41,21 +41,21 @@ C:\ProgramData\TidyPackRat\config.json
 You can edit the configuration file manually:
 
 1. **Using the GUI** (recommended)
-   - Launch TidyPackRat Configuration
+   - Launch TidyFlow Configuration
    - Make changes
    - Click "Save Configuration"
 
 2. **Manually editing JSON**
-   - Open `C:\ProgramData\TidyPackRat\config.json` in a text editor
+   - Open `C:\ProgramData\TidyFlow\config.json` in a text editor
    - Make changes carefully (maintain valid JSON)
    - Save the file
-   - Restart TidyPackRat or reload configuration
+   - Restart TidyFlow or reload configuration
 
 ## GUI Configuration
 
 ### Source Folder
 
-**Purpose**: Specifies which folder TidyPackRat will monitor and organize.
+**Purpose**: Specifies which folder TidyFlow will monitor and organize.
 
 **Default**: `C:\Users\YourName\Downloads`
 
@@ -224,7 +224,7 @@ Currently, custom categories must be added by editing the JSON configuration fil
 
 1. **Open the Configuration File**
    ```
-   C:\ProgramData\TidyPackRat\config.json
+   C:\ProgramData\TidyFlow\config.json
    ```
 
 2. **Add a New Category Object**
@@ -259,7 +259,7 @@ Currently, custom categories must be added by editing the JSON configuration fil
 
 4. **Save and Test**
    - Save the config file
-   - Reload TidyPackRat Configuration tool
+   - Reload TidyFlow Configuration tool
    - The new category should appear in the grid
 
 ### Example Custom Categories
@@ -387,7 +387,7 @@ Currently, custom categories must be added by editing the JSON configuration fil
 {
   "logging": {
     "enabled": true,
-    "logPath": "C:\\ProgramData\\TidyPackRat\\logs",
+    "logPath": "C:\\ProgramData\\TidyFlow\\logs",
     "logLevel": "info",
     "maxLogFiles": 12
   }
@@ -401,8 +401,8 @@ Currently, custom categories must be added by editing the JSON configuration fil
 - `maxLogFiles`: Maximum number of monthly log files to keep
 
 **Log File Naming**:
-- Format: `TidyPackRat-YYYY-MM.log`
-- Example: `TidyPackRat-2024-11.log`
+- Format: `TidyFlow-YYYY-MM.log`
+- Example: `TidyFlow-2024-11.log`
 - One log file per month
 
 **Log Rotation**:
@@ -412,7 +412,7 @@ Currently, custom categories must be added by editing the JSON configuration fil
 
 ## Input Validation
 
-TidyPackRat validates your configuration before saving to prevent errors.
+TidyFlow validates your configuration before saving to prevent errors.
 
 ### Validated Fields
 
@@ -444,12 +444,12 @@ If validation fails, you'll see a message explaining the issue:
 
 ## Configuration Backup
 
-TidyPackRat automatically creates a backup of your configuration file each time you save.
+TidyFlow automatically creates a backup of your configuration file each time you save.
 
 ### Backup Location
 
 ```
-C:\ProgramData\TidyPackRat\config.json.backup
+C:\ProgramData\TidyFlow\config.json.backup
 ```
 
 ### Restoring from Backup
@@ -458,15 +458,15 @@ If your configuration becomes corrupted, you can restore from the backup:
 
 **Method 1: Manual Copy**
 ```powershell
-Copy-Item "C:\ProgramData\TidyPackRat\config.json.backup" `
-          "C:\ProgramData\TidyPackRat\config.json" -Force
+Copy-Item "C:\ProgramData\TidyFlow\config.json.backup" `
+          "C:\ProgramData\TidyFlow\config.json" -Force
 ```
 
 **Method 2: If GUI Won't Load**
-1. Navigate to `C:\ProgramData\TidyPackRat\`
+1. Navigate to `C:\ProgramData\TidyFlow\`
 2. Delete or rename `config.json`
 3. Rename `config.json.backup` to `config.json`
-4. Launch TidyPackRat Configuration
+4. Launch TidyFlow Configuration
 
 ### Backup Behavior
 
@@ -515,7 +515,7 @@ Before first run:
 Check logs to ensure everything is working:
 ```powershell
 # View latest log
-notepad "C:\ProgramData\TidyPackRat\logs\TidyPackRat-$(Get-Date -Format 'yyyy-MM').log"
+notepad "C:\ProgramData\TidyFlow\logs\TidyFlow-$(Get-Date -Format 'yyyy-MM').log"
 ```
 
 ### 6. Exclude Patterns for Safety
@@ -570,7 +570,7 @@ Set schedule when computer is on but you're not using it:
 **Solutions**:
 1. Verify JSON syntax is valid (use JSONLint.com)
 2. Check file permissions on config.json
-3. Restart TidyPackRat Configuration tool
+3. Restart TidyFlow Configuration tool
 4. Check for error messages in logs
 
 ### Files Not Being Moved
@@ -622,4 +622,4 @@ Set schedule when computer is on but you're not using it:
 
 ---
 
-**Need More Help?** Check the [Troubleshooting Guide](troubleshooting.md) or [open an issue](https://github.com/ProfessorMoose74/TidyPackRat/issues).
+**Need More Help?** Check the [Troubleshooting Guide](troubleshooting.md) or [open an issue](https://github.com/ProfessorMoose74/TidyFlow/issues).

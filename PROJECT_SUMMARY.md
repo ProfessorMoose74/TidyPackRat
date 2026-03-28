@@ -1,15 +1,15 @@
-# TidyPackRat - Project Summary
+# TidyFlow - Project Summary
 
 **"Sorting your files, to clean up your mess."**
 
 ## What Was Created
 
-This is a complete, production-ready v1.0.0 implementation of TidyPackRat - an automated file management system for Windows. All components have been created and are ready for testing and deployment to your GitHub repository at https://github.com/ProfessorMoose74/TidyPackRat.
+This is a complete, production-ready v1.0.0 implementation of TidyFlow - an automated file management system for Windows. All components have been created and are ready for testing and deployment to your GitHub repository at https://github.com/ProfessorMoose74/TidyFlow.
 
 ## Project Components
 
 ### 1. PowerShell Worker Script
-**Location**: `src/worker/TidyPackRat-Worker.ps1`
+**Location**: `src/worker/TidyFlow-Worker.ps1`
 
 The core engine that does the actual file organization:
 - Reads configuration from JSON
@@ -35,7 +35,7 @@ The core engine that does the actual file organization:
 Professional Windows application for easy configuration:
 
 **Key Files**:
-- `TidyPackRat.csproj` - Visual Studio project file
+- `TidyFlow.csproj` - Visual Studio project file
 - `MainWindow.xaml` - Main UI layout
 - `MainWindow.xaml.cs` - UI logic and event handlers
 - `Models/` - Data models for configuration
@@ -61,7 +61,7 @@ Complete Windows Installer package:
 
 **Key Files**:
 - `Product.wxs` - WiX source defining installer structure
-- `TidyPackRat.Installer.wixproj` - WiX project file
+- `TidyFlow.Installer.wixproj` - WiX project file
 - `License.rtf` - MIT license for installer
 - `README.md` - Build instructions
 
@@ -128,7 +128,7 @@ Complete default configuration with 9 pre-configured file categories:
 ## Repository Structure
 
 ```
-TidyPackRat/
+TidyFlow/
 ├── README.md                      # Main project documentation
 ├── LICENSE                        # MIT License
 ├── CONTRIBUTING.md                # Contribution guidelines
@@ -138,7 +138,7 @@ TidyPackRat/
 │
 ├── src/
 │   ├── gui/                       # WPF Configuration Application
-│   │   ├── TidyPackRat.csproj    # VS project file
+│   │   ├── TidyFlow.csproj    # VS project file
 │   │   ├── App.xaml              # Application definition
 │   │   ├── MainWindow.xaml       # Main window UI
 │   │   ├── MainWindow.xaml.cs    # Main window logic
@@ -155,11 +155,11 @@ TidyPackRat/
 │   │       └── AssemblyInfo.cs
 │   │
 │   ├── worker/                    # PowerShell Worker Script
-│   │   └── TidyPackRat-Worker.ps1
+│   │   └── TidyFlow-Worker.ps1
 │   │
 │   └── installer/                 # WiX Installer Project
 │       ├── Product.wxs           # WiX source
-│       ├── TidyPackRat.Installer.wixproj
+│       ├── TidyFlow.Installer.wixproj
 │       ├── License.rtf
 │       └── README.md
 │
@@ -182,7 +182,7 @@ TidyPackRat/
 
 ### 1. Add to GitHub Repository
 
-Your repository is ready at: https://github.com/ProfessorMoose74/TidyPackRat
+Your repository is ready at: https://github.com/ProfessorMoose74/TidyFlow
 
 **Initialize Git and Push**:
 ```bash
@@ -195,7 +195,7 @@ git init
 git add .
 
 # Create initial commit
-git commit -m "Initial commit: TidyPackRat v1.0.0
+git commit -m "Initial commit: TidyFlow v1.0.0
 
 - Complete WPF GUI configuration tool
 - PowerShell worker script with comprehensive features
@@ -205,7 +205,7 @@ git commit -m "Initial commit: TidyPackRat v1.0.0
 - Default configuration with 9 file categories"
 
 # Add remote (if not already added)
-git remote add origin https://github.com/ProfessorMoose74/TidyPackRat.git
+git remote add origin https://github.com/ProfessorMoose74/TidyFlow.git
 
 # Push to GitHub
 git branch -M main
@@ -255,7 +255,7 @@ cd C:\Users\rober\Git\tidy-pack-rat
    ```
 3. Run the GUI:
    ```powershell
-   .\build\gui\TidyPackRat.exe
+   .\build\gui\TidyFlow.exe
    ```
 
 **Option C: Build the Installer**
@@ -268,7 +268,7 @@ Build command:
 .\build.ps1 -Configuration Release -BuildInstaller
 ```
 
-The installer will be at: `src\installer\bin\Release\TidyPackRat-Setup.msi`
+The installer will be at: `src\installer\bin\Release\TidyFlow-Setup.msi`
 
 ### 5. Create First Release
 
@@ -276,17 +276,17 @@ Once tested:
 
 1. **Tag the release**:
    ```bash
-   git tag -a v1.0.0 -m "TidyPackRat v1.0.0 - Initial Release"
+   git tag -a v1.0.0 -m "TidyFlow v1.0.0 - Initial Release"
    git push origin v1.0.0
    ```
 
 2. **Create GitHub Release**:
-   - Go to: https://github.com/ProfessorMoose74/TidyPackRat/releases
+   - Go to: https://github.com/ProfessorMoose74/TidyFlow/releases
    - Click "Create a new release"
    - Select tag `v1.0.0`
-   - Title: "TidyPackRat v1.0.0 - Initial Release"
+   - Title: "TidyFlow v1.0.0 - Initial Release"
    - Description: Copy from README features section
-   - Upload: `TidyPackRat-Setup.msi`
+   - Upload: `TidyFlow-Setup.msi`
    - Publish release
 
 ### 6. Optional Enhancements
@@ -374,8 +374,8 @@ MIT License - See LICENSE file for details
 
 ## Support
 
-- **Issues**: https://github.com/ProfessorMoose74/TidyPackRat/issues
-- **Discussions**: https://github.com/ProfessorMoose74/TidyPackRat/discussions
+- **Issues**: https://github.com/ProfessorMoose74/TidyFlow/issues
+- **Discussions**: https://github.com/ProfessorMoose74/TidyFlow/discussions
 
 ---
 
@@ -389,16 +389,16 @@ MIT License - See LICENSE file for details
 .\build.ps1 -Configuration Release -BuildInstaller
 
 # Run the GUI (after building)
-.\build\gui\TidyPackRat.exe
+.\build\gui\TidyFlow.exe
 
 # Clean up test files
 .\tests\test-worker.ps1 -Cleanup
 
 # View configuration
-notepad C:\ProgramData\TidyPackRat\config.json
+notepad C:\ProgramData\TidyFlow\config.json
 
 # View logs (after installation)
-notepad "C:\ProgramData\TidyPackRat\logs\TidyPackRat-$(Get-Date -Format 'yyyy-MM').log"
+notepad "C:\ProgramData\TidyFlow\logs\TidyFlow-$(Get-Date -Format 'yyyy-MM').log"
 ```
 
 ---
@@ -407,4 +407,4 @@ notepad "C:\ProgramData\TidyPackRat\logs\TidyPackRat-$(Get-Date -Format 'yyyy-MM
 
 For questions or issues during development, refer to the comprehensive documentation in the `docs/` directory.
 
-**TidyPackRat - Sorting your files, to clean up your mess!**
+**TidyFlow - Sorting your files, to clean up your mess!**

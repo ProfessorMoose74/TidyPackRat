@@ -11,12 +11,18 @@
 </p>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.2.0-green.svg)]()
+[![Version](https://img.shields.io/badge/version-1.2.7-green.svg)]()
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%2B-lightgrey.svg)]()
 
 TidyFlow is an open-source automated file management system for Windows that intelligently organizes files from your Downloads folder (or any source folder) into categorized destination folders based on file type. Set it up once, and let TidyFlow keep your files tidy!
 
-## What's New in v1.2.0
+## What's New in v1.2.7
+
+- **Windows 11 Compatibility Fixes** - Resolved PowerShell worker crashes on Windows 11 24H2 (build 26100.x) and Insider builds (26200.x)
+- **Improved Stability** - Removed Set-StrictMode and console color usage that caused crashes in newer Windows builds
+- **Modern File Formats** - Added support for HEIC, AVIF, JXL images, Markdown, EPUB documents, and AIFF audio
+
+### v1.2.0 Highlights
 
 - **System Tray Integration** - Minimize to tray, run from tray menu
 - **Dark Mode** - Toggle between light and dark themes
@@ -162,13 +168,13 @@ Enable automatic scheduling to keep your folders organized:
 
 | Category | Extensions | Default Destination |
 |----------|-----------|---------------------|
-| **Images** | .jpg, .jpeg, .png, .gif, .bmp, .svg, .webp, .ico, .tiff | Pictures |
-| **Documents** | .pdf, .docx, .doc, .txt, .rtf, .odt, .tex | Documents |
+| **Images** | .jpg, .jpeg, .png, .gif, .bmp, .svg, .webp, .ico, .tiff, .heic, .avif, .jxl | Pictures |
+| **Documents** | .pdf, .docx, .doc, .txt, .rtf, .odt, .tex, .md, .epub | Documents |
 | **Spreadsheets** | .xlsx, .xls, .csv, .ods, .xlsm | Documents\Spreadsheets |
 | **Presentations** | .pptx, .ppt, .odp, .key | Documents\Presentations |
 | **Archives** | .zip, .rar, .7z, .tar, .gz, .bz2, .xz, .iso | Documents\Archives |
 | **Videos** | .mp4, .avi, .mkv, .mov, .wmv, .flv, .webm | Videos |
-| **Audio** | .mp3, .wav, .flac, .m4a, .ogg, .aac, .wma | Music |
+| **Audio** | .mp3, .wav, .flac, .m4a, .ogg, .aac, .wma, .aiff | Music |
 | **Executables** | .exe, .msi, .bat, .cmd, .ps1 | Downloads\Executables |
 | **Code** | .py, .js, .html, .css, .cpp, .cs, .java, .php, .rb, .go, .ts, .jsx, .json, .xml, .yaml | Documents\Code |
 

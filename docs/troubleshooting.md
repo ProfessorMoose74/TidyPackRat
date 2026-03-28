@@ -1,6 +1,6 @@
-# TidyPackRat Troubleshooting Guide
+# TidyFlow Troubleshooting Guide
 
-This guide helps you diagnose and fix common issues with TidyPackRat.
+This guide helps you diagnose and fix common issues with TidyFlow.
 
 ## Table of Contents
 
@@ -17,20 +17,20 @@ This guide helps you diagnose and fix common issues with TidyPackRat.
 
 ### Check the Logs
 
-Logs are your first resource for troubleshooting. They contain detailed information about what TidyPackRat is doing.
+Logs are your first resource for troubleshooting. They contain detailed information about what TidyFlow is doing.
 
 **Log Location**:
 ```
-C:\ProgramData\TidyPackRat\logs\TidyPackRat-YYYY-MM.log
+C:\ProgramData\TidyFlow\logs\TidyFlow-YYYY-MM.log
 ```
 
 **View Logs**:
 ```powershell
 # View latest log file
-notepad "C:\ProgramData\TidyPackRat\logs\TidyPackRat-$(Get-Date -Format 'yyyy-MM').log"
+notepad "C:\ProgramData\TidyFlow\logs\TidyFlow-$(Get-Date -Format 'yyyy-MM').log"
 
 # Or from GUI
-Click "View Log" button in TidyPackRat Configuration
+Click "View Log" button in TidyFlow Configuration
 ```
 
 **What to Look For**:
@@ -41,7 +41,7 @@ Click "View Log" button in TidyPackRat Configuration
 
 ### Run in Dry Run Mode
 
-Before troubleshooting further, run in dry run mode to see what TidyPackRat would do:
+Before troubleshooting further, run in dry run mode to see what TidyFlow would do:
 
 **Via GUI**:
 1. Click "Test Run (Dry Run)" button
@@ -50,8 +50,8 @@ Before troubleshooting further, run in dry run mode to see what TidyPackRat woul
 
 **Via PowerShell**:
 ```powershell
-cd "C:\Program Files\TidyPackRat\Worker"
-.\TidyPackRat-Worker.ps1 -ConfigPath "C:\ProgramData\TidyPackRat\config.json" -DryRun -VerboseLogging
+cd "C:\Program Files\TidyFlow\Worker"
+.\TidyFlow-Worker.ps1 -ConfigPath "C:\ProgramData\TidyFlow\config.json" -DryRun -VerboseLogging
 ```
 
 ### Verify Installation
@@ -60,13 +60,13 @@ Check that all components are installed:
 
 ```powershell
 # Check executable
-Test-Path "C:\Program Files\TidyPackRat\GUI\TidyPackRat.exe"
+Test-Path "C:\Program Files\TidyFlow\GUI\TidyFlow.exe"
 
 # Check worker script
-Test-Path "C:\Program Files\TidyPackRat\Worker\TidyPackRat-Worker.ps1"
+Test-Path "C:\Program Files\TidyFlow\Worker\TidyFlow-Worker.ps1"
 
 # Check configuration
-Test-Path "C:\ProgramData\TidyPackRat\config.json"
+Test-Path "C:\ProgramData\TidyFlow\config.json"
 
 # All should return True
 ```
@@ -115,8 +115,8 @@ Test-Path "C:\ProgramData\TidyPackRat\config.json"
 
 **Solutions**:
 1. Manually create shortcut:
-   - Navigate to `C:\Program Files\TidyPackRat\GUI`
-   - Right-click `TidyPackRat.exe`
+   - Navigate to `C:\Program Files\TidyFlow\GUI`
+   - Right-click `TidyFlow.exe`
    - Send to → Desktop (create shortcut)
 2. Repair installation:
    - Run installer again
@@ -131,14 +131,14 @@ Test-Path "C:\ProgramData\TidyPackRat\config.json"
 **Solutions**:
 1. Check if file exists:
    ```powershell
-   Test-Path "C:\ProgramData\TidyPackRat\config.json"
+   Test-Path "C:\ProgramData\TidyFlow\config.json"
    ```
 
 2. Restore default configuration:
    ```powershell
    # Copy default config
-   Copy-Item "C:\Program Files\TidyPackRat\config\default-config.json" `
-             "C:\ProgramData\TidyPackRat\config.json"
+   Copy-Item "C:\Program Files\TidyFlow\config\default-config.json" `
+             "C:\ProgramData\TidyFlow\config.json"
    ```
 
 3. Launch GUI and save configuration to recreate file
@@ -152,26 +152,26 @@ Test-Path "C:\ProgramData\TidyPackRat\config.json"
 
 **Solutions**:
 1. Run GUI as Administrator:
-   - Right-click TidyPackRat Configuration
+   - Right-click TidyFlow Configuration
    - Select "Run as administrator"
 
 2. Check file permissions:
    ```powershell
    # View permissions
-   Get-Acl "C:\ProgramData\TidyPackRat" | Format-List
+   Get-Acl "C:\ProgramData\TidyFlow" | Format-List
 
    # Grant yourself write access (run as admin)
-   $acl = Get-Acl "C:\ProgramData\TidyPackRat"
+   $acl = Get-Acl "C:\ProgramData\TidyFlow"
    $permission = "$env:USERNAME", "FullControl", "Allow"
    $rule = New-Object System.Security.AccessControl.FileSystemAccessRule $permission
    $acl.SetAccessRule($rule)
-   Set-Acl "C:\ProgramData\TidyPackRat" $acl
+   Set-Acl "C:\ProgramData\TidyFlow" $acl
    ```
 
 3. Check if file is read-only:
    ```powershell
    # Remove read-only attribute
-   Set-ItemProperty "C:\ProgramData\TidyPackRat\config.json" -Name IsReadOnly -Value $false
+   Set-ItemProperty "C:\ProgramData\TidyFlow\config.json" -Name IsReadOnly -Value $false
    ```
 
 ### Invalid JSON Configuration
@@ -217,16 +217,16 @@ Test-Path "C:\ProgramData\TidyPackRat\config.json"
 
 3. Restore from automatic backup:
    ```powershell
-   # TidyPackRat creates a backup before each save
-   Copy-Item "C:\ProgramData\TidyPackRat\config.json.backup" `
-             "C:\ProgramData\TidyPackRat\config.json" -Force
+   # TidyFlow creates a backup before each save
+   Copy-Item "C:\ProgramData\TidyFlow\config.json.backup" `
+             "C:\ProgramData\TidyFlow\config.json" -Force
    ```
 
 4. Restore default configuration:
    ```powershell
    # If backup is also corrupted, restore from default
-   Copy-Item "C:\Program Files\TidyPackRat\config\default-config.json" `
-             "C:\ProgramData\TidyPackRat\config.json" -Force
+   Copy-Item "C:\Program Files\TidyFlow\config\default-config.json" `
+             "C:\ProgramData\TidyFlow\config.json" -Force
    ```
 
 ### Validation Errors When Saving
@@ -301,7 +301,7 @@ Test-Path "C:\ProgramData\TidyPackRat\config.json"
 
 6. **Run with verbose logging**:
    ```powershell
-   .\TidyPackRat-Worker.ps1 -ConfigPath "C:\ProgramData\TidyPackRat\config.json" `
+   .\TidyFlow-Worker.ps1 -ConfigPath "C:\ProgramData\TidyFlow\config.json" `
                              -VerboseLogging
    ```
 
@@ -339,7 +339,7 @@ Test-Path "C:\ProgramData\TidyPackRat\config.json"
 
 3. **Use dry run to verify**:
    ```powershell
-   .\TidyPackRat-Worker.ps1 -DryRun -VerboseLogging
+   .\TidyFlow-Worker.ps1 -DryRun -VerboseLogging
    ```
 
 ### Duplicate Files Not Being Handled Correctly
@@ -405,7 +405,7 @@ The worker script should handle special characters, but if you encounter issues:
 
 1. **Verify task exists**:
    - Open Task Scheduler (`taskschd.msc`)
-   - Look for "TidyPackRat-AutoOrganize"
+   - Look for "TidyFlow-AutoOrganize"
    - Check if it exists
 
 2. **Check task is enabled**:
@@ -454,19 +454,19 @@ The worker script should handle special characters, but if you encounter issues:
    - Verify command is correct:
      ```
      powershell.exe
-     -ExecutionPolicy Bypass -File "C:\Program Files\TidyPackRat\Worker\TidyPackRat-Worker.ps1" -ConfigPath "C:\ProgramData\TidyPackRat\config.json"
+     -ExecutionPolicy Bypass -File "C:\Program Files\TidyFlow\Worker\TidyFlow-Worker.ps1" -ConfigPath "C:\ProgramData\TidyFlow\config.json"
      ```
 
 2. **Check logs after scheduled run**:
    ```powershell
    # View log
-   notepad "C:\ProgramData\TidyPackRat\logs\TidyPackRat-$(Get-Date -Format 'yyyy-MM').log"
+   notepad "C:\ProgramData\TidyFlow\logs\TidyFlow-$(Get-Date -Format 'yyyy-MM').log"
    ```
 
 3. **Test manually**:
    ```powershell
    # Run the exact command the task uses
-   powershell.exe -ExecutionPolicy Bypass -File "C:\Program Files\TidyPackRat\Worker\TidyPackRat-Worker.ps1" -ConfigPath "C:\ProgramData\TidyPackRat\config.json"
+   powershell.exe -ExecutionPolicy Bypass -File "C:\Program Files\TidyFlow\Worker\TidyFlow-Worker.ps1" -ConfigPath "C:\ProgramData\TidyFlow\config.json"
    ```
 
 ### Task Runs Multiple Times
@@ -479,7 +479,7 @@ The worker script should handle special characters, but if you encounter issues:
 
 1. **Check for duplicate tasks**:
    - Open Task Scheduler
-   - Search for all TidyPackRat tasks
+   - Search for all TidyFlow tasks
    - Delete duplicates
 
 2. **Check trigger settings**:
@@ -492,7 +492,7 @@ The worker script should handle special characters, but if you encounter issues:
 
 ## Performance Issues
 
-### TidyPackRat Runs Slowly
+### TidyFlow Runs Slowly
 
 **Symptoms**:
 - Takes a long time to process files
@@ -598,7 +598,7 @@ powershell.exe -ExecutionPolicy Bypass -File "path\to\script.ps1"
 
 ### Protected Folder Restrictions
 
-TidyPackRat prevents you from using certain system-critical folders as the source folder to protect your system:
+TidyFlow prevents you from using certain system-critical folders as the source folder to protect your system:
 
 **Blocked Source Folders**:
 - `C:\Windows` (and subfolders)
@@ -617,29 +617,29 @@ Some operations require administrator privileges:
 
 | Operation | Requires Admin? |
 |-----------|-----------------|
-| Installing TidyPackRat | Yes |
+| Installing TidyFlow | Yes |
 | Creating scheduled tasks | Sometimes (depends on system policy) |
 | Running the worker script | No |
 | Editing configuration | No (unless file permissions restrict it) |
 
 **If you get "Access Denied" when creating a scheduled task**:
-1. Close TidyPackRat Configuration
+1. Close TidyFlow Configuration
 2. Right-click → Run as administrator
 3. Enable scheduling and save again
 
 ### PowerShell Execution Policy
 
-TidyPackRat uses `-ExecutionPolicy Bypass` when running the worker script. This is necessary because:
+TidyFlow uses `-ExecutionPolicy Bypass` when running the worker script. This is necessary because:
 - The script is locally installed and trusted
 - It allows the scheduled task to run without policy restrictions
 
-**Note**: This only affects the TidyPackRat script execution, not your system-wide policy.
+**Note**: This only affects the TidyFlow script execution, not your system-wide policy.
 
 ### Configuration File Security
 
 Your configuration is stored at:
 ```
-C:\ProgramData\TidyPackRat\config.json
+C:\ProgramData\TidyFlow\config.json
 ```
 
 **Best Practices**:
@@ -653,7 +653,7 @@ If you've tried these troubleshooting steps and still have issues:
 
 ### Collect Information
 
-1. **TidyPackRat version**: Check Help → About (or README)
+1. **TidyFlow version**: Check Help → About (or README)
 2. **Windows version**:
    ```powershell
    [System.Environment]::OSVersion.Version
@@ -664,22 +664,22 @@ If you've tried these troubleshooting steps and still have issues:
    ```
 4. **Recent log file**:
    ```
-   C:\ProgramData\TidyPackRat\logs\TidyPackRat-YYYY-MM.log
+   C:\ProgramData\TidyFlow\logs\TidyFlow-YYYY-MM.log
    ```
 5. **Configuration file** (remove sensitive paths):
    ```
-   C:\ProgramData\TidyPackRat\config.json
+   C:\ProgramData\TidyFlow\config.json
    ```
 6. **Error messages**: Copy exact error text
 
 ### Get Support
 
-1. **GitHub Issues**: [Report a bug](https://github.com/ProfessorMoose74/TidyPackRat/issues)
+1. **GitHub Issues**: [Report a bug](https://github.com/ProfessorMoose74/TidyFlow/issues)
    - Include collected information above
    - Describe what you expected vs. what happened
    - Steps to reproduce the issue
 
-2. **GitHub Discussions**: [Ask for help](https://github.com/ProfessorMoose74/TidyPackRat/discussions)
+2. **GitHub Discussions**: [Ask for help](https://github.com/ProfessorMoose74/TidyFlow/discussions)
    - For general questions
    - Share tips and tricks
    - Request features
@@ -692,8 +692,8 @@ If you've tried these troubleshooting steps and still have issues:
 
 - Review [Configuration Guide](configuration-guide.md) for advanced options
 - Check [Installation Guide](installation-guide.md) for setup help
-- Browse [GitHub Discussions](https://github.com/ProfessorMoose74/TidyPackRat/discussions) for community tips
+- Browse [GitHub Discussions](https://github.com/ProfessorMoose74/TidyFlow/discussions) for community tips
 
 ---
 
-**Still stuck?** [Open an issue](https://github.com/ProfessorMoose74/TidyPackRat/issues) with detailed information about your problem.
+**Still stuck?** [Open an issue](https://github.com/ProfessorMoose74/TidyFlow/issues) with detailed information about your problem.

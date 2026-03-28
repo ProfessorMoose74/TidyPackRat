@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Build script for TidyPackRat
+    Build script for TidyFlow
 
 .DESCRIPTION
     Builds the GUI application and prepares files for installer creation
@@ -34,12 +34,12 @@ $ErrorActionPreference = "Stop"
 
 # Paths
 $rootDir = $PSScriptRoot
-$guiProject = Join-Path $rootDir "src\gui\TidyPackRat.csproj"
-$installerProject = Join-Path $rootDir "src\installer\TidyPackRat.Installer.wixproj"
+$guiProject = Join-Path $rootDir "src\gui\TidyFlow.csproj"
+$installerProject = Join-Path $rootDir "src\installer\TidyFlow.Installer.wixproj"
 $buildDir = Join-Path $rootDir "build"
 $guiBuildOutput = Join-Path $rootDir "src\gui\bin\$Configuration"
 
-Write-Host "TidyPackRat Build Script" -ForegroundColor Cyan
+Write-Host "TidyFlow Build Script" -ForegroundColor Cyan
 Write-Host "========================`n" -ForegroundColor Cyan
 
 # Check for MSBuild
@@ -115,8 +115,8 @@ if (-not $SkipGUI) {
     Write-Host "Copying GUI binaries..." -ForegroundColor Cyan
 
     $guiFiles = @(
-        "TidyPackRat.exe",
-        "TidyPackRat.exe.config",
+        "TidyFlow.exe",
+        "TidyFlow.exe.config",
         "Newtonsoft.Json.dll"
     )
 
@@ -136,9 +136,9 @@ if (-not $SkipGUI) {
 
 # Copy worker script
 Write-Host "Copying worker script..." -ForegroundColor Cyan
-Copy-Item (Join-Path $rootDir "src\worker\TidyPackRat-Worker.ps1") `
+Copy-Item (Join-Path $rootDir "src\worker\TidyFlow-Worker.ps1") `
           (Join-Path $buildDir "worker\")
-Write-Host "  Copied: TidyPackRat-Worker.ps1" -ForegroundColor Gray
+Write-Host "  Copied: TidyFlow-Worker.ps1" -ForegroundColor Gray
 
 # Copy configuration
 Write-Host "Copying configuration..." -ForegroundColor Cyan
@@ -206,7 +206,7 @@ if ($BuildInstaller) {
         exit $LASTEXITCODE
     }
 
-    $installerOutput = Join-Path $rootDir "src\installer\bin\$Configuration\TidyPackRat-Setup.msi"
+    $installerOutput = Join-Path $rootDir "src\installer\bin\$Configuration\TidyFlow-Setup.msi"
 
     if (Test-Path $installerOutput) {
         Write-Host "`nInstaller created successfully!" -ForegroundColor Green
@@ -220,7 +220,7 @@ if ($BuildInstaller) {
 Write-Host "`n========================================" -ForegroundColor Cyan
 Write-Host "Build completed successfully!" -ForegroundColor Green
 Write-Host "`nNext steps:" -ForegroundColor Yellow
-Write-Host "  1. Test the application from build\gui\TidyPackRat.exe" -ForegroundColor White
+Write-Host "  1. Test the application from build\gui\TidyFlow.exe" -ForegroundColor White
 Write-Host "  2. Run tests: .\tests\test-worker.ps1" -ForegroundColor White
 if (-not $BuildInstaller) {
     Write-Host "  3. Build installer: .\build.ps1 -BuildInstaller" -ForegroundColor White

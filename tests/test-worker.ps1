@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Test script for TidyPackRat worker
+    Test script for TidyFlow worker
 
 .DESCRIPTION
     Creates test files and runs the worker script in dry-run mode
@@ -59,8 +59,8 @@ Write-Host "Created $($testFiles.Count) test files" -ForegroundColor Green
 
 # Create test configuration
 $testConfig = @{
-    appName = "TidyPackRat"
-    version = "1.0.0"
+    appName = "TidyFlow"
+    version = "1.2.7"
     sourceFolder = $testSource
     fileAgeThreshold = 24
     fileSizeThreshold = 0
@@ -130,7 +130,7 @@ $testConfig | ConvertTo-Json -Depth 10 | Out-File -FilePath $configPath -Encodin
 Write-Host "Test configuration created at: $configPath" -ForegroundColor Green
 
 # Find worker script
-$workerScript = Join-Path (Split-Path $PSScriptRoot -Parent) "src\worker\TidyPackRat-Worker.ps1"
+$workerScript = Join-Path (Split-Path $PSScriptRoot -Parent) "src\worker\TidyFlow-Worker.ps1"
 
 if (-not (Test-Path $workerScript)) {
     Write-Host "Worker script not found at: $workerScript" -ForegroundColor Red
@@ -138,7 +138,7 @@ if (-not (Test-Path $workerScript)) {
     exit 1
 }
 
-Write-Host "`nRunning TidyPackRat worker in DRY RUN mode..." -ForegroundColor Cyan
+Write-Host "`nRunning TidyFlow worker in DRY RUN mode..." -ForegroundColor Cyan
 Write-Host "========================================`n" -ForegroundColor Cyan
 
 # Run worker script in dry-run mode

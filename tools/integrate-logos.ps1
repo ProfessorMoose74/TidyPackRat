@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Integrates TidyPackRat logos into the project
+    Integrates TidyFlow logos into the project
 
 .DESCRIPTION
     Sets up both the mascot logo and title logo in the appropriate locations
@@ -25,7 +25,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-Write-Host "TidyPackRat Logo Integration" -ForegroundColor Cyan
+Write-Host "TidyFlow Logo Integration" -ForegroundColor Cyan
 Write-Host "============================`n" -ForegroundColor Cyan
 
 $assetsDir = Join-Path $PSScriptRoot "..\assets"
@@ -95,4 +95,4 @@ Write-Host "  .\tools\prepare-assets.ps1 -LogoPath `"$assetsDir\logo.png`"" -For
 
 Write-Host "`nTo update README with title logo:" -ForegroundColor Yellow
 Write-Host "  Edit README.md and update the logo line to:" -ForegroundColor Gray
-Write-Host '  <img src="assets/title-logo.png" alt="TidyPackRat" width="600"/>' -ForegroundColor Gray
+Write-Host '  <img src="assets/title-logo.png" alt="TidyFlow" width="600"/>' -ForegroundColor Gray

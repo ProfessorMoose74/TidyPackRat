@@ -1,6 +1,6 @@
-# Contributing to TidyPackRat
+# Contributing to TidyFlow
 
-First off, thank you for considering contributing to TidyPackRat! It's people like you that make TidyPackRat such a great tool.
+First off, thank you for considering contributing to TidyFlow! It's people like you that make TidyFlow such a great tool.
 
 ## Code of Conduct
 
@@ -20,8 +20,8 @@ Before creating bug reports, please check the existing issues to avoid duplicate
 - **Include your environment details**:
   - Windows version
   - PowerShell version
-  - TidyPackRat version
-  - Relevant log files from `C:\ProgramData\TidyPackRat\logs`
+  - TidyFlow version
+  - Relevant log files from `C:\ProgramData\TidyFlow\logs`
 
 ### Suggesting Enhancements
 
@@ -56,13 +56,13 @@ Enhancement suggestions are tracked as GitHub issues. When creating an enhanceme
 
 1. Clone your fork:
    ```bash
-   git clone https://github.com/YOUR-USERNAME/TidyPackRat.git
-   cd TidyPackRat
+   git clone https://github.com/YOUR-USERNAME/TidyFlow.git
+   cd TidyFlow
    ```
 
 2. Open the solution in Visual Studio:
    ```bash
-   start src\gui\TidyPackRat.sln
+   start TidyFlow.sln
    ```
 
 3. Build the solution (Ctrl+Shift+B)
@@ -75,7 +75,7 @@ Enhancement suggestions are tracked as GitHub issues. When creating an enhanceme
 
 ```powershell
 # Dry run test
-.\src\worker\TidyPackRat-Worker.ps1 -ConfigPath "config\default-config.json" -DryRun -VerboseLogging
+.\src\worker\TidyFlow-Worker.ps1 -ConfigPath "config\default-config.json" -DryRun -VerboseLogging
 
 # Create test files
 mkdir TestSource
@@ -83,7 +83,7 @@ echo "test" > TestSource\test.txt
 echo "test" > TestSource\test.jpg
 
 # Run the worker
-.\src\worker\TidyPackRat-Worker.ps1 -ConfigPath "config\default-config.json"
+.\src\worker\TidyFlow-Worker.ps1 -ConfigPath "config\default-config.json"
 ```
 
 #### Testing the GUI
@@ -124,7 +124,7 @@ public static AppConfiguration LoadConfiguration(string filePath = null)
 - Use proper error handling with try/catch
 - Write verbose logging statements
 - Follow PowerShell naming conventions (Pascal case for functions)
-- Use strict mode: `Set-StrictMode -Version Latest`
+- Avoid `Set-StrictMode` (causes crashes on Windows 11 Insider builds)
 
 Example:
 ```powershell
@@ -208,7 +208,7 @@ When adding new features or making changes:
 ## Project Structure
 
 ```
-TidyPackRat/
+TidyFlow/
 ├── src/
 │   ├── gui/              # WPF configuration application
 │   │   ├── Models/       # Data models
@@ -251,7 +251,7 @@ We especially welcome contributions in these areas:
 
 If you need help with development:
 
-1. Check existing [GitHub Discussions](https://github.com/ProfessorMoose74/TidyPackRat/discussions)
+1. Check existing [GitHub Discussions](https://github.com/ProfessorMoose74/TidyFlow/discussions)
 2. Ask in a new discussion thread
 3. Reference relevant documentation
 4. Provide context about what you're trying to achieve
@@ -265,8 +265,8 @@ Contributors will be recognized in:
 
 ## License
 
-By contributing to TidyPackRat, you agree that your contributions will be licensed under the MIT License.
+By contributing to TidyFlow, you agree that your contributions will be licensed under the MIT License.
 
 ---
 
-Thank you for contributing to TidyPackRat! Your efforts help make file organization easier for everyone.
+Thank you for contributing to TidyFlow! Your efforts help make file organization easier for everyone.

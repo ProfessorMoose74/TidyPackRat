@@ -1,16 +1,16 @@
-# TidyPackRat Quick Start Guide
+# TidyFlow Quick Start Guide
 
-Get TidyPackRat up and running in 5 minutes!
+Get TidyFlow up and running in 5 minutes!
 
 ## For End Users (Installation)
 
 ### Step 1: Download & Install
-1. Download `TidyPackRat-Setup.msi` from [Releases](https://github.com/ProfessorMoose74/TidyPackRat/releases)
+1. Download `TidyFlow-Setup.msi` from [Releases](https://github.com/ProfessorMoose74/TidyFlow/releases)
 2. Double-click to run the installer
 3. Follow the wizard (just click Next → Next → Install → Finish)
 
 ### Step 2: Configure
-1. Launch "TidyPackRat Configuration" from Start Menu
+1. Launch "TidyFlow Configuration" from Start Menu
 2. The source folder defaults to your Downloads folder (you can change it)
 3. Review the file categories - they're pre-configured for common file types
 4. Click "Save Configuration"
@@ -42,14 +42,14 @@ msbuild /?        # Should show MSBuild help
 ### Quick Build
 ```powershell
 # Clone the repo
-git clone https://github.com/ProfessorMoose74/TidyPackRat.git
-cd TidyPackRat
+git clone https://github.com/ProfessorMoose74/TidyFlow.git
+cd TidyFlow
 
 # Build the application
 .\build.ps1 -Configuration Release
 
 # Test it
-.\build\gui\TidyPackRat.exe
+.\build\gui\TidyFlow.exe
 ```
 
 ### Build the Installer
@@ -60,7 +60,7 @@ cd TidyPackRat
 .\build.ps1 -Configuration Release -BuildInstaller
 
 # Installer will be at:
-# src\installer\bin\Release\TidyPackRat-Setup.msi
+# src\installer\bin\Release\TidyFlow-Setup.msi
 ```
 
 ---
@@ -76,7 +76,7 @@ cd TidyPackRat
 3. Run now or schedule
 
 ### 3. Custom File Types
-Edit `C:\ProgramData\TidyPackRat\config.json` and add:
+Edit `C:\ProgramData\TidyFlow\config.json` and add:
 ```json
 {
   "name": "E-Books",
@@ -102,17 +102,17 @@ Edit `C:\ProgramData\TidyPackRat\config.json` and add:
 
 ### Scheduled task not running
 - Make sure you clicked "Save Configuration" after enabling schedule
-- Check Task Scheduler (Win+R → `taskschd.msc`) for "TidyPackRat-AutoOrganize"
+- Check Task Scheduler (Win+R → `taskschd.msc`) for "TidyFlow-AutoOrganize"
 
 ### Need more help?
 - Read the [full documentation](docs/)
 - Check [Troubleshooting Guide](docs/troubleshooting.md)
-- [Open an issue](https://github.com/ProfessorMoose74/TidyPackRat/issues)
+- [Open an issue](https://github.com/ProfessorMoose74/TidyFlow/issues)
 
 ---
 
 ## That's It!
 
-TidyPackRat is designed to be simple. Install, configure once, and forget about file organization forever.
+TidyFlow is designed to be simple. Install, configure once, and forget about file organization forever.
 
 **Happy organizing!**

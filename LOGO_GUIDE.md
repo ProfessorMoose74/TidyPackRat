@@ -1,6 +1,6 @@
-# TidyPackRat Logo Guide
+# TidyFlow Logo Guide
 
-You have two beautiful logos for TidyPackRat! Here's how to use them effectively.
+You have two beautiful logos for TidyFlow! Here's how to use them effectively.
 
 ## 📦 Your Logos
 
@@ -12,7 +12,7 @@ You have two beautiful logos for TidyPackRat! Here's how to use them effectively
 **Best Used For**:
 - ✅ README header (splash page) - **Already configured!**
 - ✅ Social media posts
-- ✅ Blog articles about TidyPackRat
+- ✅ Blog articles about TidyFlow
 - ✅ Presentation slides
 - ✅ Marketing materials
 - ✅ Website banner
@@ -105,7 +105,7 @@ Capture the application in action:
 
 ## 📱 Social Media Dimensions
 
-If you want to share TidyPackRat on social media:
+If you want to share TidyFlow on social media:
 
 | Platform | Dimensions | Logo to Use |
 |----------|-----------|-------------|
@@ -147,4 +147,4 @@ Keep this personality in all communications!
 
 ---
 
-**Your branding is now complete!** Both logos work beautifully together and give TidyPackRat a professional, friendly identity. 🎨✨
+**Your branding is now complete!** Both logos work beautifully together and give TidyFlow a professional, friendly identity. 🎨✨

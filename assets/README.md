@@ -1,6 +1,6 @@
-# TidyPackRat Assets
+# TidyFlow Assets
 
-This directory contains visual assets for the TidyPackRat project.
+This directory contains visual assets for the TidyFlow project.
 
 ## Logo
 - `logo.png` - Main project logo (pack rat mascot with glasses)
@@ -23,4 +23,4 @@ This directory contains visual assets for the TidyPackRat project.
 - `Dialog.bmp` (493×312 pixels) - Installer dialog background
 
 ## Credits
-Logo designed by Copilot for the TidyPackRat project.
+Logo designed by Copilot for the TidyFlow project.

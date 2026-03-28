@@ -1,6 +1,6 @@
 {
   "appName": "TidyFlow",
-  "version": "1.2.5",
+  "version": "1.2.7",
   "sourceFolder": "%USERPROFILE%\\Downloads",
   "fileAgeThreshold": 24,
   "fileSizeThreshold": 0,
@@ -8,13 +8,13 @@
   "categories": [
     {
       "name": "Images",
-      "extensions": [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".svg", ".webp", ".ico", ".tiff", ".tif"],
+      "extensions": [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".svg", ".webp", ".ico", ".tiff", ".tif", ".heic", ".heif", ".avif", ".jxl"],
       "destination": "%USERPROFILE%\\Pictures",
       "enabled": true
     },
     {
       "name": "Documents",
-      "extensions": [".pdf", ".docx", ".doc", ".txt", ".rtf", ".odt", ".tex", ".wpd"],
+      "extensions": [".pdf", ".docx", ".doc", ".txt", ".rtf", ".odt", ".tex", ".wpd", ".md", ".epub"],
       "destination": "%USERPROFILE%\\Documents",
       "enabled": true
     },
@@ -44,7 +44,7 @@
     },
     {
       "name": "Audio",
-      "extensions": [".mp3", ".wav", ".flac", ".m4a", ".ogg", ".aac", ".wma", ".opus"],
+      "extensions": [".mp3", ".wav", ".flac", ".m4a", ".ogg", ".aac", ".wma", ".opus", ".aiff"],
       "destination": "%USERPROFILE%\\Music",
       "enabled": true
     },

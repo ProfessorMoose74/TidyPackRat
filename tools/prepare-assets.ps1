@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Prepares TidyPackRat visual assets for the project
+    Prepares TidyFlow visual assets for the project
 
 .DESCRIPTION
     Converts the logo PNG to various formats needed:
@@ -27,7 +27,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-Write-Host "TidyPackRat Asset Preparation Tool" -ForegroundColor Cyan
+Write-Host "TidyFlow Asset Preparation Tool" -ForegroundColor Cyan
 Write-Host "==================================`n" -ForegroundColor Cyan
 
 # Check if logo exists
@@ -129,7 +129,7 @@ Add application screenshots here for documentation:
 Screenshots should be:
 - PNG format
 - Clear and well-lit
-- Show the TidyPackRat interface in action
+- Show the TidyFlow interface in action
 - Cropped to relevant areas
 "@
 

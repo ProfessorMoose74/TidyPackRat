@@ -1,6 +1,6 @@
-# TidyPackRat Installation Guide
+# TidyFlow Installation Guide
 
-This guide provides detailed instructions for installing TidyPackRat on Windows systems.
+This guide provides detailed instructions for installing TidyFlow on Windows systems.
 
 ## Table of Contents
 
@@ -30,7 +30,7 @@ This guide provides detailed instructions for installing TidyPackRat on Windows 
 
 ## Pre-Installation Checklist
 
-Before installing TidyPackRat, ensure:
+Before installing TidyFlow, ensure:
 
 1. **Check Windows Version**
    ```powershell
@@ -61,11 +61,11 @@ Before installing TidyPackRat, ensure:
 ### Method 1: MSI Installer (Recommended)
 
 1. **Download the Installer**
-   - Go to [Releases](https://github.com/ProfessorMoose74/TidyPackRat/releases)
-   - Download `TidyPackRat-Setup.msi` (latest version)
+   - Go to [Releases](https://github.com/ProfessorMoose74/TidyFlow/releases)
+   - Download `TidyFlow-Setup.msi` (latest version)
 
 2. **Run the Installer**
-   - Double-click `TidyPackRat-Setup.msi`
+   - Double-click `TidyFlow-Setup.msi`
    - If prompted by User Account Control, click "Yes"
 
 3. **Follow the Installation Wizard**
@@ -79,7 +79,7 @@ Before installing TidyPackRat, ensure:
    - Click "Next"
 
    **Installation Folder**
-   - Default: `C:\Program Files\TidyPackRat`
+   - Default: `C:\Program Files\TidyFlow`
    - Click "Change" to select a different location (not recommended)
    - Click "Next"
 
@@ -97,7 +97,7 @@ Before installing TidyPackRat, ensure:
 
    **Completion**
    - Click "Finish"
-   - Optionally check "Launch TidyPackRat Configuration"
+   - Optionally check "Launch TidyFlow Configuration"
 
 ### Method 2: Manual Installation (Advanced)
 
@@ -105,14 +105,14 @@ For developers or advanced users who want to install from source:
 
 1. **Clone the Repository**
    ```bash
-   git clone https://github.com/ProfessorMoose74/TidyPackRat.git
-   cd TidyPackRat
+   git clone https://github.com/ProfessorMoose74/TidyFlow.git
+   cd TidyFlow
    ```
 
 2. **Build the Application**
    ```bash
    # Build the GUI
-   msbuild src\gui\TidyPackRat.csproj /p:Configuration=Release
+   msbuild src\gui\TidyFlow.csproj /p:Configuration=Release
 
    # The binaries will be in src\gui\bin\Release\
    ```
@@ -120,19 +120,19 @@ For developers or advanced users who want to install from source:
 3. **Manual File Placement**
    ```bash
    # Create directories
-   mkdir "C:\Program Files\TidyPackRat"
-   mkdir "C:\Program Files\TidyPackRat\GUI"
-   mkdir "C:\Program Files\TidyPackRat\Worker"
-   mkdir "C:\ProgramData\TidyPackRat"
+   mkdir "C:\Program Files\TidyFlow"
+   mkdir "C:\Program Files\TidyFlow\GUI"
+   mkdir "C:\Program Files\TidyFlow\Worker"
+   mkdir "C:\ProgramData\TidyFlow"
 
    # Copy files
-   copy src\gui\bin\Release\* "C:\Program Files\TidyPackRat\GUI\"
-   copy src\worker\*.ps1 "C:\Program Files\TidyPackRat\Worker\"
-   copy config\default-config.json "C:\ProgramData\TidyPackRat\config.json"
+   copy src\gui\bin\Release\* "C:\Program Files\TidyFlow\GUI\"
+   copy src\worker\*.ps1 "C:\Program Files\TidyFlow\Worker\"
+   copy config\default-config.json "C:\ProgramData\TidyFlow\config.json"
    ```
 
 4. **Create Shortcuts** (optional)
-   - Right-click on `C:\Program Files\TidyPackRat\GUI\TidyPackRat.exe`
+   - Right-click on `C:\Program Files\TidyFlow\GUI\TidyFlow.exe`
    - Select "Create shortcut"
    - Move shortcut to Start Menu or Desktop
 
@@ -140,8 +140,8 @@ For developers or advanced users who want to install from source:
 
 ### First Launch
 
-1. **Launch TidyPackRat**
-   - Start Menu → TidyPackRat → TidyPackRat Configuration
+1. **Launch TidyFlow**
+   - Start Menu → TidyFlow → TidyFlow Configuration
    - Or double-click the desktop shortcut if created
 
 2. **Initial Configuration Wizard** (if enabled)
@@ -210,14 +210,14 @@ Check that all files were installed correctly:
 
 ```powershell
 # Program files
-Test-Path "C:\Program Files\TidyPackRat\GUI\TidyPackRat.exe"
-Test-Path "C:\Program Files\TidyPackRat\Worker\TidyPackRat-Worker.ps1"
+Test-Path "C:\Program Files\TidyFlow\GUI\TidyFlow.exe"
+Test-Path "C:\Program Files\TidyFlow\Worker\TidyFlow-Worker.ps1"
 
 # Configuration
-Test-Path "C:\ProgramData\TidyPackRat\config.json"
+Test-Path "C:\ProgramData\TidyFlow\config.json"
 
 # Start Menu shortcut
-Test-Path "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\TidyPackRat\TidyPackRat Configuration.lnk"
+Test-Path "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\TidyFlow\TidyFlow Configuration.lnk"
 ```
 
 All commands should return `True`.
@@ -231,8 +231,8 @@ If you enabled scheduling:
    - Type `taskschd.msc`
    - Press Enter
 
-2. **Locate TidyPackRat Task**
-   - Look for "TidyPackRat-AutoOrganize"
+2. **Locate TidyFlow Task**
+   - Look for "TidyFlow-AutoOrganize"
    - Right-click → Properties
    - Verify the trigger and actions
 
@@ -243,17 +243,17 @@ If you enabled scheduling:
 
 ### Verify Logging
 
-After running TidyPackRat at least once:
+After running TidyFlow at least once:
 
 ```powershell
 # Check log directory exists
-Test-Path "C:\ProgramData\TidyPackRat\logs"
+Test-Path "C:\ProgramData\TidyFlow\logs"
 
 # List log files
-Get-ChildItem "C:\ProgramData\TidyPackRat\logs"
+Get-ChildItem "C:\ProgramData\TidyFlow\logs"
 
 # View latest log
-Get-Content "C:\ProgramData\TidyPackRat\logs\TidyPackRat-$(Get-Date -Format 'yyyy-MM').log"
+Get-Content "C:\ProgramData\TidyFlow\logs\TidyFlow-$(Get-Date -Format 'yyyy-MM').log"
 ```
 
 ## Troubleshooting
@@ -264,7 +264,7 @@ Get-Content "C:\ProgramData\TidyPackRat\logs\TidyPackRat-$(Get-Date -Format 'yyy
 - Run the installer as Administrator
 - Right-click MSI → "Run as administrator"
 
-**Error: "The installer was interrupted before TidyPackRat could be installed"**
+**Error: "The installer was interrupted before TidyFlow could be installed"**
 - Disable antivirus temporarily
 - Ensure no other installation is in progress
 - Check Windows Installer service is running
@@ -284,13 +284,13 @@ Get-Content "C:\ProgramData\TidyPackRat\logs\TidyPackRat-$(Get-Date -Format 'yyy
 If you get permission errors when running:
 
 1. **Run as Administrator**
-   - Right-click TidyPackRat Configuration
+   - Right-click TidyFlow Configuration
    - Select "Run as administrator"
 
 2. **Check Folder Permissions**
    ```powershell
    # Check if you have write access to config directory
-   $acl = Get-Acl "C:\ProgramData\TidyPackRat"
+   $acl = Get-Acl "C:\ProgramData\TidyFlow"
    $acl.Access | Format-Table
    ```
 
@@ -299,38 +299,38 @@ If you get permission errors when running:
 If shortcuts weren't created:
 
 1. **Create Manually**
-   - Right-click `C:\Program Files\TidyPackRat\GUI\TidyPackRat.exe`
+   - Right-click `C:\Program Files\TidyFlow\GUI\TidyFlow.exe`
    - Send to → Desktop (create shortcut)
    - Move to Start Menu folder if desired
 
 ## Uninstallation
 
-To remove TidyPackRat:
+To remove TidyFlow:
 
 ### Method 1: Settings App
 
 1. Open Settings (Win+I)
 2. Go to Apps → Apps & features
-3. Find "TidyPackRat File Organizer"
+3. Find "TidyFlow File Organizer"
 4. Click → Uninstall
 5. Confirm
 
 ### Method 2: Start Menu
 
-1. Start Menu → TidyPackRat
-2. Click "Uninstall TidyPackRat"
+1. Start Menu → TidyFlow
+2. Click "Uninstall TidyFlow"
 3. Confirm
 
 ### Method 3: Control Panel
 
 1. Control Panel → Programs → Programs and Features
-2. Find "TidyPackRat File Organizer"
+2. Find "TidyFlow File Organizer"
 3. Right-click → Uninstall
 
 ### What Gets Removed
 
-- Program files in `C:\Program Files\TidyPackRat`
-- Configuration files in `C:\ProgramData\TidyPackRat`
+- Program files in `C:\Program Files\TidyFlow`
+- Configuration files in `C:\ProgramData\TidyFlow`
 - Start Menu shortcuts
 - Desktop shortcut (if created)
 - Scheduled task (if enabled)
@@ -344,8 +344,8 @@ After installation:
 
 1. Read the [Configuration Guide](configuration-guide.md) for detailed customization
 2. Review the [Troubleshooting Guide](troubleshooting.md) for common issues
-3. Join the [GitHub Discussions](https://github.com/ProfessorMoose74/TidyPackRat/discussions) for tips and community support
+3. Join the [GitHub Discussions](https://github.com/ProfessorMoose74/TidyFlow/discussions) for tips and community support
 
 ---
 
-**Need Help?** [Open an issue](https://github.com/ProfessorMoose74/TidyPackRat/issues) on GitHub.
+**Need Help?** [Open an issue](https://github.com/ProfessorMoose74/TidyFlow/issues) on GitHub.

@@ -1,6 +1,6 @@
-# TidyPackRat Tools
+# TidyFlow Tools
 
-This directory contains utility scripts for TidyPackRat development.
+This directory contains utility scripts for TidyFlow development.
 
 ## Asset Preparation
 
