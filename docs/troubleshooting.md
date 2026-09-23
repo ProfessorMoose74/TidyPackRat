@@ -1,699 +1,240 @@
 # TidyFlow Troubleshooting Guide
 
-This guide helps you diagnose and fix common issues with TidyFlow.
+Most questions are answered by two tools built into TidyFlow:
 
-## Table of Contents
+- **Preview changes** shows every file in the source folder and what will happen to it, including *why* a file stays.
+- **The log** records every run. Open it with **Settings > Open log folder** and open `TidyFlow-YYYY-MM.log`.
 
-- [General Troubleshooting](#general-troubleshooting)
-- [Installation Issues](#installation-issues)
-- [Configuration Issues](#configuration-issues)
-- [File Organization Issues](#file-organization-issues)
-- [Scheduling Issues](#scheduling-issues)
-- [Performance Issues](#performance-issues)
-- [Error Messages](#error-messages)
-- [Getting Help](#getting-help)
+## Contents
 
-## General Troubleshooting
+- [Downloading and running TidyFlow](#downloading-and-running-tidyflow)
+- [Reading the log](#reading-the-log)
+- [Files aren't moved](#files-arent-moved)
+- [Files went to the wrong place](#files-went-to-the-wrong-place)
+- [Undo](#undo)
+- [Scheduled runs](#scheduled-runs)
+- [Watch for new files](#watch-for-new-files)
+- [Startup and the notification area](#startup-and-the-notification-area)
+- [Notifications](#notifications)
+- [Settings and saving](#settings-and-saving)
+- [Upgrading from 1.x](#upgrading-from-1x)
+- [Command-line exit codes](#command-line-exit-codes)
+- [Removing TidyFlow completely](#removing-tidyflow-completely)
+- [Getting help](#getting-help)
 
-### Check the Logs
+## Downloading and running TidyFlow
 
-Logs are your first resource for troubleshooting. They contain detailed information about what TidyFlow is doing.
+**"Windows protected your PC"**
 
-**Log Location**:
+TidyFlow isn't code-signed, so Windows SmartScreen may warn you the first time you run a newly downloaded `TidyFlow.exe`. Select **More info**, then **Run anyway**. Only do this for a copy you downloaded from the official [Releases page](https://github.com/ProfessorMoose74/TidyPackRat/releases).
+
+If there's no **Run anyway** button, your organization may block unsigned apps; ask your IT department. You can also right-click the zip before unzipping, choose **Properties**, tick **Unblock** and select **OK**.
+
+**Antivirus blocked or quarantined TidyFlow.exe**
+
+Some antivirus tools are wary of unsigned, single-file apps like `TidyFlow.exe`, which bundles .NET inside one large file. If yours blocks it:
+
+1. Make sure your copy came from the official [Releases page](https://github.com/ProfessorMoose74/TidyPackRat/releases). If you're unsure, download it again from there.
+2. Restore the file from quarantine and add an exception for your TidyFlow folder, following your antivirus's instructions. Consider also reporting it to your antivirus vendor as a false positive.
+3. Prefer not to? [Build TidyFlow yourself](../CONTRIBUTING.md#build-test-run) from the source with `.\build.ps1 -Portable`.
+
+**I moved TidyFlow.exe and the schedule stopped**
+
+The scheduled task still points at the old location. Open `TidyFlow.exe` once from its new folder: it repairs the task when it starts. If you use **Start TidyFlow when I sign in to Windows**, turn it off and on again in Settings too.
+
+**Which zip do I need?**
+
+`x64` for almost all Intel and AMD PCs, `arm64` for Windows on ARM. **Settings > System > About > System type** tells you which you have. The x64 build also runs on ARM PCs through emulation, but the ARM64 build is faster.
+
+## Reading the log
+
+Each run writes lines like these, followed by a summary:
+
 ```
-C:\ProgramData\TidyFlow\logs\TidyFlow-YYYY-MM.log
-```
-
-**View Logs**:
-```powershell
-# View latest log file
-notepad "C:\ProgramData\TidyFlow\logs\TidyFlow-$(Get-Date -Format 'yyyy-MM').log"
-
-# Or from GUI
-Click "View Log" button in TidyFlow Configuration
-```
-
-**What to Look For**:
-- Error messages in red
-- Warnings in yellow
-- Files that were skipped and why
-- Actual file movements
-
-### Run in Dry Run Mode
-
-Before troubleshooting further, run in dry run mode to see what TidyFlow would do:
-
-**Via GUI**:
-1. Click "Test Run (Dry Run)" button
-2. Watch the PowerShell window
-3. Check what files would be moved
-
-**Via PowerShell**:
-```powershell
-cd "C:\Program Files\TidyFlow\Worker"
-.\TidyFlow-Worker.ps1 -ConfigPath "C:\ProgramData\TidyFlow\config.json" -DryRun -VerboseLogging
-```
-
-### Verify Installation
-
-Check that all components are installed:
-
-```powershell
-# Check executable
-Test-Path "C:\Program Files\TidyFlow\GUI\TidyFlow.exe"
-
-# Check worker script
-Test-Path "C:\Program Files\TidyFlow\Worker\TidyFlow-Worker.ps1"
-
-# Check configuration
-Test-Path "C:\ProgramData\TidyFlow\config.json"
-
-# All should return True
+MOVED [Documents] report.pdf -> C:\Users\you\Documents\report.pdf
+SKIPPED setup.exe (no category for this file type)
+FAILED video.mp4: The process cannot access the file because it is being used by another process.
 ```
 
-## Installation Issues
-
-### Installer Won't Run
-
-**Error**: "Windows cannot access the specified device, path, or file"
-
-**Solutions**:
-1. Right-click installer → Properties → Unblock
-2. Run as Administrator (Right-click → Run as administrator)
-3. Temporarily disable antivirus
-4. Download installer again (may be corrupted)
-
-**Error**: "This installation is forbidden by system policy"
-
-**Solutions**:
-1. Run as Administrator
-2. Check Group Policy settings (if on a company computer)
-3. Contact your IT department
-
-### Installation Hangs or Fails
-
-**Symptoms**:
-- Installer stops responding
-- Installation never completes
-- Error during installation
-
-**Solutions**:
-1. Close all running applications
-2. Disable antivirus temporarily
-3. Restart computer and try again
-4. Check Windows Installer service:
-   ```powershell
-   Get-Service -Name msiserver
-   # Should show "Running"
-
-   # If not running:
-   Start-Service -Name msiserver
-   ```
-5. Check disk space (need at least 100 MB free)
-
-### Missing Start Menu Shortcuts
-
-**Solutions**:
-1. Manually create shortcut:
-   - Navigate to `C:\Program Files\TidyFlow\GUI`
-   - Right-click `TidyFlow.exe`
-   - Send to → Desktop (create shortcut)
-2. Repair installation:
-   - Run installer again
-   - Choose "Repair"
-
-## Configuration Issues
-
-### Configuration File Not Found
-
-**Error**: "Configuration file not found"
-
-**Solutions**:
-1. Check if file exists:
-   ```powershell
-   Test-Path "C:\ProgramData\TidyFlow\config.json"
-   ```
-
-2. Restore default configuration:
-   ```powershell
-   # Copy default config
-   Copy-Item "C:\Program Files\TidyFlow\config\default-config.json" `
-             "C:\ProgramData\TidyFlow\config.json"
-   ```
-
-3. Launch GUI and save configuration to recreate file
-
-### Configuration Changes Not Saving
-
-**Symptoms**:
-- Save button doesn't work
-- Changes revert after closing GUI
-- Error when saving
-
-**Solutions**:
-1. Run GUI as Administrator:
-   - Right-click TidyFlow Configuration
-   - Select "Run as administrator"
-
-2. Check file permissions:
-   ```powershell
-   # View permissions
-   Get-Acl "C:\ProgramData\TidyFlow" | Format-List
-
-   # Grant yourself write access (run as admin)
-   $acl = Get-Acl "C:\ProgramData\TidyFlow"
-   $permission = "$env:USERNAME", "FullControl", "Allow"
-   $rule = New-Object System.Security.AccessControl.FileSystemAccessRule $permission
-   $acl.SetAccessRule($rule)
-   Set-Acl "C:\ProgramData\TidyFlow" $acl
-   ```
-
-3. Check if file is read-only:
-   ```powershell
-   # Remove read-only attribute
-   Set-ItemProperty "C:\ProgramData\TidyFlow\config.json" -Name IsReadOnly -Value $false
-   ```
-
-### Invalid JSON Configuration
-
-**Error**: "Failed to load configuration" or "Invalid configuration file"
-
-**Symptoms**:
-- GUI shows error on startup
-- Worker script fails to run
-
-**Solutions**:
-1. Validate JSON syntax:
-   - Copy config file contents
-   - Paste into JSONLint.com
-   - Fix any syntax errors
-
-2. Common JSON mistakes:
-   ```json
-   // WRONG - Missing comma
-   {
-     "name": "Images"
-     "enabled": true
-   }
-
-   // CORRECT
-   {
-     "name": "Images",
-     "enabled": true
-   }
-
-   // WRONG - Trailing comma
-   {
-     "name": "Images",
-     "enabled": true,
-   }
-
-   // CORRECT
-   {
-     "name": "Images",
-     "enabled": true
-   }
-   ```
-
-3. Restore from automatic backup:
-   ```powershell
-   # TidyFlow creates a backup before each save
-   Copy-Item "C:\ProgramData\TidyFlow\config.json.backup" `
-             "C:\ProgramData\TidyFlow\config.json" -Force
-   ```
-
-4. Restore default configuration:
-   ```powershell
-   # If backup is also corrupted, restore from default
-   Copy-Item "C:\Program Files\TidyFlow\config\default-config.json" `
-             "C:\ProgramData\TidyFlow\config.json" -Force
-   ```
-
-### Validation Errors When Saving
-
-**Symptoms**:
-- Error message appears when clicking "Save Configuration"
-- Configuration not saved
-
-**Common Validation Errors and Solutions**:
-
-| Error Message | Solution |
-|---------------|----------|
-| "Source folder path cannot be empty" | Enter a valid folder path |
-| "Invalid source folder path" | Don't use system folders (Windows, Program Files, root drive) |
-| "File age threshold must be 0 or greater" | Enter 0 or a positive number |
-| "File size threshold must be 0 or greater" | Enter 0 or a positive number |
-| "Please enter a valid time in HH:mm format" | Use 24-hour format like 02:00 or 14:30 |
-
-**Time Format Requirements**:
-- Hours: 00-23 (24-hour format)
-- Minutes: 00-59
-- Format: HH:mm (e.g., 02:00, 14:30, 23:59)
-- Invalid examples: 2:00 AM, 25:00, 12:60
-
-## File Organization Issues
-
-### Files Aren't Being Moved
-
-**Symptoms**:
-- Files remain in source folder
-- No errors in log
-- Test run shows files should be moved
-
-**Checklist**:
-
-1. **Is the category enabled?**
-   ```json
-   {
-     "name": "Images",
-     "enabled": true  // Must be true
-   }
-   ```
-
-2. **Is the file extension in the category?**
-   - Check category's `extensions` array
-   - Extensions are case-insensitive
-   - Must include the dot: `.jpg` not `jpg`
-
-3. **Is the file too new?**
-   ```powershell
-   # Check file age
-   $file = Get-Item "C:\Users\YourName\Downloads\file.jpg"
-   $age = (Get-Date) - $file.LastWriteTime
-   Write-Host "File is $($age.TotalHours) hours old"
-
-   # Compare with threshold in config
-   # If file age < threshold, it won't be moved
-   ```
-
-4. **Does it match an exclude pattern?**
-   - Check `excludePatterns` in config
-   - Common patterns: `*.tmp`, `~*`, `*.part`
-
-5. **Is the destination accessible?**
-   ```powershell
-   # Test destination folder
-   Test-Path "C:\Users\YourName\Pictures"
-
-   # Try creating a test file there
-   "test" | Out-File "C:\Users\YourName\Pictures\test.txt"
-   ```
-
-6. **Run with verbose logging**:
-   ```powershell
-   .\TidyFlow-Worker.ps1 -ConfigPath "C:\ProgramData\TidyFlow\config.json" `
-                             -VerboseLogging
-   ```
-
-### Files Being Moved to Wrong Location
-
-**Symptoms**:
-- Files end up in unexpected folders
-- Wrong category being used
-
-**Solutions**:
-
-1. **Check for overlapping extensions**:
-   ```json
-   // If .pdf is in multiple categories, first enabled one wins
-   {
-     "categories": [
-       {
-         "name": "Documents",
-         "extensions": [".pdf"],  // This will be used
-         "enabled": true
-       },
-       {
-         "name": "Work Docs",
-         "extensions": [".pdf"],  // This won't be used for .pdf
-         "enabled": true
-       }
-     ]
-   }
-   ```
-
-2. **Verify destination paths**:
-   - Check each category's `destination` field
-   - Ensure paths are correct
-   - Check for typos
-
-3. **Use dry run to verify**:
-   ```powershell
-   .\TidyFlow-Worker.ps1 -DryRun -VerboseLogging
-   ```
-
-### Duplicate Files Not Being Handled Correctly
-
-**Symptoms**:
-- Files with same name causing errors
-- Files being skipped unexpectedly
-- File names not being renamed
-
-**Solutions**:
-
-1. **Check duplicate handling setting**:
-   ```json
-   {
-     "duplicateHandling": "rename"  // or "skip"
-   }
-   ```
-
-2. **Verify rename logic**:
-   - `rename`: Adds `_1`, `_2`, etc.
-   - `skip`: Leaves file in source folder
-
-3. **Check permissions** on destination:
-   ```powershell
-   # Ensure you can write to destination
-   $dest = "C:\Users\YourName\Pictures"
-   "test" | Out-File "$dest\test.txt"
-   ```
-
-### Files with Special Characters
-
-**Symptoms**:
-- Files with brackets, ampersands, etc. not moving
-- Errors with certain filenames
-
-**Solutions**:
-
-The worker script should handle special characters, but if you encounter issues:
-
-1. **Check logs** for specific errors
-2. **Rename problematic files** manually:
-   ```powershell
-   # Remove special characters
-   Get-ChildItem "C:\Users\YourName\Downloads" | ForEach-Object {
-     $newName = $_.Name -replace '[^\w\s\.\-]', '_'
-     if ($newName -ne $_.Name) {
-       Rename-Item $_.FullName -NewName $newName
-     }
-   }
-   ```
-
-3. **Add to exclude patterns** if specific files cause issues
-
-## Scheduling Issues
-
-### Scheduled Task Not Running
-
-**Symptoms**:
-- Files not being organized automatically
-- Task doesn't execute at scheduled time
-
-**Troubleshooting Steps**:
-
-1. **Verify task exists**:
-   - Open Task Scheduler (`taskschd.msc`)
-   - Look for "TidyFlow-AutoOrganize"
-   - Check if it exists
-
-2. **Check task is enabled**:
-   - Right-click task → Properties
-   - Ensure "Enabled" is checked at bottom
-
-3. **Verify trigger**:
-   - Open task properties → Triggers tab
-   - Check frequency and time
-   - Ensure trigger is enabled
-
-4. **Check last run result**:
-   - Select task in Task Scheduler
-   - Look at "Last Run Result" column
-   - `0x0` = Success
-   - Other codes = Error
-
-5. **View task history**:
-   - Right-click task → View History
-   - Check for errors or warnings
-
-6. **Manually run task**:
-   - Right-click task → Run
-   - Check if it runs successfully
-   - Review logs
-
-7. **Check PowerShell execution policy**:
-   ```powershell
-   Get-ExecutionPolicy
-   # Should allow scripts
-
-   # If restricted, set to RemoteSigned (run as admin)
-   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope LocalMachine
-   ```
-
-### Task Runs But Files Not Organized
-
-**Symptoms**:
-- Task shows as successful
-- But files aren't moved
-
-**Solutions**:
-
-1. **Check task action**:
-   - Task properties → Actions tab
-   - Verify command is correct:
-     ```
-     powershell.exe
-     -ExecutionPolicy Bypass -File "C:\Program Files\TidyFlow\Worker\TidyFlow-Worker.ps1" -ConfigPath "C:\ProgramData\TidyFlow\config.json"
-     ```
-
-2. **Check logs after scheduled run**:
-   ```powershell
-   # View log
-   notepad "C:\ProgramData\TidyFlow\logs\TidyFlow-$(Get-Date -Format 'yyyy-MM').log"
-   ```
-
-3. **Test manually**:
-   ```powershell
-   # Run the exact command the task uses
-   powershell.exe -ExecutionPolicy Bypass -File "C:\Program Files\TidyFlow\Worker\TidyFlow-Worker.ps1" -ConfigPath "C:\ProgramData\TidyFlow\config.json"
-   ```
-
-### Task Runs Multiple Times
-
-**Symptoms**:
-- Files being moved repeatedly
-- Multiple log entries
-
-**Solutions**:
-
-1. **Check for duplicate tasks**:
-   - Open Task Scheduler
-   - Search for all TidyFlow tasks
-   - Delete duplicates
-
-2. **Check trigger settings**:
-   - Ensure "Repeat task every" is not set
-   - Remove any extra triggers
-
-3. **Recreate task**:
-   - Delete existing task
-   - Save configuration again in GUI
-
-## Performance Issues
-
-### TidyFlow Runs Slowly
-
-**Symptoms**:
-- Takes a long time to process files
-- High CPU or disk usage
-
-**Solutions**:
-
-1. **Large number of files**:
-   - This is normal for thousands of files
-   - Consider organizing more frequently
-
-2. **Slow network drives**:
-   - Avoid organizing files on network shares
-   - Or increase file age threshold
-
-3. **Check destination disk space**:
-   ```powershell
-   # Check free space
-   Get-PSDrive C | Select-Object Used,Free
-   ```
-
-4. **Exclude unnecessary patterns**:
-   - Review and optimize exclude patterns
-   - Avoid overly complex wildcards
-
-### High Memory Usage
-
-**Symptoms**:
-- PowerShell using lots of RAM
-- System slows down during organization
-
-**Solutions**:
-
-1. **Normal for large operations**:
-   - PowerShell will use memory for file processing
-   - Memory released after completion
-
-2. **Schedule during off-hours**:
-   - Set schedule for times when you're not using PC
-
-3. **Process folders in batches**:
-   - Organize smaller sets of files more frequently
-
-## Error Messages
-
-### "Access Denied"
-
-**Causes**:
-- Insufficient permissions
-- File in use by another program
-- Protected system files
-
-**Solutions**:
-1. Run as Administrator
-2. Close programs using the files
-3. Add files to exclude patterns if they're system files
-4. Check file/folder permissions
-
-### "Path Too Long"
-
-**Error**: Path exceeds Windows 260-character limit
-
-**Solutions**:
-1. Enable long paths in Windows 10:
-   ```powershell
-   # Run as Administrator
-   New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" `
-                     -Name "LongPathsEnabled" -Value 1 -PropertyType DWORD -Force
-   ```
-
-2. Shorten destination folder paths
-3. Rename files with very long names
-
-### "Execution Policy" Errors
-
-**Error**: "...cannot be loaded because running scripts is disabled..."
-
-**Solutions**:
-```powershell
-# Check current policy
-Get-ExecutionPolicy
-
-# Set to RemoteSigned (run as admin)
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope LocalMachine
-
-# Or bypass for single run
-powershell.exe -ExecutionPolicy Bypass -File "path\to\script.ps1"
-```
-
-### "File Not Found"
-
-**Causes**:
-- Configuration file missing
-- Worker script not found
-- Source or destination folder doesn't exist
-
-**Solutions**:
-1. Verify all paths exist
-2. Reinstall if program files are missing
-3. Restore default configuration
-
-## Security Considerations
-
-### Protected Folder Restrictions
-
-TidyFlow prevents you from using certain system-critical folders as the source folder to protect your system:
-
-**Blocked Source Folders**:
-- `C:\Windows` (and subfolders)
-- `C:\Windows\System32`
-- `C:\Program Files`
-- `C:\Program Files (x86)`
-- Root drives (e.g., `C:\`)
-
-**Why?** Organizing files in these locations could break Windows or installed applications.
-
-**Solution**: Use user folders like Downloads, Desktop, or custom folders in your user profile.
-
-### Administrator Requirements
-
-Some operations require administrator privileges:
-
-| Operation | Requires Admin? |
-|-----------|-----------------|
-| Installing TidyFlow | Yes |
-| Creating scheduled tasks | Sometimes (depends on system policy) |
-| Running the worker script | No |
-| Editing configuration | No (unless file permissions restrict it) |
-
-**If you get "Access Denied" when creating a scheduled task**:
-1. Close TidyFlow Configuration
-2. Right-click → Run as administrator
-3. Enable scheduling and save again
-
-### PowerShell Execution Policy
-
-TidyFlow uses `-ExecutionPolicy Bypass` when running the worker script. This is necessary because:
-- The script is locally installed and trusted
-- It allows the scheduled task to run without policy restrictions
-
-**Note**: This only affects the TidyFlow script execution, not your system-wide policy.
-
-### Configuration File Security
-
-Your configuration is stored at:
-```
-C:\ProgramData\TidyFlow\config.json
-```
-
-**Best Practices**:
-- Don't store sensitive information in folder paths
-- The file is readable by all users on the system
-- A backup is automatically created before each save
-
-## Getting Help
-
-If you've tried these troubleshooting steps and still have issues:
-
-### Collect Information
-
-1. **TidyFlow version**: Check Help → About (or README)
-2. **Windows version**:
-   ```powershell
-   [System.Environment]::OSVersion.Version
-   ```
-3. **PowerShell version**:
-   ```powershell
-   $PSVersionTable.PSVersion
-   ```
-4. **Recent log file**:
-   ```
-   C:\ProgramData\TidyFlow\logs\TidyFlow-YYYY-MM.log
-   ```
-5. **Configuration file** (remove sensitive paths):
-   ```
-   C:\ProgramData\TidyFlow\config.json
-   ```
-6. **Error messages**: Copy exact error text
-
-### Get Support
-
-1. **GitHub Issues**: [Report a bug](https://github.com/ProfessorMoose74/TidyFlow/issues)
-   - Include collected information above
-   - Describe what you expected vs. what happened
-   - Steps to reproduce the issue
-
-2. **GitHub Discussions**: [Ask for help](https://github.com/ProfessorMoose74/TidyFlow/discussions)
-   - For general questions
-   - Share tips and tricks
-   - Request features
-
-3. **Check Existing Issues**:
-   - Someone may have already reported your issue
-   - Check closed issues too (may have solution)
-
-### Community Resources
-
-- Review [Configuration Guide](configuration-guide.md) for advanced options
-- Check [Installation Guide](installation-guide.md) for setup help
-- Browse [GitHub Discussions](https://github.com/ProfessorMoose74/TidyFlow/discussions) for community tips
-
----
-
-**Still stuck?** [Open an issue](https://github.com/ProfessorMoose74/TidyFlow/issues) with detailed information about your problem.
+| Line | Meaning |
+|---|---|
+| `MOVED` | The file was moved (and can be undone from History). |
+| `SKIPPED` | The file stayed; the reason is in brackets. |
+| `FAILED` | TidyFlow tried to move it but Windows refused. The message says why (file in use, access denied, and so on). The next run tries again. |
+| `Run skipped:` / `Scheduled run skipped:` | A background run didn't start because the settings were never saved, couldn't be read, or aren't valid. |
+
+If the log folder is empty, check that logging hasn't been turned off in `config.json` (`logging.enabled`). See the [Configuration Guide](configuration-guide.md#configjson-reference).
+
+## Files aren't moved
+
+Run **Preview changes** and find the file. The reason tells you what to change:
+
+| Reason | Fix |
+|---|---|
+| modified too recently | The file changed within **Files changed in the last (hours)** (default 24). Wait, or lower the number (`0` = no limit). |
+| smaller than the minimum size | Lower **Files smaller than (KB)** (`0` = no limit). |
+| matches an exclude pattern | Remove or change the pattern under **Files matching these patterns**. |
+| hidden or system file | Turn off **Leave hidden and system files alone**, or unhide the file. |
+| no category for this file type | Add the extension to a category, or turn on the category that has it (Installers and Code are off by default). |
+| already exists in *category* | A file with that name is already at the destination and **If the name is already taken** is set to **Leave it where it is**. Switch to **Move it and add a number**. |
+
+The file isn't in the preview at all?
+
+- It's in a **subfolder**. Only files directly in the source folder are organized.
+- You're looking at a different folder. Check **Folder to organize** on the Rules tab, or select **Open source folder** on the Dashboard.
+
+## Files went to the wrong place
+
+- **Two categories list the same extension:** the enabled category higher in the list wins. Remove the extension from one of them.
+- **Check the destination:** paths with variables such as `%USERPROFILE%\Documents` expand to your own folders. OneDrive may redirect Documents, Pictures and Desktop into your OneDrive folder.
+- **Put them back:** open **History** and select **Undo** on the run.
+
+## Undo
+
+Undo puts every file from that run back into the source folder.
+
+| What you see | Why |
+|---|---|
+| A restored file has `_1` added | A file with the same name appeared in the source folder since. TidyFlow never overwrites it. |
+| Some files are reported as not undone | You already moved, renamed or deleted them after TidyFlow moved them. |
+| An old run isn't listed | History keeps the last 50 runs. |
+
+## Scheduled runs
+
+**Nothing happens at the scheduled time**
+
+1. On the **Schedule** tab, check that **On a schedule** (or **A minute after I sign in to Windows**) is on and that you selected **Save**. The unsaved-changes bar at the bottom means it isn't saved yet.
+2. The tab should show **Next scheduled run: …**. If it doesn't, restart TidyFlow; it recreates the task on startup if it's missing or points to an old location of `TidyFlow.exe`.
+3. Check the log for a `Scheduled run skipped:` line (see below).
+4. Open Task Scheduler (**Win+R**, `taskschd.msc`), find **TidyFlow-AutoOrganize** in the Task Scheduler Library, and check **Last Run Time** / **Last Run Result**. Right-click > **Run** to test it now. A result of `0x0` is success; `0x1`, `0x2` and `0x3` are the [exit codes](#command-line-exit-codes) below.
+
+**The run happened but nothing moved**
+
+Scheduled runs use exactly the same rules as **Organize now**, so **Preview changes** shows what they would do. The most common reason is the 24-hour **Files changed in the last (hours)** rule.
+
+**"Run skipped: TidyFlow hasn't been set up yet"**
+
+Background runs never use settings you haven't reviewed. Open TidyFlow, check the Rules tab, and select **Save** once.
+
+**"Scheduled run skipped: …" with a settings message**
+
+The saved settings aren't valid any more, for example the source folder was deleted or a category moves files into the source folder. Open TidyFlow, fix what the message says, and select **Save**.
+
+**The PC was off or asleep**
+
+The run happens as soon as possible after the PC is back on. No admin rights or wake timers are involved.
+
+**It ran at a different time than expected**
+
+The time is 24-hour: `02:00` is 2 AM, `14:00` is 2 PM. Weekly runs use the day you picked; monthly runs use the date you picked, or **Last day**.
+
+**A window pops up during scheduled runs**
+
+That was a 1.x problem. In 2.0 scheduled runs start TidyFlow in the background with no window. If you still see a PowerShell window, the old 1.x task is still there: open TidyFlow once and it replaces it.
+
+## Watch for new files
+
+| Problem | Fix |
+|---|---|
+| New files aren't picked up | TidyFlow must be running (its icon is in the notification area). Turn on **Start TidyFlow when I sign in to Windows** and **Keep running in the notification area when I close the window** in Settings. |
+| There's a delay | Expected. Files are moved about 15 seconds after they stop changing and are no longer in use, so half-finished downloads aren't moved. |
+| A large download wasn't moved | Files still locked after 30 minutes are given up on. The next manual or scheduled run picks them up. |
+| A file matched no rule | The watcher ignores **Files changed in the last (hours)**, but every other rule still applies. Check with **Preview changes**. |
+| "Can't watch … because it doesn't exist" or "File watching stopped: …" | The source folder was deleted, renamed or became unreachable (for example a disconnected drive). Pick the folder again on the Rules tab, then turn **Watch for new files** back on (Schedule tab, or **Watch folder for new files** in the notification area menu). |
+
+## Startup and the notification area
+
+**TidyFlow doesn't start when I sign in**
+
+- Check **Start TidyFlow when I sign in to Windows** in Settings.
+- If you moved `TidyFlow.exe`, turn that setting off and on again so it points at the new location.
+- Check **Windows Settings > Apps > Startup** (or Task Manager > **Startup apps**) and make sure **TidyFlow** isn't turned off there.
+- If you built and installed the optional MSIX package, TidyFlow shows *"Windows has TidyFlow's startup entry turned off. Turn it on in Settings > Apps > Startup."* when Windows has disabled its startup task. Open **Windows Settings > Apps > Startup** and turn **TidyFlow** on.
+- If your organization manages the PC, a policy may block it.
+
+**I closed the window but TidyFlow is still running**
+
+That's **Keep running in the notification area when I close the window**. Select the TidyFlow icon in the notification area to open it, or right-click and choose **Exit**. The icon may be hidden under the **^** arrow on the taskbar.
+
+**Launching TidyFlow again doesn't open a second window**
+
+Only one TidyFlow runs at a time. Launching it again brings the existing window to the front.
+
+## Notifications
+
+- Check **Notify me when files are organized in the background** in Settings. Notifications are only shown for background runs (schedule and watcher), and only when something moved or failed.
+- Check **Windows Settings > System > Notifications** and make sure TidyFlow is allowed and Do not disturb / Focus is off. TidyFlow registers itself for notifications the first time it runs, so it appears in that list after you've opened it once.
+- If you ran `TidyFlow.exe --uninstall`, the notification registration was removed. Open TidyFlow again to re-register.
+- **Play a sound** controls the notification sound.
+
+## Settings and saving
+
+**"You have unsaved changes to your rules or schedule."**
+
+Rules and Schedule edits need **Save** (Ctrl+S). **Discard** throws them away. Settings tab options apply immediately.
+
+**Save is refused with a message**
+
+See the table in [Saving and validation](configuration-guide.md#saving-and-validation). Common ones: the source folder is a drive root, Windows, Program Files or your user profile folder itself; a category moves files into the source folder; the time isn't in `HH:mm` format.
+
+**My settings were reset / config.json was damaged**
+
+If `config.json` can't be read, TidyFlow automatically uses `config.json.backup` (the previous saved version). If neither can be read, TidyFlow says *"TidyFlow settings couldn't be read"* and starts with its default settings without changing your file; it's only replaced (with a backup) when you select **Save**. Until then, scheduled runs are skipped. Unknown values in an otherwise valid file fall back to their defaults.
+
+**History disappeared**
+
+If `history.json` was damaged, TidyFlow sets it aside as `history.json.corrupt` in the data folder and starts a new history.
+
+**Where is the data folder?**
+
+Use **Settings > Open data folder**. For the portable build it's `%LOCALAPPDATA%\TidyFlow` (or your `TIDYFLOW_DATA_DIR`). If you built and installed the optional MSIX package, it's in private package storage instead. See [Data folder](configuration-guide.md#data-folder).
+
+**Start over with default settings**
+
+Exit TidyFlow (notification area > **Exit**), open the data folder, and delete or rename `config.json` and `config.json.backup`. To reset only the categories, use **Restore defaults** on the Rules tab.
+
+## Upgrading from 1.x
+
+| Question | Answer |
+|---|---|
+| Were my settings kept? | Yes. They're upgraded automatically. See [Upgrading from 1.x](configuration-guide.md#upgrading-from-1x). |
+| My minimum file size behaves differently | 1.x's scheduled runs treated the number as bytes while the app said KB. 2.0 always uses KB, as the screen says. |
+| My old logs are gone | 1.x logged to `C:\ProgramData\TidyFlow\logs`. 2.0 logs to its own data folder. The old folder can be deleted. |
+| Do I still need to change the PowerShell execution policy? | No. 2.0 doesn't use PowerShell at all. If you changed the policy for 1.x, you can set it back. |
+| The old scheduled task is still there | Open TidyFlow once. It replaces a task that still points to the 1.x PowerShell worker. |
+| I had 1.x from an MSI or MSIX installer | Uninstall it from **Settings > Apps > Installed apps**. See [Upgrading from TidyFlow 1.x](installation-guide.md#upgrading-from-tidyflow-1x); export your settings first if 1.x was an MSIX package. |
+
+## Command-line exit codes
+
+`TidyFlow.exe --run` (what the scheduled task runs) exits with:
+
+| Code | Meaning | What to do |
+|---|---|---|
+| `0` | Success (including "nothing to organize") | |
+| `1` | Some files failed to move | Look for `FAILED` lines in the log. Usually a file was in use. |
+| `2` | Settings invalid, unreadable, or never saved | Open TidyFlow, fix what the log says, and select **Save**. |
+| `3` | The run failed, for example the source folder is missing | Check the source folder exists and is reachable, then see the log. |
+
+## Removing TidyFlow completely
+
+The portable build has no entry in **Settings > Apps**. To remove it:
+
+1. Exit TidyFlow (right-click the notification-area icon > **Exit**).
+2. Run `TidyFlow.exe --uninstall` (for example from **Win+R**: `"C:\path\to\TidyFlow.exe" --uninstall`) and confirm. This removes the scheduled task `TidyFlow-AutoOrganize`, the start-at-sign-in entry and the notification registration.
+3. Delete `%LOCALAPPDATA%\TidyFlow` (or your `TIDYFLOW_DATA_DIR` folder) to remove settings, history and logs.
+4. Delete the folder that contains `TidyFlow.exe`.
+
+Already deleted `TidyFlow.exe`? Remove **TidyFlow-AutoOrganize** in Task Scheduler (`taskschd.msc`) and turn TidyFlow off in **Windows Settings > Apps > Startup**, or download TidyFlow again just to run `--uninstall`.
+
+If you built and installed the optional MSIX package, uninstall it from **Settings > Apps > Installed apps** instead (this removes its data too), and delete **TidyFlow-AutoOrganize** in Task Scheduler if you had a schedule.
+
+## Getting help
+
+If you're still stuck, [open an issue](https://github.com/ProfessorMoose74/TidyPackRat/issues/new/choose) with:
+
+- Your Windows version (`winver`) and TidyFlow version (**Settings > About**, including Portable or MSIX package)
+- What you expected and what happened
+- The relevant lines from the log (remove any file names you'd rather not share)
+- For scheduling problems: the **Last Run Result** of **TidyFlow-AutoOrganize** in Task Scheduler
+
+Questions and ideas are welcome as issues too. Found a security problem? Please report it privately as described in [SECURITY.md](../SECURITY.md).

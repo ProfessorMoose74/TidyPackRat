@@ -1,0 +1,18 @@
+<Project>
+  <!-- Shared settings for every project in the repo. Bump the version here only. -->
+  <PropertyGroup>
+    <Version>2.0.0</Version>
+    <Authors>Elemental Genius LLC</Authors>
+    <Company>Elemental Genius LLC</Company>
+    <Product>TidyFlow</Product>
+    <Copyright>Copyright © 2024-2026 Elemental Genius LLC</Copyright>
+    <RepositoryUrl>https://github.com/ProfessorMoose74/TidyPackRat</RepositoryUrl>
+
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+</Project>

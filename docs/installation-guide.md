@@ -1,351 +1,118 @@
 # TidyFlow Installation Guide
 
-This guide provides detailed instructions for installing TidyFlow on Windows systems.
+TidyFlow is distributed on [GitHub Releases](https://github.com/ProfessorMoose74/TidyPackRat/releases) as a portable app: one `TidyFlow.exe`, no installer. It isn't in the Microsoft Store or any other store, so only download it from the Releases page.
 
-## Table of Contents
+## System requirements
 
-- [System Requirements](#system-requirements)
-- [Pre-Installation Checklist](#pre-installation-checklist)
-- [Installation Methods](#installation-methods)
-- [Post-Installation Setup](#post-installation-setup)
-- [Verification](#verification)
-- [Troubleshooting](#troubleshooting)
+| | |
+|---|---|
+| **Windows** | Windows 10 version 2004 (build 19041) or later, or Windows 11 |
+| **Processor** | x64 or ARM64 |
+| **Other software** | None. `TidyFlow.exe` includes the .NET runtime it needs. No PowerShell or admin rights required. |
 
-## System Requirements
+To check your Windows version, press **Win+R**, type `winver` and press Enter.
 
-### Minimum Requirements
+## Install
 
-- **Operating System**: Windows 10 (version 1903 or later)
-- **RAM**: 2 GB
-- **Disk Space**: 50 MB for installation
-- **PowerShell**: Version 5.1 or later (included in Windows 10)
-- **.NET Framework**: 4.8 (included in Windows 10 version 1903+)
+1. Open the [Releases page](https://github.com/ProfessorMoose74/TidyPackRat/releases) and, under the latest release, download:
 
-### Recommended Requirements
+   | File | For |
+   |---|---|
+   | `TidyFlow-<version>-x64-portable.zip` | Most PCs (Intel or AMD) |
+   | `TidyFlow-<version>-arm64-portable.zip` | Windows on ARM (for example Snapdragon laptops) |
 
-- **Operating System**: Windows 10 (version 21H1 or later) or Windows 11
-- **RAM**: 4 GB or more
-- **Disk Space**: 100 MB (including space for logs)
-- **Permissions**: Administrator access for installation
+   Not sure? **Settings > System > About** shows **System type**: "x64-based processor" or "ARM-based processor".
 
-## Pre-Installation Checklist
+2. Unzip it to a folder you'll keep, for example `%LOCALAPPDATA%\Programs\TidyFlow` or `C:\Tools\TidyFlow`. (Don't run it from inside the zip or from a temporary folder.) The zip contains `TidyFlow.exe` (about 80 MB) and `LICENSE`.
+3. Run `TidyFlow.exe`.
+4. Optional: right-click `TidyFlow.exe` and choose **Pin to Start** or **Pin to taskbar** (on Windows 11, under **Show more options**).
 
-Before installing TidyFlow, ensure:
+### "Windows protected your PC"
 
-1. **Check Windows Version**
-   ```powershell
-   # Run in PowerShell
-   [System.Environment]::OSVersion.Version
+TidyFlow isn't code-signed, so the first time you run it Windows SmartScreen may show **Windows protected your PC**. Select **More info**, then **Run anyway**. You only need to do this once per downloaded copy.
+
+Some antivirus tools are also cautious about unsigned single-file apps. If yours blocks or quarantines `TidyFlow.exe`, see [Troubleshooting](troubleshooting.md#downloading-and-running-tidyflow). Always get TidyFlow from the official [Releases page](https://github.com/ProfessorMoose74/TidyPackRat/releases); the source code is in the same repository if you'd rather build it yourself.
+
+### Moving TidyFlow later
+
+Moving `TidyFlow.exe` to another folder is fine. The next time you open it from the new location, TidyFlow repairs its scheduled task to point there. If you use **Start TidyFlow when I sign in to Windows**, turn that setting off and on again after moving.
+
+### Where TidyFlow keeps its data
+
+Settings, history, statistics and logs are stored in `%LOCALAPPDATA%\TidyFlow`, not next to the program, so replacing or moving `TidyFlow.exe` never loses them. To keep them somewhere else (for example on a USB stick with the program), set the `TIDYFLOW_DATA_DIR` environment variable to a folder of your choice. See [Data folder](configuration-guide.md#data-folder).
+
+## First launch
+
+1. TidyFlow opens on the **Dashboard**.
+2. Go to **Rules** and check the **Folder to organize** (Downloads by default) and the categories.
+3. Select **Save** (Ctrl+S). Scheduled and command-line runs only start working once you've saved your settings at least once.
+4. Select **Preview changes** to see what would happen, then **Move N files**.
+
+See the [Quick Start](../QUICKSTART.md) and [Configuration Guide](configuration-guide.md) for the rest.
+
+## Upgrading to a new version
+
+TidyFlow doesn't update itself. To upgrade:
+
+1. Download the new zip from the [Releases page](https://github.com/ProfessorMoose74/TidyPackRat/releases).
+2. Exit TidyFlow (right-click the notification-area icon > **Exit**).
+3. Replace `TidyFlow.exe` in your TidyFlow folder with the new one.
+4. Open TidyFlow. Your settings, history and schedule carry over.
+
+Tip: select **Watch** > **Custom** > **Releases** on the GitHub repository to be notified of new versions.
+
+## Upgrading from TidyFlow 1.x
+
+When 2.0 starts for the first time it:
+
+- Upgrades your 1.x settings in `%LOCALAPPDATA%\TidyFlow` (categories, rules, schedule, preferences). See [Upgrading from 1.x](configuration-guide.md#upgrading-from-1x) for exactly what changes.
+- Replaces the old scheduled task, which ran the PowerShell worker, with one that runs `TidyFlow.exe` directly.
+- Deletes the leftover 1.x worker files (`TidyFlow-Worker.ps1`, `worker-deployment.json`) from its data folder.
+
+How you get there depends on how 1.x was installed:
+
+| 1.x was installed with | Do this |
+|---|---|
+| The portable ZIP | Delete the old 1.x folder, then install 2.0 as above. Your settings are picked up automatically. |
+| The MSI installer | Uninstall 1.x from **Settings > Apps > Installed apps**, then install 2.0. Settings in `%LOCALAPPDATA%\TidyFlow` survive the MSI uninstall and are picked up automatically. |
+| An MSIX package | In 1.x, **Export** your settings to a `.tfconfig` file first: uninstalling an MSIX package removes its private data. Then uninstall 1.x from **Settings > Apps > Installed apps**, install 2.0, select **Settings > Import settings…**, review, and **Save**. |
+
+Optional cleanup: 1.x may have left logs and settings in `C:\ProgramData\TidyFlow`. 2.0 doesn't use that folder, so you can delete it once your settings are in 2.0.
+
+## Checking it works
+
+| What | How |
+|---|---|
+| The app runs | **Settings > About** shows the version and "Portable". |
+| Organizing works | Put a test file (for example an old `.pdf`) in the source folder, then **Preview changes**. Note that files changed in the last 24 hours stay by default. |
+| The schedule is set | Schedule tab shows **Next scheduled run: …**. You can also open Task Scheduler (**Win+R**, `taskschd.msc`) and look for **TidyFlow-AutoOrganize** in the Task Scheduler Library. Right-click > **Run** to test it. |
+| Runs are logged | **Settings > Open log folder** and open `TidyFlow-YYYY-MM.log`. |
+
+## Uninstalling
+
+1. Exit TidyFlow: right-click the TidyFlow icon in the notification area and choose **Exit**.
+2. Run `TidyFlow.exe --uninstall`. For example, press **Win+R** and enter the full path in quotes followed by `--uninstall`:
+
    ```
-   Should show version 10.0.18362 or higher
-
-2. **Check PowerShell Version**
-   ```powershell
-   $PSVersionTable.PSVersion
-   ```
-   Should show version 5.1 or higher
-
-3. **Check .NET Framework Version**
-   ```powershell
-   # Run in PowerShell
-   (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full").Release -ge 528040
-   ```
-   Should return `True`
-
-4. **Close Running Applications**
-   - Close any file managers viewing your Downloads folder
-   - Close any applications that might access files you want to organize
-
-## Installation Methods
-
-### Method 1: MSI Installer (Recommended)
-
-1. **Download the Installer**
-   - Go to [Releases](https://github.com/ProfessorMoose74/TidyFlow/releases)
-   - Download `TidyFlow-Setup.msi` (latest version)
-
-2. **Run the Installer**
-   - Double-click `TidyFlow-Setup.msi`
-   - If prompted by User Account Control, click "Yes"
-
-3. **Follow the Installation Wizard**
-
-   **Welcome Screen**
-   - Click "Next" to continue
-
-   **License Agreement**
-   - Read the MIT License
-   - Check "I accept the terms in the License Agreement"
-   - Click "Next"
-
-   **Installation Folder**
-   - Default: `C:\Program Files\TidyFlow`
-   - Click "Change" to select a different location (not recommended)
-   - Click "Next"
-
-   **Ready to Install**
-   - Review your choices
-   - Click "Install"
-
-   **Installation Progress**
-   - Wait for files to be copied and configured
-   - The installer will:
-     - Copy program files
-     - Create configuration directory
-     - Add Start Menu shortcuts
-     - Optionally create desktop shortcut
-
-   **Completion**
-   - Click "Finish"
-   - Optionally check "Launch TidyFlow Configuration"
-
-### Method 2: Manual Installation (Advanced)
-
-For developers or advanced users who want to install from source:
-
-1. **Clone the Repository**
-   ```bash
-   git clone https://github.com/ProfessorMoose74/TidyFlow.git
-   cd TidyFlow
+   "%LOCALAPPDATA%\Programs\TidyFlow\TidyFlow.exe" --uninstall
    ```
 
-2. **Build the Application**
-   ```bash
-   # Build the GUI
-   msbuild src\gui\TidyFlow.csproj /p:Configuration=Release
+   Confirm when asked. TidyFlow removes its scheduled task (`TidyFlow-AutoOrganize`), the start-at-sign-in entry and its notification registration, then tells you where your settings are.
+3. Optional: delete `%LOCALAPPDATA%\TidyFlow` (or your `TIDYFLOW_DATA_DIR` folder) to remove settings, history, statistics and logs. `--uninstall` keeps them in case you come back.
+4. Delete the folder that contains `TidyFlow.exe`.
 
-   # The binaries will be in src\gui\bin\Release\
-   ```
+Files TidyFlow organized stay in their destination folders.
 
-3. **Manual File Placement**
-   ```bash
-   # Create directories
-   mkdir "C:\Program Files\TidyFlow"
-   mkdir "C:\Program Files\TidyFlow\GUI"
-   mkdir "C:\Program Files\TidyFlow\Worker"
-   mkdir "C:\ProgramData\TidyFlow"
+## Optional: the MSIX package
 
-   # Copy files
-   copy src\gui\bin\Release\* "C:\Program Files\TidyFlow\GUI\"
-   copy src\worker\*.ps1 "C:\Program Files\TidyFlow\Worker\"
-   copy config\default-config.json "C:\ProgramData\TidyFlow\config.json"
-   ```
+The repository also contains an optional MSIX packaging project for people who want an installed app (Start menu entry, `tidyflow.exe` command alias, Windows startup task). It isn't published anywhere: you build it and sign it yourself. See [Optional: building an MSIX package](msix-packaging.md).
 
-4. **Create Shortcuts** (optional)
-   - Right-click on `C:\Program Files\TidyFlow\GUI\TidyFlow.exe`
-   - Select "Create shortcut"
-   - Move shortcut to Start Menu or Desktop
+If you built and installed the optional MSIX package:
 
-## Post-Installation Setup
-
-### First Launch
-
-1. **Launch TidyFlow**
-   - Start Menu → TidyFlow → TidyFlow Configuration
-   - Or double-click the desktop shortcut if created
-
-2. **Initial Configuration Wizard** (if enabled)
-   - Welcome screen
-   - Source folder selection
-   - Destination mapping
-   - Basic preferences
-
-3. **Review Default Settings**
-   - Source folder: `C:\Users\YourName\Downloads`
-   - File categories: Images, Documents, Videos, etc.
-   - File age threshold: 24 hours
-   - Duplicate handling: Rename
-
-### Customize Your Configuration
-
-1. **Adjust File Categories**
-   - Enable/disable categories as needed
-   - Change destination folders
-   - Click "Browse" next to each category
-
-2. **Set Organization Rules**
-   - Adjust file age threshold if needed
-   - Choose duplicate handling strategy
-   - Add exclude patterns
-
-3. **Configure Scheduling** (optional)
-   - Check "Enable automatic scheduling"
-   - Select frequency (Daily/Weekly/Monthly)
-   - Set time to run
-   - Optionally enable "Run on startup"
-
-4. **Save Configuration**
-   - Click "Save Configuration"
-   - If scheduling is enabled, you may be prompted for admin rights
-
-### Test Your Configuration
-
-Before running automatically, test your setup:
-
-1. **Create Test Files** (optional)
-   ```powershell
-   # Create some test files in Downloads
-   echo "test" > $env:USERPROFILE\Downloads\test.txt
-   echo "test" > $env:USERPROFILE\Downloads\test.jpg
-   ```
-
-2. **Run Dry Run**
-   - Click "Test Run (Dry Run)" button
-   - Review the PowerShell window output
-   - Check what files would be moved
-
-3. **Review Results**
-   - No files are actually moved in dry run mode
-   - Verify the proposed moves are correct
-
-4. **Run Actual Operation**
-   - Click "Run Now" to actually move files
-   - Check the log file for confirmation
-
-## Verification
-
-### Verify Installation Files
-
-Check that all files were installed correctly:
-
-```powershell
-# Program files
-Test-Path "C:\Program Files\TidyFlow\GUI\TidyFlow.exe"
-Test-Path "C:\Program Files\TidyFlow\Worker\TidyFlow-Worker.ps1"
-
-# Configuration
-Test-Path "C:\ProgramData\TidyFlow\config.json"
-
-# Start Menu shortcut
-Test-Path "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\TidyFlow\TidyFlow Configuration.lnk"
-```
-
-All commands should return `True`.
-
-### Verify Scheduled Task (if enabled)
-
-If you enabled scheduling:
-
-1. **Open Task Scheduler**
-   - Press Win+R
-   - Type `taskschd.msc`
-   - Press Enter
-
-2. **Locate TidyFlow Task**
-   - Look for "TidyFlow-AutoOrganize"
-   - Right-click → Properties
-   - Verify the trigger and actions
-
-3. **Test Run from Task Scheduler**
-   - Right-click the task
-   - Select "Run"
-   - Check the log file for results
-
-### Verify Logging
-
-After running TidyFlow at least once:
-
-```powershell
-# Check log directory exists
-Test-Path "C:\ProgramData\TidyFlow\logs"
-
-# List log files
-Get-ChildItem "C:\ProgramData\TidyFlow\logs"
-
-# View latest log
-Get-Content "C:\ProgramData\TidyFlow\logs\TidyFlow-$(Get-Date -Format 'yyyy-MM').log"
-```
-
-## Troubleshooting
-
-### Installation Failed
-
-**Error: "This installation is forbidden by system policy"**
-- Run the installer as Administrator
-- Right-click MSI → "Run as administrator"
-
-**Error: "The installer was interrupted before TidyFlow could be installed"**
-- Disable antivirus temporarily
-- Ensure no other installation is in progress
-- Check Windows Installer service is running
-
-### Missing Prerequisites
-
-**PowerShell Version Too Old**
-- Windows 10 includes PowerShell 5.1 by default
-- If needed, install [Windows Management Framework 5.1](https://www.microsoft.com/en-us/download/details.aspx?id=54616)
-
-**.NET Framework 4.8 Missing**
-- Download from [Microsoft](https://dotnet.microsoft.com/download/dotnet-framework/net48)
-- Install and restart computer
-
-### Permission Issues
-
-If you get permission errors when running:
-
-1. **Run as Administrator**
-   - Right-click TidyFlow Configuration
-   - Select "Run as administrator"
-
-2. **Check Folder Permissions**
-   ```powershell
-   # Check if you have write access to config directory
-   $acl = Get-Acl "C:\ProgramData\TidyFlow"
-   $acl.Access | Format-Table
-   ```
-
-### Start Menu Shortcuts Missing
-
-If shortcuts weren't created:
-
-1. **Create Manually**
-   - Right-click `C:\Program Files\TidyFlow\GUI\TidyFlow.exe`
-   - Send to → Desktop (create shortcut)
-   - Move to Start Menu folder if desired
-
-## Uninstallation
-
-To remove TidyFlow:
-
-### Method 1: Settings App
-
-1. Open Settings (Win+I)
-2. Go to Apps → Apps & features
-3. Find "TidyFlow File Organizer"
-4. Click → Uninstall
-5. Confirm
-
-### Method 2: Start Menu
-
-1. Start Menu → TidyFlow
-2. Click "Uninstall TidyFlow"
-3. Confirm
-
-### Method 3: Control Panel
-
-1. Control Panel → Programs → Programs and Features
-2. Find "TidyFlow File Organizer"
-3. Right-click → Uninstall
-
-### What Gets Removed
-
-- Program files in `C:\Program Files\TidyFlow`
-- Configuration files in `C:\ProgramData\TidyFlow`
-- Start Menu shortcuts
-- Desktop shortcut (if created)
-- Scheduled task (if enabled)
-- Log files
-
-**Note**: Files that have already been organized will remain in their destination folders.
-
-## Next Steps
-
-After installation:
-
-1. Read the [Configuration Guide](configuration-guide.md) for detailed customization
-2. Review the [Troubleshooting Guide](troubleshooting.md) for common issues
-3. Join the [GitHub Discussions](https://github.com/ProfessorMoose74/TidyFlow/discussions) for tips and community support
+- Its data is in `%LOCALAPPDATA%\Packages\ElementalGeniusLLC.TidyFlow_<id>\LocalCache\Local\TidyFlow` (use **Settings > Open data folder**), and **Settings > About** shows "MSIX package".
+- Uninstall it from **Settings > Apps > Installed apps**. Windows removes its data folder too. To remove the scheduled task, first turn off **On a schedule** and **A minute after I sign in to Windows** and select **Save**, or delete **TidyFlow-AutoOrganize** in Task Scheduler afterwards.
+- Don't use it and the portable build at the same time: they share the scheduled task name (`TidyFlow-AutoOrganize`).
 
 ---
 
-**Need Help?** [Open an issue](https://github.com/ProfessorMoose74/TidyFlow/issues) on GitHub.
+**Next:** [Configuration Guide](configuration-guide.md) · [Troubleshooting](troubleshooting.md) · [Open an issue](https://github.com/ProfessorMoose74/TidyPackRat/issues)

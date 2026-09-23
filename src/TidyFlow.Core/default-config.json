@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 2,
+  "sourceFolder": "%USERPROFILE%\\Downloads",
+  "fileAgeThreshold": 24,
+  "minFileSizeKB": 0,
+  "duplicateHandling": "rename",
+  "skipHiddenFiles": true,
+  "categories": [
+    {
+      "name": "Images",
+      "extensions": [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".svg", ".webp", ".ico", ".tiff", ".tif", ".heic", ".heif", ".avif", ".jxl", ".dng", ".cr2", ".cr3", ".nef", ".arw", ".raw"],
+      "destination": "%USERPROFILE%\\Pictures",
+      "enabled": true
+    },
+    {
+      "name": "Documents",
+      "extensions": [".pdf", ".docx", ".doc", ".txt", ".rtf", ".odt", ".tex", ".wpd", ".md", ".epub", ".pages", ".xps", ".oxps"],
+      "destination": "%USERPROFILE%\\Documents",
+      "enabled": true
+    },
+    {
+      "name": "Spreadsheets",
+      "extensions": [".xlsx", ".xls", ".xlsm", ".csv", ".tsv", ".ods", ".numbers"],
+      "destination": "%USERPROFILE%\\Documents\\Spreadsheets",
+      "enabled": true
+    },
+    {
+      "name": "Presentations",
+      "extensions": [".pptx", ".ppt", ".odp", ".key"],
+      "destination": "%USERPROFILE%\\Documents\\Presentations",
+      "enabled": true
+    },
+    {
+      "name": "Archives",
+      "extensions": [".zip", ".rar", ".7z", ".tar", ".gz", ".tgz", ".bz2", ".xz", ".zst", ".iso"],
+      "destination": "%USERPROFILE%\\Documents\\Archives",
+      "enabled": true
+    },
+    {
+      "name": "Videos",
+      "extensions": [".mp4", ".avi", ".mkv", ".mov", ".wmv", ".flv", ".webm", ".m4v"],
+      "destination": "%USERPROFILE%\\Videos",
+      "enabled": true
+    },
+    {
+      "name": "Audio",
+      "extensions": [".mp3", ".wav", ".flac", ".m4a", ".ogg", ".aac", ".wma", ".opus", ".aiff"],
+      "destination": "%USERPROFILE%\\Music",
+      "enabled": true
+    },
+    {
+      "name": "Installers",
+      "extensions": [".exe", ".msi", ".msix", ".msixbundle", ".appx", ".appxbundle", ".appinstaller"],
+      "destination": "%USERPROFILE%\\Downloads\\Installers",
+      "enabled": false
+    },
+    {
+      "name": "Code",
+      "extensions": [".py", ".js", ".ts", ".jsx", ".tsx", ".vue", ".html", ".css", ".cpp", ".c", ".h", ".cs", ".java", ".kt", ".php", ".rb", ".go", ".rs", ".swift", ".json", ".xml", ".yaml", ".yml", ".toml", ".sql", ".ps1", ".bat", ".cmd", ".sh"],
+      "destination": "%USERPROFILE%\\Documents\\Code",
+      "enabled": false
+    }
+  ],
+  "schedule": {
+    "enabled": false,
+    "frequency": "daily",
+    "time": "02:00",
+    "dayOfWeek": "monday",
+    "dayOfMonth": 1,
+    "runOnStartup": false
+  },
+  "excludePatterns": [
+    "*.tmp",
+    "~*",
+    "*.crdownload",
+    "*.part",
+    "*.partial",
+    "*.download"
+  ],
+  "logging": {
+    "enabled": true,
+    "logPath": "",
+    "logLevel": "info",
+    "maxLogFiles": 12
+  }
+}

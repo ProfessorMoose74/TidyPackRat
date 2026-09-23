@@ -1,0 +1,50 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <!-- The Windows SDK projection provides StartupTask for the MSIX build. -->
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
+    <UseWPF>true</UseWPF>
+    <!-- Only for the notification-area icon; WPF has no native equivalent. -->
+    <UseWindowsForms>true</UseWindowsForms>
+    <RootNamespace>TidyFlow</RootNamespace>
+    <AssemblyName>TidyFlow</AssemblyName>
+    <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Description>Automatic file organizer for Windows.</Description>
+
+    <!-- RIDs the MSIX package builds for; the package publishes self-contained so no runtime install is needed. -->
+    <RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
+    <SelfContained Condition="'$(RuntimeIdentifier)' != ''">true</SelfContained>
+
+    <!-- WPF0001: Application.ThemeMode (the Fluent theme) is still flagged experimental in .NET 10. -->
+    <NoWarn>$(NoWarn);WPF0001</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- UseWindowsForms adds these global usings, which clash with WPF types of the same name. -->
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
+    <!-- WPF leaves System.IO out of implicit usings (Path clashes with Shapes.Path); no code here uses Shapes. -->
+    <Using Include="System.IO" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+    <PackageReference Include="Microsoft.Toolkit.Uwp.Notifications" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TidyFlow.Core\TidyFlow.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\icon.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="TidyFlow.Tests" />
+  </ItemGroup>
+
+</Project>

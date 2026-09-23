@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>TidyFlow.Core</RootNamespace>
+    <Description>TidyFlow organizing engine, configuration and activity storage.</Description>
+    <!-- The MSIX build publishes the app for these runtimes, which flows down to this project. -->
+    <RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The single source of truth for the default configuration. -->
+    <EmbeddedResource Include="default-config.json" LogicalName="TidyFlow.Core.default-config.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="TidyFlow.Core.Tests" />
+  </ItemGroup>
+
+</Project>

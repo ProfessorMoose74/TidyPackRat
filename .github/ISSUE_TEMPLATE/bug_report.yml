@@ -1,0 +1,55 @@
+name: Bug report
+description: Something isn't working the way it should.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report this! If a file wasn't moved, try **Preview changes** first; it says why each file stays where it is.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. On the Rules tab, ...
+        2. Select Organize now
+        3. ...
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: TidyFlow version
+      description: Shown under Settings > About.
+      placeholder: "2.0.0"
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version
+      description: Press Win+R and run `winver`.
+      placeholder: "Windows 11 25H2 (build 26200)"
+    validations:
+      required: true
+  - type: dropdown
+    id: arch
+    attributes:
+      label: PC type
+      options:
+        - x64 (most PCs)
+        - ARM64 (Windows on ARM)
+        - Not sure
+  - type: textarea
+    id: log
+    attributes:
+      label: Log
+      description: Settings > Open log folder, then paste the relevant lines from `TidyFlow-YYYY-MM.log`. Remove any file names you'd rather not share.
+      render: text

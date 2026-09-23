@@ -1,0 +1,27 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="ARM64" />
+  </Configurations>
+  <Folder Name="/src/">
+    <Project Path="src/TidyFlow.Core/TidyFlow.Core.csproj" />
+    <Project Path="src/TidyFlow/TidyFlow.csproj" />
+    <!-- Only Visual Studio's MSBuild can build the MSIX project, so plain "dotnet build" (Any CPU) skips it. -->
+    <Project Path="src/TidyFlow.Package/TidyFlow.Package.wapproj" Type="C7167F0D-BC9F-4E6E-AFE1-012C56B48DB5">
+      <Build Solution="*|Any CPU" Project="false" />
+      <Deploy Solution="*|x64" />
+      <Deploy Solution="*|ARM64" />
+    </Project>
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/TidyFlow.Core.Tests/TidyFlow.Core.Tests.csproj" />
+    <Project Path="tests/TidyFlow.Tests/TidyFlow.Tests.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="global.json" />
+    <File Path="build.ps1" />
+  </Folder>
+</Solution>
