@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Build
+        run: dotnet build TidyFlow.slnx -c Release
+
+      - name: Test
+        run: dotnet test --solution TidyFlow.slnx -c Release --no-build
+
+  portable:
+    # The same downloads a release publishes, attached to the run so any commit can be tried out.
+    runs-on: windows-latest
+    needs: build-and-test
+    strategy:
+      matrix:
+        runtime: [win-x64, win-arm64]
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Publish portable build
+        shell: pwsh
+        run: ./build.ps1 -Portable -Runtime ${{ matrix.runtime }} -SkipTests
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TidyFlow-portable-${{ matrix.runtime }}
+          path: dist/*.zip
+          if-no-files-found: error

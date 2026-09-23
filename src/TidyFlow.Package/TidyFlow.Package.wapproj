@@ -1,17 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Optional MSIX package (see docs/msix-packaging.md). Needs Visual Studio's "Windows application packaging" tools,
+  so build it with Visual Studio or build.ps1 -Package (dotnet build alone can't).
+-->
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '15.0'">
     <VisualStudioVersion>15.0</VisualStudioVersion>
   </PropertyGroup>
   <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="Debug|x86">
-      <Configuration>Debug</Configuration>
-      <Platform>x86</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|x86">
-      <Configuration>Release</Configuration>
-      <Platform>x86</Platform>
-    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
@@ -31,41 +27,24 @@
   </ItemGroup>
   <PropertyGroup>
     <WapProjPath Condition="'$(WapProjPath)'==''">$(MSBuildExtensionsPath)\Microsoft\DesktopBridge\</WapProjPath>
-    <PathToXAMLWinRTImplementations>TidyFlow\</PathToXAMLWinRTImplementations>
   </PropertyGroup>
   <Import Project="$(WapProjPath)\Microsoft.DesktopBridge.props" />
   <PropertyGroup>
-    <ProjectGuid>87654321-4321-4321-4321-210987654321</ProjectGuid>
+    <ProjectGuid>11c78433-3dc7-410d-b985-503ce33927e8</ProjectGuid>
     <TargetPlatformVersion>10.0.26100.0</TargetPlatformVersion>
-    <TargetPlatformMinVersion>10.0.18362.0</TargetPlatformMinVersion>
+    <TargetPlatformMinVersion>10.0.19041.0</TargetPlatformMinVersion>
     <DefaultLanguage>en-US</DefaultLanguage>
+    <EntryPointProjectUniqueName>..\TidyFlow\TidyFlow.csproj</EntryPointProjectUniqueName>
+    <!-- Unsigned by default; sign with your own certificate to install the .msix file (see docs/msix-packaging.md). -->
     <AppxPackageSigningEnabled>false</AppxPackageSigningEnabled>
-    <EntryPointProjectUniqueName>..\gui\TidyFlow.csproj</EntryPointProjectUniqueName>
     <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
     <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
     <AppxSymbolPackageEnabled>True</AppxSymbolPackageEnabled>
     <GenerateTestArtifacts>False</GenerateTestArtifacts>
-    <AppxBundle>Never</AppxBundle>
+    <AppxBundle>Always</AppxBundle>
+    <AppxBundlePlatforms>x64|arm64</AppxBundlePlatforms>
     <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
-    <AppxPackageDir>$(SolutionDir)dist\msix\</AppxPackageDir>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-    <AppxBundlePlatforms>x86</AppxBundlePlatforms>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
-    <AppxBundlePlatforms>x86</AppxBundlePlatforms>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <AppxBundlePlatforms>x64</AppxBundlePlatforms>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <AppxBundlePlatforms>x64</AppxBundlePlatforms>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
-    <AppxBundlePlatforms>ARM64</AppxBundlePlatforms>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
-    <AppxBundlePlatforms>ARM64</AppxBundlePlatforms>
+    <AppxPackageDir>$(MSBuildThisFileDirectory)..\..\dist\msix\</AppxPackageDir>
   </PropertyGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
@@ -73,7 +52,6 @@
     </AppxManifest>
   </ItemGroup>
   <ItemGroup>
-    <!-- Image assets -->
     <Content Include="Images\BadgeLogo.png" />
     <Content Include="Images\LargeTile.png" />
     <Content Include="Images\SmallTile.png" />
@@ -90,18 +68,8 @@
     <Content Include="Images\Wide310x150Logo.png" />
   </ItemGroup>
   <ItemGroup>
-    <!-- Worker script and config files -->
-    <Content Include="..\..\src\worker\TidyFlow-Worker.ps1">
-      <Link>TidyFlow-Worker.ps1</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\..\config\default-config.json">
-      <Link>default-config.json</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\gui\TidyFlow.csproj">
+    <ProjectReference Include="..\TidyFlow\TidyFlow.csproj">
+      <!-- Stops NuGet comparing the packaging project's placeholder framework with the app's. -->
       <SkipGetTargetFrameworkProperties>True</SkipGetTargetFrameworkProperties>
     </ProjectReference>
   </ItemGroup>

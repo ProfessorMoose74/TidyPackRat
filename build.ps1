@@ -1,227 +1,94 @@
 <#
 .SYNOPSIS
-    Build script for TidyFlow
+    Builds, tests and packages TidyFlow.
 
 .DESCRIPTION
-    Builds the GUI application and prepares files for installer creation
-
-.PARAMETER Configuration
-    Build configuration (Debug or Release)
-
-.PARAMETER SkipGUI
-    Skip building the GUI application
-
-.PARAMETER BuildInstaller
-    Also build the WiX installer (requires WiX Toolset)
+    With no switches: restores, builds and runs the unit tests (needs only the .NET 10 SDK).
+    -Portable publishes a self-contained, single-file TidyFlow.exe to dist\portable that runs without installing
+    anything, and zips it for a GitHub release. This is how TidyFlow is distributed.
+    -Package builds the optional MSIX bundle (x64 + ARM64, unsigned; sign it with your own certificate to install
+    it). That step needs Visual Studio with the "Windows application development" workload.
 
 .EXAMPLE
-    .\build.ps1 -Configuration Release
-
+    .\build.ps1
 .EXAMPLE
-    .\build.ps1 -Configuration Release -BuildInstaller
+    .\build.ps1 -Portable -Runtime win-arm64
+.EXAMPLE
+    .\build.ps1 -Package
 #>
-
+[CmdletBinding()]
 param(
-    [ValidateSet("Debug", "Release")]
-    [string]$Configuration = "Release",
+    [ValidateSet('Debug', 'Release')]
+    [string]$Configuration = 'Release',
 
-    [switch]$SkipGUI,
+    # Build the optional MSIX bundle in dist\msix.
+    [switch]$Package,
 
-    [switch]$BuildInstaller
+    # Publish a self-contained, single-file build to dist\portable, plus a zip for releases.
+    [switch]$Portable,
+
+    [ValidateSet('win-x64', 'win-arm64')]
+    [string]$Runtime = 'win-x64',
+
+    [switch]$SkipTests
 )
 
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = 'Stop'
+$root = $PSScriptRoot
+$solution = Join-Path $root 'TidyFlow.slnx'
 
-# Paths
-$rootDir = $PSScriptRoot
-$guiProject = Join-Path $rootDir "src\gui\TidyFlow.csproj"
-$installerProject = Join-Path $rootDir "src\installer\TidyFlow.Installer.wixproj"
-$buildDir = Join-Path $rootDir "build"
-$guiBuildOutput = Join-Path $rootDir "src\gui\bin\$Configuration"
-
-Write-Host "TidyFlow Build Script" -ForegroundColor Cyan
-Write-Host "========================`n" -ForegroundColor Cyan
-
-# Check for MSBuild
-$msbuild = Get-Command msbuild -ErrorAction SilentlyContinue
-if (-not $msbuild) {
-    Write-Host "MSBuild not found in PATH" -ForegroundColor Red
-    Write-Host "Please run this from Visual Studio Developer Command Prompt" -ForegroundColor Yellow
-    Write-Host "Or add MSBuild to your PATH" -ForegroundColor Yellow
-    exit 1
+function Invoke-Step([string]$Name, [scriptblock]$Command) {
+    Write-Host "`n== $Name" -ForegroundColor Cyan
+    & $Command
+    if ($LASTEXITCODE -ne 0) { throw "$Name failed (exit code $LASTEXITCODE)." }
 }
 
-Write-Host "Using MSBuild: $($msbuild.Source)" -ForegroundColor Green
-
-# Build GUI Application
-if (-not $SkipGUI) {
-    Write-Host "`nBuilding GUI application ($Configuration)..." -ForegroundColor Cyan
-
-    if (-not (Test-Path $guiProject)) {
-        Write-Host "GUI project not found: $guiProject" -ForegroundColor Red
-        exit 1
-    }
-
-    # Restore NuGet packages first
-    Write-Host "Restoring NuGet packages..." -ForegroundColor Yellow
-    $nuget = Get-Command nuget -ErrorAction SilentlyContinue
-    if (-not $nuget) {
-        Write-Host "NuGet not found in PATH" -ForegroundColor Red
-        Write-Host "Please install NuGet CLI or add it to your PATH" -ForegroundColor Yellow
-        exit 1
-    }
-    & nuget restore "$guiProject"
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "NuGet restore failed!" -ForegroundColor Red
-        exit $LASTEXITCODE
-    }
-
-    # Build the project
-    $buildArgs = @(
-        "`"$guiProject`"",
-        "/p:Configuration=$Configuration",
-        "/p:Platform=AnyCPU",
-        "/t:Rebuild",
-        "/v:minimal"
-    )
-
-    & msbuild $buildArgs
-
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "GUI build failed!" -ForegroundColor Red
-        exit $LASTEXITCODE
-    }
-
-    Write-Host "GUI build completed successfully!" -ForegroundColor Green
-}
-else {
-    Write-Host "Skipping GUI build" -ForegroundColor Yellow
+if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
+    throw 'The .NET SDK was not found. Install the .NET 10 SDK from https://dot.net.'
 }
 
-# Prepare build directory
-Write-Host "`nPreparing build directory..." -ForegroundColor Cyan
+Invoke-Step 'Build' { dotnet build $solution -c $Configuration -nologo }
 
-if (Test-Path $buildDir) {
-    Remove-Item $buildDir -Recurse -Force
+if (-not $SkipTests) {
+    Invoke-Step 'Test' { dotnet test --solution $solution -c $Configuration --no-build }
 }
 
-New-Item -Path $buildDir -ItemType Directory | Out-Null
-New-Item -Path (Join-Path $buildDir "gui") -ItemType Directory | Out-Null
-New-Item -Path (Join-Path $buildDir "worker") -ItemType Directory | Out-Null
-New-Item -Path (Join-Path $buildDir "config") -ItemType Directory | Out-Null
-
-# Copy GUI binaries
-if (-not $SkipGUI) {
-    Write-Host "Copying GUI binaries..." -ForegroundColor Cyan
-
-    $guiFiles = @(
-        "TidyFlow.exe",
-        "TidyFlow.exe.config",
-        "Newtonsoft.Json.dll"
-    )
-
-    foreach ($file in $guiFiles) {
-        $source = Join-Path $guiBuildOutput $file
-        $dest = Join-Path $buildDir "gui\$file"
-
-        if (Test-Path $source) {
-            Copy-Item $source $dest
-            Write-Host "  Copied: $file" -ForegroundColor Gray
-        }
-        else {
-            Write-Host "  Warning: $file not found" -ForegroundColor Yellow
-        }
+if ($Portable) {
+    $output = Join-Path $root "dist\portable\$Runtime"
+    if (Test-Path $output) { Remove-Item $output -Recurse -Force }
+    Invoke-Step "Publish portable ($Runtime)" {
+        dotnet publish (Join-Path $root 'src\TidyFlow\TidyFlow.csproj') -c $Configuration -r $Runtime --self-contained -o $output -nologo `
+            -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true `
+            -p:DebugType=none
     }
+
+    [xml]$props = Get-Content (Join-Path $root 'Directory.Build.props')
+    $version = $props.Project.PropertyGroup.Version | Where-Object { $_ } | Select-Object -First 1
+    $zip = Join-Path $root "dist\TidyFlow-$version-$($Runtime -replace '^win-', '')-portable.zip"
+    Copy-Item (Join-Path $root 'LICENSE') $output
+    Compress-Archive -Path (Join-Path $output '*') -DestinationPath $zip -Force
+    Write-Host "Portable build: $output\TidyFlow.exe" -ForegroundColor Green
+    Write-Host "Release zip:    $zip" -ForegroundColor Green
 }
 
-# Copy worker script
-Write-Host "Copying worker script..." -ForegroundColor Cyan
-Copy-Item (Join-Path $rootDir "src\worker\TidyFlow-Worker.ps1") `
-          (Join-Path $buildDir "worker\")
-Write-Host "  Copied: TidyFlow-Worker.ps1" -ForegroundColor Gray
-
-# Copy configuration
-Write-Host "Copying configuration..." -ForegroundColor Cyan
-Copy-Item (Join-Path $rootDir "config\default-config.json") `
-          (Join-Path $buildDir "config\")
-Write-Host "  Copied: default-config.json" -ForegroundColor Gray
-
-Write-Host "`nBuild directory prepared: $buildDir" -ForegroundColor Green
-
-# Build installer if requested
-if ($BuildInstaller) {
-    Write-Host "`nBuilding WiX installer..." -ForegroundColor Cyan
-
-    # Check for WiX - search in common locations and PATH
-    $wixCandle = $null
-
-    # Check PATH first
-    $wixCandle = Get-Command candle.exe -ErrorAction SilentlyContinue
-
-    # Check common installation locations
-    if (-not $wixCandle) {
-        $wixPaths = @(
-            "C:\Program Files (x86)\WiX Toolset v3.14\bin\candle.exe",
-            "C:\Program Files (x86)\WiX Toolset v3.11\bin\candle.exe",
-            "C:\Program Files\WiX Toolset v3.14\bin\candle.exe",
-            "C:\Program Files\WiX Toolset v3.11\bin\candle.exe",
-            "${env:WIX}bin\candle.exe"
-        )
-
-        foreach ($path in $wixPaths) {
-            if (Test-Path $path) {
-                $wixCandle = $path
-                break
-            }
-        }
+if ($Package) {
+    $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
+    $msbuild = if (Test-Path $vswhere) {
+        & $vswhere -latest -prerelease -requires Microsoft.Component.MSBuild -find 'MSBuild\**\Bin\MSBuild.exe' | Select-Object -First 1
+    }
+    if (-not $msbuild) {
+        throw 'Visual Studio (with the Windows application development workload) is required to build the MSIX package.'
     }
 
-    if (-not $wixCandle) {
-        Write-Host "WiX Toolset not found!" -ForegroundColor Red
-        Write-Host "Please install WiX Toolset from https://wixtoolset.org" -ForegroundColor Yellow
-        Write-Host "Or ensure WiX bin directory is in your PATH" -ForegroundColor Yellow
-        exit 1
+    Invoke-Step 'Package (MSIX bundle, x64 + ARM64)' {
+        & $msbuild $solution -restore -nologo -v:minimal `
+            "-p:Configuration=$Configuration" '-p:Platform=x64' `
+            '-p:UapAppxPackageBuildMode=SideloadOnly' '-p:AppxBundle=Always' '-p:AppxBundlePlatforms=x64|arm64'
     }
 
-    Write-Host "Using WiX: $wixCandle" -ForegroundColor Green
-
-    if (-not (Test-Path $installerProject)) {
-        Write-Host "Installer project not found: $installerProject" -ForegroundColor Red
-        exit 1
-    }
-
-    $buildArgs = @(
-        "`"$installerProject`"",
-        "/p:Configuration=$Configuration",
-        "/p:Platform=x86",
-        "/p:SourceDir=..\..\build",
-        "/t:Rebuild",
-        "/v:minimal"
-    )
-
-    & msbuild $buildArgs
-
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "Installer build failed!" -ForegroundColor Red
-        exit $LASTEXITCODE
-    }
-
-    $installerOutput = Join-Path $rootDir "src\installer\bin\$Configuration\TidyFlow-Setup.msi"
-
-    if (Test-Path $installerOutput) {
-        Write-Host "`nInstaller created successfully!" -ForegroundColor Green
-        Write-Host "Location: $installerOutput" -ForegroundColor Cyan
-
-        $fileInfo = Get-Item $installerOutput
-        Write-Host "Size: $([math]::Round($fileInfo.Length / 1MB, 2)) MB" -ForegroundColor Gray
-    }
+    $bundle = Get-ChildItem (Join-Path $root 'dist\msix') -Filter '*.msixbundle' -Recurse |
+        Sort-Object LastWriteTime -Descending | Select-Object -First 1
+    Write-Host "MSIX bundle (unsigned): $($bundle.FullName)" -ForegroundColor Green
 }
 
-Write-Host "`n========================================" -ForegroundColor Cyan
-Write-Host "Build completed successfully!" -ForegroundColor Green
-Write-Host "`nNext steps:" -ForegroundColor Yellow
-Write-Host "  1. Test the application from build\gui\TidyFlow.exe" -ForegroundColor White
-Write-Host "  2. Run tests: .\tests\test-worker.ps1" -ForegroundColor White
-if (-not $BuildInstaller) {
-    Write-Host "  3. Build installer: .\build.ps1 -BuildInstaller" -ForegroundColor White
-}
+Write-Host "`nDone." -ForegroundColor Green

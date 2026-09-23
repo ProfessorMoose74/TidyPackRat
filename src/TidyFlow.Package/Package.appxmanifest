@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
-         xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest"
          xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
-         xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+         xmlns:uap5="http://schemas.microsoft.com/appx/manifest/uap/windows10/5"
          xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
-         IgnorableNamespaces="uap mp rescap desktop">
+         xmlns:com="http://schemas.microsoft.com/appx/manifest/com/windows10"
+         xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+         IgnorableNamespaces="uap uap5 desktop com rescap">
 
+  <!-- Keep Version in step with <Version> in Directory.Build.props (the fourth part must be 0 for the Store). -->
   <Identity Name="ElementalGeniusLLC.TidyFlow"
             Publisher="CN=29741907-368C-452F-B311-240CE1EF415D"
-            Version="1.2.7.0"
+            Version="2.0.0.0"
             ProcessorArchitecture="x64" />
-
-  <mp:PhoneIdentity PhoneProductId="00000000-0000-0000-0000-000000000000" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
 
   <Properties>
     <DisplayName>TidyFlow</DisplayName>
@@ -21,7 +21,7 @@
   </Properties>
 
   <Dependencies>
-    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.18362.0" MaxVersionTested="10.0.26200.0" />
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.19041.0" MaxVersionTested="10.0.26200.0" />
   </Dependencies>
 
   <Resources>
@@ -30,12 +30,12 @@
 
   <Applications>
     <Application Id="TidyFlow"
-                 Executable="TidyFlow.exe"
-                 EntryPoint="Windows.FullTrustApplication">
+                 Executable="$targetnametoken$.exe"
+                 EntryPoint="$targetentrypoint$">
       <uap:VisualElements
         DisplayName="TidyFlow"
-        Description="Automatic file organizer for Windows. Keeps your Downloads folder tidy with smart categorization, scheduling, and real-time file watching."
-        BackgroundColor="#2C3E50"
+        Description="Automatic file organizer for Windows. Keeps your Downloads folder tidy with smart categories, scheduling, and real-time file watching."
+        BackgroundColor="transparent"
         Square150x150Logo="Images\Square150x150Logo.png"
         Square44x44Logo="Images\Square44x44Logo.png">
         <uap:DefaultTile
@@ -50,22 +50,43 @@
           </uap:ShowNameOnTiles>
         </uap:DefaultTile>
         <uap:SplashScreen Image="Images\SplashScreen.png" BackgroundColor="#2C3E50" />
-        <uap:LockScreen BadgeLogo="Images\BadgeLogo.png" Notification="badge" />
       </uap:VisualElements>
+
+      <!-- Extensions name the executable literally: the build only substitutes $targetnametoken$ on <Application>. -->
       <Extensions>
-        <!-- File type associations for config import/export -->
+        <!-- Double-clicking an exported settings file opens TidyFlow and offers to import it. -->
         <uap:Extension Category="windows.fileTypeAssociation">
           <uap:FileTypeAssociation Name="tidyflowconfig">
             <uap:SupportedFileTypes>
               <uap:FileType>.tfconfig</uap:FileType>
             </uap:SupportedFileTypes>
-            <uap:DisplayName>TidyFlow Configuration</uap:DisplayName>
+            <uap:DisplayName>TidyFlow settings</uap:DisplayName>
             <uap:Logo>Images\Square44x44Logo.png</uap:Logo>
           </uap:FileTypeAssociation>
         </uap:Extension>
-        <!-- Startup task for run at startup feature -->
-        <desktop:Extension Category="windows.startupTask">
+
+        <!-- A path that never changes between updates; the scheduled task launches it with the "run" switch. -->
+        <uap5:Extension Category="windows.appExecutionAlias" Executable="TidyFlow\TidyFlow.exe" EntryPoint="Windows.FullTrustApplication">
+          <uap5:AppExecutionAlias>
+            <uap5:ExecutionAlias Alias="tidyflow.exe" />
+          </uap5:AppExecutionAlias>
+        </uap5:Extension>
+
+        <!-- "Start TidyFlow when I sign in". Off until the user turns it on in Settings. -->
+        <desktop:Extension Category="windows.startupTask" Executable="TidyFlow\TidyFlow.exe" EntryPoint="Windows.FullTrustApplication">
           <desktop:StartupTask TaskId="TidyFlowStartup" Enabled="false" DisplayName="TidyFlow" />
+        </desktop:Extension>
+
+        <!-- Lets Windows start TidyFlow when a notification is clicked. -->
+        <com:Extension Category="windows.comServer">
+          <com:ComServer>
+            <com:ExeServer Executable="TidyFlow\TidyFlow.exe" Arguments="-ToastActivated" DisplayName="TidyFlow notifications">
+              <com:Class Id="0f645bdf-e151-4b36-8121-9dfa67a6716a" DisplayName="TidyFlow notifications" />
+            </com:ExeServer>
+          </com:ComServer>
+        </com:Extension>
+        <desktop:Extension Category="windows.toastNotificationActivation">
+          <desktop:ToastNotificationActivation ToastActivatorCLSID="0f645bdf-e151-4b36-8121-9dfa67a6716a" />
         </desktop:Extension>
       </Extensions>
     </Application>
