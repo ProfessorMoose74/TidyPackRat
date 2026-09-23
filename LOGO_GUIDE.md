@@ -4,10 +4,8 @@ You have two beautiful logos for TidyFlow! Here's how to use them effectively.
 
 ## 📦 Your Logos
 
-### 1. Title Logo (Colorful 3D Text)
-**File**: `assets/title-logo.png`
-
-**Description**: "TIDY PACK RAT" in colorful 3D letters (red, yellow, teal, green)
+### 1. Title Logo
+**File**: `assets/TidyFlow-logo.png` (used at the top of the README). `assets/title-logo.png` is the original "TIDY PACK RAT" title artwork from before the rename, kept for reference.
 
 **Best Used For**:
 - ✅ README header (splash page) - **Already configured!**
@@ -33,7 +31,7 @@ You have two beautiful logos for TidyFlow! Here's how to use them effectively.
 - ✅ Application icon (.ico)
 - ✅ GitHub repository avatar
 - ✅ Favicon for documentation site
-- ✅ App Store listings (if you expand)
+- ✅ GitHub Releases and social preview images
 - ✅ Small icons and badges
 - ✅ Profile pictures
 - ✅ Watermarks
@@ -57,16 +55,16 @@ This creates a **visual hierarchy**: Title → Tagline → Mascot → Info
 
 ### 1. Save Both Logos
 ```
-assets/title-logo.png    ← Save the colorful "TIDY PACK RAT" image here
-assets/logo.png          ← Save the pack rat mascot image here
+assets/TidyFlow-logo.png ← The title logo shown at the top of the README
+assets/logo.png          ← The pack rat mascot (source for all icons)
 ```
 
-### 2. Create Application Icon
-Convert the mascot logo to ICO format:
-- Go to: https://convertio.co/png-ico/
-- Upload `assets/logo.png`
-- Select sizes: 16, 32, 48, 256
-- Download and save as: `src/gui/Assets/icon.ico`
+### 2. Create Application Icon and Package Images
+No online converters or extra tools needed; the scripts in `tools/` build everything from `assets/logo.png`:
+- `.\tools\New-AppIcon.ps1` writes `src/TidyFlow/Assets/icon.ico` (16–256 px) for the window, taskbar and notification area
+- `.\tools\Generate-MsixAssets.ps1` writes the tile and splash images for the optional MSIX package to `src/TidyFlow.Package/Images`
+
+Use a square PNG with a transparent background, at least 512×512. See [tools/README.md](tools/README.md).
 
 ### 3. Optional: Create Combined Banner
 For extra polish, create a banner that combines both:
@@ -74,33 +72,29 @@ For extra polish, create a banner that combines both:
 - Mascot logo on the side or bottom
 - Perfect for GitHub social preview image (1200×630px)
 
-### 4. Take Screenshots
-Capture the application in action:
-- Main configuration window
-- Category settings
-- Schedule configuration
-- Test run/dry run
-- Save to: `assets/screenshots/`
+### 4. Screenshots
+Screenshots live in `assets/screenshots/` and are used by the README: `dashboard.png`, `preview.png`, `history.png` and `rules.png`. When the UI changes, retake them at the same names. A Schedule tab shot would be a nice addition.
 
 ## 🖼️ File Checklist
 
-- [ ] `assets/title-logo.png` - Colorful title (saved from Copilot)
-- [ ] `assets/logo.png` - Pack rat mascot (saved from Copilot)
-- [ ] `src/gui/Assets/icon.ico` - Windows icon (converted from logo.png)
-- [ ] `assets/screenshots/` - Application screenshots (take after building)
+- [x] `assets/TidyFlow-logo.png` - Title logo
+- [x] `assets/logo.png` - Pack rat mascot
+- [x] `src/TidyFlow/Assets/icon.ico` - Windows icon (built by `tools/New-AppIcon.ps1`)
+- [x] `src/TidyFlow.Package/Images/` - Optional MSIX package tile images (built by `tools/Generate-MsixAssets.ps1`)
+- [x] `assets/screenshots/` - Dashboard, Preview changes, History and Rules screenshots
 
 ## 🚀 Quick Commands
 
 ```powershell
-# After saving both logos, integrate them:
-.\tools\integrate-logos.ps1 -MascotLogoPath "C:\Downloads\mascot.png" `
-                             -TitleLogoPath "C:\Downloads\title.png"
+# Replace the mascot logo:
+Copy-Item C:\path\to\new-logo.png assets\logo.png
 
-# Create the application icon:
-.\tools\prepare-assets.ps1 -LogoPath "assets\logo.png"
+# Rebuild the application icon and the MSIX images:
+.\tools\New-AppIcon.ps1
+.\tools\Generate-MsixAssets.ps1
 
 # Build the project with the new icon:
-.\build.ps1 -Configuration Release
+.\build.ps1
 ```
 
 ## 📱 Social Media Dimensions

@@ -1,625 +1,277 @@
 # TidyFlow Configuration Guide
 
-This guide provides detailed information about configuring TidyFlow to meet your specific file organization needs.
+Everything you can change in TidyFlow 2.0, where it lives, and what it does.
 
-## Table of Contents
+## Contents
 
-- [Configuration File](#configuration-file)
-- [GUI Configuration](#gui-configuration)
-- [Advanced Configuration](#advanced-configuration)
-- [Custom Categories](#custom-categories)
-- [Rules and Filters](#rules-and-filters)
-- [Scheduling](#scheduling)
-- [Best Practices](#best-practices)
+- [How organizing works](#how-organizing-works)
+- [Rules tab](#rules-tab)
+- [Default categories](#default-categories)
+- [Schedule tab](#schedule-tab)
+- [Settings tab](#settings-tab)
+- [Saving and validation](#saving-and-validation)
+- [Data folder](#data-folder)
+- [config.json reference](#configjson-reference)
+- [Upgrading from 1.x](#upgrading-from-1x)
+- [Tips](#tips)
 
-## Configuration File
+## How organizing works
 
-TidyFlow stores its configuration in JSON format at:
-```
-C:\ProgramData\TidyFlow\config.json
-```
+**Organize now**, **Preview changes**, scheduled runs and the file watcher all use the same engine, so they follow exactly the same rules. For each file **directly in the source folder** (subfolders are never touched), TidyFlow checks, in this order:
 
-### Configuration Structure
+| Check | If it matches, the file stays because… |
+|---|---|
+| Hidden or system file (when that option is on) | hidden or system file |
+| Name matches an exclude pattern | matches an exclude pattern |
+| Changed in the last N hours (not for the watcher) | modified too recently |
+| Smaller than N KB | smaller than the minimum size |
+| No enabled category lists its extension | no category for this file type |
+| Name already taken at the destination and set to "Leave it where it is" | already exists in *category* |
+
+Otherwise the file moves to its category's destination folder (created if needed). **Preview changes** shows these reasons for every file, and the log records a `MOVED`, `SKIPPED` or `FAILED` line for each.
+
+## Rules tab
+
+Changes on this tab need **Save** (see [Saving and validation](#saving-and-validation)).
+
+### Folder to organize
+
+The source folder. Default: `%USERPROFILE%\Downloads`. Select **Browse…** or type a path; variables such as `%USERPROFILE%` work.
+
+TidyFlow refuses to organize a drive root (like `C:\`), the Windows folder, Program Files, or your user profile folder itself (`C:\Users\you`). Folders inside your profile, like Desktop or Documents, are fine.
+
+### Categories
+
+Each category has a **Name**, **Extensions**, a **Destination** folder and an on/off switch.
+
+- **Extensions:** type them separated by commas, semicolons or spaces, with or without the dot (`jpg, .png; heic`). Case doesn't matter.
+- **Destination:** select **Browse…** or type a path. Variables like `%USERPROFILE%` work. A category can't move files into the source folder itself.
+- **Order matters:** if two enabled categories list the same extension, the one higher in the list wins.
+- **Add category** adds a new row; the remove button deletes one. **Restore defaults** replaces your categories with the built-in ones (other settings stay as they are).
+
+### What to leave alone
+
+| Setting | Default | Notes |
+|---|---|---|
+| Files changed in the last (hours) | `24` | Based on the file's last-modified time. `0` = no limit. Doesn't apply to watched-folder moves. |
+| Files smaller than (KB) | `0` | `0` = no limit. `1024` = skip files under 1 MB. |
+| Files matching these patterns | `*.tmp`, `~*`, `*.crdownload`, `*.part`, `*.partial`, `*.download` | One per line. `*` matches anything, `?` one character. Matched against the file name, ignoring case. `*invoice*` works too. |
+| Leave hidden and system files alone (desktop.ini, thumbs.db) | On | |
+
+### If the name is already taken
+
+| Choice | What happens |
+|---|---|
+| **Move it and add a number (report_1.pdf)** (default) | The file moves with `_1`, `_2`, … added before the extension. |
+| **Leave it where it is** | The file stays in the source folder. |
+
+Nothing is ever overwritten.
+
+## Default categories
+
+| Category | Extensions | Moves to | On |
+|---|---|---|---|
+| Images | .jpg .jpeg .png .gif .bmp .svg .webp .ico .tiff .tif .heic .heif .avif .jxl .dng .cr2 .cr3 .nef .arw .raw | `%USERPROFILE%\Pictures` | Yes |
+| Documents | .pdf .docx .doc .txt .rtf .odt .tex .wpd .md .epub .pages .xps .oxps | `%USERPROFILE%\Documents` | Yes |
+| Spreadsheets | .xlsx .xls .xlsm .csv .tsv .ods .numbers | `%USERPROFILE%\Documents\Spreadsheets` | Yes |
+| Presentations | .pptx .ppt .odp .key | `%USERPROFILE%\Documents\Presentations` | Yes |
+| Archives | .zip .rar .7z .tar .gz .tgz .bz2 .xz .zst .iso | `%USERPROFILE%\Documents\Archives` | Yes |
+| Videos | .mp4 .avi .mkv .mov .wmv .flv .webm .m4v | `%USERPROFILE%\Videos` | Yes |
+| Audio | .mp3 .wav .flac .m4a .ogg .aac .wma .opus .aiff | `%USERPROFILE%\Music` | Yes |
+| Installers | .exe .msi .msix .msixbundle .appx .appxbundle .appinstaller | `%USERPROFILE%\Downloads\Installers` | No |
+| Code | .py .js .ts .jsx .tsx .vue .html .css .cpp .c .h .cs .java .kt .php .rb .go .rs .swift .json .xml .yaml .yml .toml .sql .ps1 .bat .cmd .sh | `%USERPROFILE%\Documents\Code` | No |
+
+Installers and Code are off by default so programs and scripts aren't moved unexpectedly.
+
+### Custom category ideas
+
+| Name | Extensions |
+|---|---|
+| E-Books | .epub .mobi .azw .azw3 (remove .epub from Documents, or put E-Books above it) |
+| 3D Models | .stl .obj .fbx .blend .3mf |
+| Fonts | .ttf .otf .woff .woff2 |
+| CAD | .dwg .dxf .step .stp .iges |
+| Torrents | .torrent |
+
+## Schedule tab
+
+Schedule changes need **Save**; **Watch for new files** takes effect immediately.
+
+### Organize automatically
+
+| Option | Details |
+|---|---|
+| **On a schedule** | **Every day**, **Every week** (pick the day) or **Every month** (pick the 1st–28th or **Last day**), at a 24-hour time such as `02:00` or `18:30`. |
+| **A minute after I sign in to Windows** | Runs once, a minute after each sign-in. Works with or without the schedule. |
+
+When saved, the tab shows **Next scheduled run: …**, read from Windows Task Scheduler.
+
+How it works:
+
+- TidyFlow creates a per-user Task Scheduler task named **TidyFlow-AutoOrganize** that runs `TidyFlow.exe --run`. No admin rights are needed.
+- The portable build points the task at the `TidyFlow.exe` you're running. If you move it, open TidyFlow once from the new location and it updates the task.
+- If you built and installed the optional MSIX package, the task uses its app execution alias `%LOCALAPPDATA%\Microsoft\WindowsApps\tidyflow.exe`, which stays the same across package updates.
+- Runs happen in the background with no window. If your PC was off or asleep at the scheduled time, the run happens as soon as possible.
+- Each scheduled run is recorded in History (so you can undo it), counts in the statistics, is written to the log and, if notifications are on, shows a Windows notification when something moved.
+- Turning off both options (and saving) removes the task.
+- Each time TidyFlow starts, it repairs the task if it's missing, points to an old location of `TidyFlow.exe`, or still points to the old 1.x PowerShell worker.
+
+### Watch for new files
+
+**Organize new files as soon as they arrive.** New files are moved about 15 seconds after they stop changing and are no longer locked (in other words, finished downloading).
+
+- The **Files changed in the last (hours)** rule is ignored; all other rules apply.
+- Works only while TidyFlow is running. To keep it running, turn on **Start TidyFlow when I sign in to Windows** and **Keep running in the notification area when I close the window** on the Settings tab.
+- Files still locked after 30 minutes are given up on; the next run picks them up.
+- Each batch of watched-folder moves appears in History as one **Watched folder** entry.
+- You can also toggle it from the notification area menu (**Watch folder for new files**).
+
+## Settings tab
+
+These settings take effect immediately.
+
+| Setting | Notes |
+|---|---|
+| **Theme** | Use my Windows setting / Light / Dark |
+| **Start TidyFlow when I sign in to Windows (in the notification area)** | Adds a `TidyFlow` entry to your per-user Run key (`HKCU\Software\Microsoft\Windows\CurrentVersion\Run`) that starts `TidyFlow.exe --minimized`. If you move `TidyFlow.exe`, turn this off and on again. If you built and installed the optional MSIX package, it uses the package startup task instead, which you can also switch in **Windows Settings > Apps > Startup**; if it's turned off there, TidyFlow tells you. |
+| **Keep running in the notification area when I close the window** | Closing the window hides TidyFlow instead of exiting. Use **Exit** from the notification area menu to quit. |
+| **Start minimized to the notification area** | |
+| **Notify me when files are organized in the background** | For scheduled and watched-folder runs. |
+| **Play a sound** | |
+| **Export settings… / Import settings…** | Saves or loads a `.tfconfig` file with your rules, schedule and app settings (logging settings stay as they are on this PC). You can also drag a `.tfconfig` file onto `TidyFlow.exe` (with the optional MSIX package, double-clicking the file works too). Exports from 1.x import fine. Imported rules and schedule still need **Save**. |
+| **Open log folder / Open data folder** | Opens the right folder for your version (see [Data folder](#data-folder)). |
+| **Reset statistics…** | Clears the Dashboard numbers. History is kept. |
+
+**About** shows the version and whether you're running the portable build or the MSIX package.
+
+### Command line
+
+| Command | What it does |
+|---|---|
+| `TidyFlow.exe --run` | Organizes once with your saved settings, with no window (what the scheduled task runs). Exit codes: `0` OK, `1` some files failed, `2` settings invalid, unreadable or never saved, `3` the run failed. |
+| `TidyFlow.exe --minimized` | Starts in the notification area (used by **Start TidyFlow when I sign in**). |
+| `TidyFlow.exe --uninstall` | After asking, removes the scheduled task, the start-at-sign-in entry and the notification registration. Settings, history and logs are kept. See [Uninstalling](installation-guide.md#uninstalling). |
+| `TidyFlow.exe path\to\settings.tfconfig` | Opens TidyFlow and offers to import the file. |
+
+## Saving and validation
+
+- Edits on the **Rules** and **Schedule** tabs show a bar at the bottom: *You have unsaved changes to your rules or schedule.* Select **Save** (Ctrl+S) or **Discard**.
+- **Organize now** and **Preview changes** save pending edits first.
+- Invalid settings are rejected with a message, for example:
+
+| Message | Fix |
+|---|---|
+| Choose a source folder to organize. | Pick a folder. |
+| TidyFlow can't organize *path*. Choose a regular folder such as Downloads. | Drive roots, Windows, Program Files and your profile folder itself aren't allowed. |
+| Category '*name*' moves files into the source folder itself. | Pick a different destination. |
+| Category '*name*' needs a destination folder. / has no file extensions. / Every category needs a name. | Fill in the missing field or remove the category. |
+| '*time*' isn't a valid time. Use 24-hour HH:mm, for example 02:00. | Use `02:00`, `14:30`, and so on (not `2:00 AM`). |
+
+## Data folder
+
+| Version | Location |
+|---|---|
+| Portable build | `%LOCALAPPDATA%\TidyFlow` |
+| Optional MSIX package (if you built and installed it) | `%LOCALAPPDATA%\Packages\ElementalGeniusLLC.TidyFlow_<id>\LocalCache\Local\TidyFlow` (Windows redirects `%LOCALAPPDATA%\TidyFlow` here) |
+
+Use **Settings > Open data folder** rather than typing the path. For the portable build, delete this folder yourself if you want to remove your settings; uninstalling the MSIX package removes it automatically.
+
+| File | Contents |
+|---|---|
+| `config.json` | Organization settings: rules, categories, schedule |
+| `config.json.backup` | The previous version, used automatically if `config.json` is damaged |
+| `preferences.json` | App settings from the Settings tab |
+| `statistics.json` | Dashboard numbers |
+| `history.json` | The last 50 runs, for Undo. A damaged file is set aside as `history.json.corrupt`. |
+| `logs\TidyFlow-YYYY-MM.log` | One log per month (last 12 kept). Each run logs `MOVED` / `SKIPPED` / `FAILED` lines and a summary. |
+
+The `TIDYFLOW_DATA_DIR` environment variable overrides the data folder (useful for development, or to keep settings next to the program, for example on a USB stick).
+
+## config.json reference
+
+You rarely need to edit `config.json` by hand; the app covers every setting. If you do, exit TidyFlow first (notification area > **Exit**), keep the JSON valid, and reopen TidyFlow. Unknown or invalid values fall back to defaults. Environment variables like `%USERPROFILE%` work in all paths.
 
 ```json
 {
-  "appName": "TidyFlow",
-  "version": "1.0.0",
-  "sourceFolder": "C:\\Users\\YourName\\Downloads",
+  "schemaVersion": 2,
+  "sourceFolder": "%USERPROFILE%\\Downloads",
   "fileAgeThreshold": 24,
-  "fileSizeThreshold": 0,
+  "minFileSizeKB": 0,
   "duplicateHandling": "rename",
-  "categories": [ ... ],
-  "schedule": { ... },
-  "excludePatterns": [ ... ],
-  "logging": { ... }
-}
-```
-
-### Editing the Configuration File
-
-You can edit the configuration file manually:
-
-1. **Using the GUI** (recommended)
-   - Launch TidyFlow Configuration
-   - Make changes
-   - Click "Save Configuration"
-
-2. **Manually editing JSON**
-   - Open `C:\ProgramData\TidyFlow\config.json` in a text editor
-   - Make changes carefully (maintain valid JSON)
-   - Save the file
-   - Restart TidyFlow or reload configuration
-
-## GUI Configuration
-
-### Source Folder
-
-**Purpose**: Specifies which folder TidyFlow will monitor and organize.
-
-**Default**: `C:\Users\YourName\Downloads`
-
-**How to Change**:
-1. Click "Browse..." next to Source Folder field
-2. Navigate to desired folder
-3. Click "OK"
-4. Save configuration
-
-**Tips**:
-- Can be any folder on your computer
-- Commonly used: Downloads, Desktop, Documents subfolders
-- Can organize network drives (if always accessible)
-
-### File Categories
-
-Each category represents a type of file and where it should go.
-
-**Category Properties**:
-- **Name**: Display name (e.g., "Images")
-- **Extensions**: List of file extensions (e.g., .jpg, .png)
-- **Destination**: Where files of this type will be moved
-- **Enabled**: Whether this category is active
-
-**How to Enable/Disable Categories**:
-1. Check/uncheck the "Enabled" checkbox in the data grid
-2. Save configuration
-
-**How to Change Destination Folders**:
-1. Click "Browse" button for the category
-2. Select destination folder
-3. Click "OK"
-4. Save configuration
-
-**Pre-configured Categories**:
-
-| Category | Default Extensions |
-|----------|-------------------|
-| Images | .jpg, .jpeg, .png, .gif, .bmp, .svg, .webp, .ico, .tiff, .tif |
-| Documents | .pdf, .docx, .doc, .txt, .rtf, .odt, .tex, .wpd |
-| Spreadsheets | .xlsx, .xls, .csv, .ods, .xlsm |
-| Presentations | .pptx, .ppt, .odp, .key |
-| Archives | .zip, .rar, .7z, .tar, .gz, .bz2, .xz, .iso |
-| Videos | .mp4, .avi, .mkv, .mov, .wmv, .flv, .webm, .m4v |
-| Audio | .mp3, .wav, .flac, .m4a, .ogg, .aac, .wma, .opus |
-| Executables | .exe, .msi, .bat, .cmd, .ps1 |
-| Code | .py, .js, .html, .css, .cpp, .cs, .java, .php, etc. |
-
-## Advanced Configuration
-
-### File Age Threshold
-
-**Purpose**: Prevents moving files that are too new (might still be downloading or in use).
-
-**Setting**: "Skip files newer than (hours)"
-
-**Default**: 24 hours
-
-**Recommended Values**:
-- **1 hour**: For frequently used folders, quick organization
-- **24 hours**: Default, safe for most scenarios
-- **72 hours**: Very conservative, good for shared folders
-- **0 hours**: Organize everything immediately (use with caution!)
-
-**Example Scenarios**:
-```json
-{
-  "fileAgeThreshold": 24,  // Files must be at least 1 day old
-  "fileAgeThreshold": 1,   // Files must be at least 1 hour old
-  "fileAgeThreshold": 168  // Files must be at least 1 week old
-}
-```
-
-### File Size Threshold
-
-**Purpose**: Ignore files smaller than a certain size.
-
-**Setting**: "Skip files smaller than (KB)" in the GUI, or `fileSizeThreshold` in config.json
-
-**Default**: 0 (no minimum size)
-
-**How to Change**:
-1. In the "Organization Rules" section, find "Skip files smaller than (KB)"
-2. Enter a value in kilobytes
-3. Click "Save Configuration"
-
-**Common Values**:
-| GUI Value (KB) | JSON Value | Description |
-|----------------|------------|-------------|
-| 0 | 0 | No minimum (default) |
-| 1 | 1 | Skip files < 1 KB |
-| 10 | 10 | Skip files < 10 KB |
-| 100 | 100 | Skip files < 100 KB |
-| 1024 | 1024 | Skip files < 1 MB |
-
-**Use Cases**:
-- Skip tiny temp files
-- Avoid organizing thumbnails
-- Focus on substantial files only
-
-**Note**: The value must be 0 or greater. Negative values will display a validation error.
-
-### Duplicate Handling
-
-**Purpose**: Defines what happens when a file with the same name exists in the destination.
-
-**Options**:
-1. **Rename** (default): Adds a number to the filename
-   - `photo.jpg` → `photo_1.jpg`
-   - `photo_1.jpg` → `photo_2.jpg`
-
-2. **Skip**: Leaves the file in the source folder
-   - Prevents overwrites
-   - File remains in Downloads
-
-**How to Set**:
-- GUI: Select from "Duplicate file handling" dropdown
-- JSON: `"duplicateHandling": "rename"` or `"skip"`
-
-**Example**:
-```json
-{
-  "duplicateHandling": "rename"  // or "skip"
-}
-```
-
-### Exclude Patterns
-
-**Purpose**: Prevent certain files from being organized based on filename patterns.
-
-**Default Patterns**:
-- `*.tmp` - Temporary files
-- `~*` - Office temp files (e.g., ~$document.docx)
-- `*.crdownload` - Chrome partial downloads
-- `*.part` - Firefox partial downloads
-
-**Wildcard Syntax**:
-- `*` matches any characters
-- `?` matches a single character
-- Patterns are case-insensitive on Windows
-
-**How to Add Patterns**:
-1. In GUI: Add each pattern on a new line in "Exclude patterns" box
-2. In JSON: Add to `excludePatterns` array
-
-**Examples**:
-```json
-{
-  "excludePatterns": [
-    "*.tmp",           // All .tmp files
-    "~*",              // Files starting with ~
-    "*.crdownload",    // Chrome downloads
-    "desktop.ini",     // Specific filename
-    "Thumbs.db",       // Windows thumbnail cache
-    "*.partial",       // Partial downloads
-    "backup_*"         // Files starting with "backup_"
-  ]
-}
-```
-
-## Custom Categories
-
-Currently, custom categories must be added by editing the JSON configuration file.
-
-### Adding a New Category
-
-1. **Open the Configuration File**
-   ```
-   C:\ProgramData\TidyFlow\config.json
-   ```
-
-2. **Add a New Category Object**
-   ```json
-   {
-     "name": "E-Books",
-     "extensions": [".epub", ".mobi", ".azw", ".azw3", ".pdf"],
-     "destination": "C:\\Users\\YourName\\Documents\\E-Books",
-     "enabled": true
-   }
-   ```
-
-3. **Full Example**
-   ```json
-   {
-     "categories": [
-       {
-         "name": "Images",
-         "extensions": [".jpg", ".png", ".gif"],
-         "destination": "C:\\Users\\YourName\\Pictures",
-         "enabled": true
-       },
-       {
-         "name": "E-Books",
-         "extensions": [".epub", ".mobi", ".azw", ".azw3"],
-         "destination": "C:\\Users\\YourName\\Documents\\E-Books",
-         "enabled": true
-       }
-     ]
-   }
-   ```
-
-4. **Save and Test**
-   - Save the config file
-   - Reload TidyFlow Configuration tool
-   - The new category should appear in the grid
-
-### Example Custom Categories
-
-**3D Models**
-```json
-{
-  "name": "3D Models",
-  "extensions": [".stl", ".obj", ".fbx", ".blend", ".3ds"],
-  "destination": "C:\\Users\\YourName\\Documents\\3D Models",
-  "enabled": true
-}
-```
-
-**Fonts**
-```json
-{
-  "name": "Fonts",
-  "extensions": [".ttf", ".otf", ".woff", ".woff2"],
-  "destination": "C:\\Users\\YourName\\Documents\\Fonts",
-  "enabled": true
-}
-```
-
-**CAD Files**
-```json
-{
-  "name": "CAD",
-  "extensions": [".dwg", ".dxf", ".step", ".stp", ".iges"],
-  "destination": "C:\\Users\\YourName\\Documents\\CAD",
-  "enabled": true
-}
-```
-
-**Torrents**
-```json
-{
-  "name": "Torrents",
-  "extensions": [".torrent"],
-  "destination": "C:\\Users\\YourName\\Downloads\\Torrents",
-  "enabled": true
-}
-```
-
-## Scheduling
-
-### Schedule Configuration
-
-**Enable Automatic Scheduling**
-- Check "Enable automatic scheduling" in GUI
-- Or set `"enabled": true` in schedule section
-
-**Frequency Options**:
-1. **Daily**: Runs every day at specified time
-2. **Weekly**: Runs once per week (Mondays by default)
-3. **Monthly**: Runs on the 1st of each month
-
-**Time Format**: 24-hour format (HH:mm)
-- `02:00` = 2:00 AM
-- `14:30` = 2:30 PM
-- `23:00` = 11:00 PM
-
-**Run on Startup**
-- Runs when you log in to Windows
-- Good for organizing files accumulated while PC was off
-
-### Schedule Examples
-
-**Daily at 2 AM**
-```json
-{
-  "schedule": {
-    "enabled": true,
-    "frequency": "daily",
-    "time": "02:00",
-    "runOnStartup": false
-  }
-}
-```
-
-**Weekly on Mondays at 6 PM**
-```json
-{
+  "skipHiddenFiles": true,
+  "categories": [
+    {
+      "name": "Images",
+      "extensions": [".jpg", ".jpeg", ".png"],
+      "destination": "%USERPROFILE%\\Pictures",
+      "enabled": true
+    }
+  ],
   "schedule": {
     "enabled": true,
     "frequency": "weekly",
     "time": "18:00",
+    "dayOfWeek": "friday",
+    "dayOfMonth": 1,
     "runOnStartup": false
-  }
-}
-```
-
-**Monthly + Run on Startup**
-```json
-{
-  "schedule": {
-    "enabled": true,
-    "frequency": "monthly",
-    "time": "03:00",
-    "runOnStartup": true
-  }
-}
-```
-
-### Disabling Scheduling
-
-**Via GUI**:
-1. Uncheck "Enable automatic scheduling"
-2. Save configuration
-
-**Via JSON**:
-```json
-{
-  "schedule": {
-    "enabled": false
-  }
-}
-```
-
-## Logging Configuration
-
-### Log Settings
-
-```json
-{
+  },
+  "excludePatterns": ["*.tmp", "~*", "*.crdownload", "*.part", "*.partial", "*.download"],
   "logging": {
     "enabled": true,
-    "logPath": "C:\\ProgramData\\TidyFlow\\logs",
+    "logPath": "",
     "logLevel": "info",
     "maxLogFiles": 12
   }
 }
 ```
 
-**Properties**:
-- `enabled`: Enable/disable logging
-- `logPath`: Directory where log files are stored
-- `logLevel`: Verbosity (info, warn, error)
-- `maxLogFiles`: Maximum number of monthly log files to keep
+| Key | Values | Meaning |
+|---|---|---|
+| `schemaVersion` | `2` | Settings format version. |
+| `sourceFolder` | path | Folder to organize. |
+| `fileAgeThreshold` | hours, `0` = no limit | Files changed in the last N hours stay. |
+| `minFileSizeKB` | KB, `0` = no limit | Files smaller than this stay. |
+| `duplicateHandling` | `"rename"` \| `"skip"` | Add a number, or leave it where it is. |
+| `skipHiddenFiles` | `true` \| `false` | Leave hidden and system files alone. |
+| `categories[]` | `name`, `extensions[]`, `destination`, `enabled` | In priority order. |
+| `schedule.enabled` | `true` \| `false` | "On a schedule". |
+| `schedule.frequency` | `"daily"` \| `"weekly"` \| `"monthly"` | |
+| `schedule.time` | `"HH:mm"` | 24-hour time. |
+| `schedule.dayOfWeek` | `"monday"` … `"sunday"` | Used for weekly runs. |
+| `schedule.dayOfMonth` | `1`–`28`, `0` = last day | Used for monthly runs. |
+| `schedule.runOnStartup` | `true` \| `false` | "A minute after I sign in to Windows". |
+| `excludePatterns[]` | wildcard patterns | Files matching these stay. |
+| `logging.enabled` | `true` \| `false` | Write run logs. |
+| `logging.logPath` | `""` or a folder path | Empty (the default) means the `logs` folder inside TidyFlow's data folder, which follows `TIDYFLOW_DATA_DIR` and the MSIX package's private location. Set a folder path (variables allowed) to log somewhere else. |
+| `logging.logLevel` | `"info"` \| `"warn"` \| `"error"` | `info` logs every moved and skipped file; `warn` and `error` log only problems. |
+| `logging.maxLogFiles` | number | Monthly log files to keep. |
 
-**Log File Naming**:
-- Format: `TidyFlow-YYYY-MM.log`
-- Example: `TidyFlow-2024-11.log`
-- One log file per month
+`preferences.json`, `statistics.json` and `history.json` are managed by the app; don't edit them.
 
-**Log Rotation**:
-- Automatically rotates monthly
-- Keeps last N months based on `maxLogFiles`
-- Old logs are automatically deleted
+## Upgrading from 1.x
 
-## Input Validation
+Your 1.x settings are upgraded automatically the first time 2.0 starts:
 
-TidyFlow validates your configuration before saving to prevent errors.
+| 1.x | 2.0 |
+|---|---|
+| `fileSizeThreshold` | `minFileSizeKB`, treated as KB (what the 1.x screen said; the 1.x scheduled worker wrongly used bytes) |
+| `darkMode` preference | `theme` |
+| `logging.logPath` in `C:\ProgramData\TidyFlow\logs` | `""` (TidyFlow's own logs folder) |
+| Unknown or invalid values | Defaults, instead of failing to load |
+| Scheduled task pointing at `TidyFlow-Worker.ps1` | Recreated to run `TidyFlow.exe --run` |
+| Leftover `TidyFlow-Worker.ps1`, `worker-deployment.json` | Deleted from the data folder |
 
-### Validated Fields
+Settings files exported from 1.x can be imported with **Import settings…**.
 
-| Field | Validation Rules |
-|-------|------------------|
-| Source Folder | Cannot be empty; cannot be system-critical paths (Windows, System32, Program Files, root drive) |
-| File Age Threshold | Must be 0 or greater |
-| File Size Threshold | Must be 0 or greater |
-| Schedule Time | Must be in HH:mm format (00:00 to 23:59) |
+## Tips
 
-### Validation Error Messages
-
-If validation fails, you'll see a message explaining the issue:
-
-- **"Source folder path cannot be empty"**: Enter a valid folder path
-- **"Invalid source folder path"**: The path is a protected system location
-- **"File age threshold must be 0 or greater"**: Enter a non-negative number
-- **"File size threshold must be 0 or greater"**: Enter a non-negative number
-- **"Please enter a valid time in HH:mm format"**: Use 24-hour time format (e.g., 02:00, 14:30)
-
-### Time Format Examples
-
-| Valid | Invalid |
-|-------|---------|
-| 02:00 | 2:00 AM |
-| 14:30 | 2:30 PM |
-| 00:00 | 24:00 |
-| 23:59 | 25:00 |
-
-## Configuration Backup
-
-TidyFlow automatically creates a backup of your configuration file each time you save.
-
-### Backup Location
-
-```
-C:\ProgramData\TidyFlow\config.json.backup
-```
-
-### Restoring from Backup
-
-If your configuration becomes corrupted, you can restore from the backup:
-
-**Method 1: Manual Copy**
-```powershell
-Copy-Item "C:\ProgramData\TidyFlow\config.json.backup" `
-          "C:\ProgramData\TidyFlow\config.json" -Force
-```
-
-**Method 2: If GUI Won't Load**
-1. Navigate to `C:\ProgramData\TidyFlow\`
-2. Delete or rename `config.json`
-3. Rename `config.json.backup` to `config.json`
-4. Launch TidyFlow Configuration
-
-### Backup Behavior
-
-- A backup is created before each save operation
-- Only the most recent backup is kept
-- Backup creation failure does not prevent saving (non-critical)
-
-## Best Practices
-
-### 1. Start Small
-
-Begin with a few enabled categories:
-```json
-{
-  "categories": [
-    {"name": "Images", "enabled": true},
-    {"name": "Documents", "enabled": true},
-    {"name": "Archives", "enabled": false},
-    // Others disabled initially
-  ]
-}
-```
-
-### 2. Use Test Run First
-
-Always use "Test Run (Dry Run)" before actual operation:
-- Shows what would happen
-- No files are actually moved
-- Helps verify configuration
-
-### 3. Set Appropriate File Age
-
-Choose based on your usage:
-- Active folder (daily use): 24-48 hours
-- Occasional use: 72 hours or more
-- Archive folder: 168 hours (1 week)
-
-### 4. Backup Important Files
-
-Before first run:
-- Backup important files
-- Or test with a copy of your Downloads folder
-
-### 5. Review Logs Regularly
-
-Check logs to ensure everything is working:
-```powershell
-# View latest log
-notepad "C:\ProgramData\TidyFlow\logs\TidyFlow-$(Get-Date -Format 'yyyy-MM').log"
-```
-
-### 6. Exclude Patterns for Safety
-
-Add patterns for files you never want moved:
-```json
-{
-  "excludePatterns": [
-    "*.tmp",
-    "~*",
-    "important_*",
-    "*_donotmove*"
-  ]
-}
-```
-
-### 7. Organize by Project or Topic
-
-Create destination folders by project:
-```json
-{
-  "categories": [
-    {
-      "name": "Work Documents",
-      "extensions": [".docx", ".pdf"],
-      "destination": "C:\\Users\\YourName\\Work\\Documents",
-      "enabled": true
-    },
-    {
-      "name": "Personal Documents",
-      "extensions": [".txt"],
-      "destination": "C:\\Users\\YourName\\Personal\\Documents",
-      "enabled": true
-    }
-  ]
-}
-```
-
-### 8. Schedule During Off-Hours
-
-Set schedule when computer is on but you're not using it:
-- Early morning: `02:00` or `03:00`
-- Late night: `23:00` or `00:00`
-- Lunch time: `12:00` or `13:00`
-
-## Troubleshooting Configuration Issues
-
-### Configuration Not Loading
-
-**Symptom**: Changes don't take effect
-
-**Solutions**:
-1. Verify JSON syntax is valid (use JSONLint.com)
-2. Check file permissions on config.json
-3. Restart TidyFlow Configuration tool
-4. Check for error messages in logs
-
-### Files Not Being Moved
-
-**Check**:
-1. Category is enabled
-2. File extension is in the category's list
-3. File age is greater than threshold
-4. File doesn't match exclude patterns
-5. Destination folder is accessible
-
-### Scheduled Task Not Running
-
-**Verify**:
-1. Schedule is enabled in configuration
-2. Task exists in Task Scheduler (`taskschd.msc`)
-3. Task is enabled
-4. Trigger is configured correctly
-5. You saved configuration after enabling schedule
-
-## Configuration Templates
-
-### Conservative Template
-```json
-{
-  "fileAgeThreshold": 72,
-  "duplicateHandling": "skip",
-  "excludePatterns": ["*"]  // Start with all excluded
-}
-```
-
-### Aggressive Template
-```json
-{
-  "fileAgeThreshold": 1,
-  "duplicateHandling": "rename",
-  "excludePatterns": ["*.tmp", "~*"]
-}
-```
-
-### Balanced Template (Recommended)
-```json
-{
-  "fileAgeThreshold": 24,
-  "duplicateHandling": "rename",
-  "excludePatterns": ["*.tmp", "~*", "*.crdownload", "*.part"]
-}
-```
+- **Preview first.** Use **Preview changes** after any rule change.
+- **Everything can be undone.** History keeps the last 50 runs, each with **Undo**.
+- **Conservative setup:** Files changed in the last `168` hours (one week) + **Leave it where it is**.
+- **Fast setup:** turn on **Watch for new files** so downloads are sorted as soon as they finish.
+- **Protect specific files** with patterns such as `important_*` or `*_keep*`.
+- **Schedule for a time your PC is usually on.** If it's off, TidyFlow catches up at the next opportunity anyway.
 
 ---
 
-**Need More Help?** Check the [Troubleshooting Guide](troubleshooting.md) or [open an issue](https://github.com/ProfessorMoose74/TidyFlow/issues).
+**Need more help?** See the [Troubleshooting Guide](troubleshooting.md) or [open an issue](https://github.com/ProfessorMoose74/TidyPackRat/issues).
