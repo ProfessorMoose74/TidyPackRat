@@ -73,7 +73,10 @@
       "Bash(git -C \"C:\\\\Users\\\\rober\\\\Git\\\\tidy-pack-rat\" commit -m \"$\\(cat <<''EOF''\nv1.2.7: Fix PowerShell crash on Windows 11 Insider build 26200.x\n\nRoot Cause:\nWindows 11 Insider builds \\(26200.6901\\) have PowerShell compatibility\nissues with Set-StrictMode and colored console output that cause\nimmediate crashes when launching the worker script.\n\nFixes:\n- Remove Set-StrictMode -Version Latest entirely - \"Latest\" introduces\n  breaking strict checks on newer PowerShell versions in Insider builds\n- Remove ALL -ForegroundColor arguments from Write-Host calls - colored\n  output crashes the console host on build 26200.x\n- Add immediate \"TidyFlow Worker starting...\" output before any\n  initialization to confirm script launch\n- Change ErrorActionPreference from \"Stop\" to \"Continue\" to prevent\n  immediate termination on minor issues\n- Simplify Wait-ForKeyPress and Write-Log functions \\(no color output\\)\n\nNote: These are cosmetic/compatibility changes only. The core file\norganization logic remains unchanged and was never broken.\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
       "Bash(git -C \"C:\\\\Users\\\\rober\\\\Git\\\\tidy-pack-rat\" remote set-url gitlab http://10.200.10.32/robert/tidy-pack-rat.git)",
       "Bash(git -C \"C:\\\\Users\\\\rober\\\\Git\\\\tidy-pack-rat\" config:*)",
-      "Bash(git -C \"C:\\\\Users\\\\rober\\\\Git\\\\tidy-pack-rat\" -c credential.helper= -c \"credential.http://10.200.10.32.helper=manager\" push gitlab main)"
+      "Bash(git -C \"C:\\\\Users\\\\rober\\\\Git\\\\tidy-pack-rat\" -c credential.helper= -c \"credential.http://10.200.10.32.helper=manager\" push gitlab main)",
+      "Bash(gh pr:*)",
+      "Bash(git fetch:*)",
+      "Bash(gh api:*)"
     ],
     "deny": [],
     "ask": []
