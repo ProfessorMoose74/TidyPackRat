@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- WinGet package (`winget install ElementalGenius.TidyFlow`), with new releases submitted automatically by the release workflow.
+
 ## [2.0.0] - 2026-09-23
 
 A complete rewrite on .NET 10. Your 1.x settings are upgraded automatically. Download it from [GitHub Releases](https://github.com/ProfessorMoose74/TidyPackRat/releases).

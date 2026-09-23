@@ -70,3 +70,21 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release create '${{ github.ref_name }}' dist/*.zip --title "TidyFlow ${{ github.ref_name }}" --notes-file release-notes.md
+
+  winget:
+    # Opens a pull request at microsoft/winget-pkgs for the new version. Needs a WINGET_TOKEN repository secret
+    # (a classic token with the public_repo scope) and a fork of winget-pkgs under the repository owner's account.
+    # Skipped when the secret isn't set.
+    runs-on: windows-latest
+    needs: release
+    env:
+      WINGET_TOKEN: ${{ secrets.WINGET_TOKEN }}
+    steps:
+      - name: Submit to WinGet
+        if: env.WINGET_TOKEN != ''
+        uses: vedantmgoyal9/winget-releaser@4ffc7888bffd451b357355dc214d43bb9f23917e # v2
+        with:
+          identifier: ElementalGenius.TidyFlow
+          installers-regex: '-portable\.zip$'
+          release-notes-url: https://github.com/ProfessorMoose74/TidyPackRat/releases/tag/${{ github.ref_name }}
+          token: ${{ env.WINGET_TOKEN }}

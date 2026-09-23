@@ -28,6 +28,14 @@ TidyFlow is a free, open-source file organizer for Windows. It moves files out o
 2. Unzip it somewhere permanent, for example `%LOCALAPPDATA%\Programs\TidyFlow`.
 3. Run `TidyFlow.exe`. That's it: it's a single self-contained file with nothing else to install.
 
+Or install it with [WinGet](docs/installation-guide.md#install-with-winget), which also handles updates:
+
+```powershell
+winget install ElementalGenius.TidyFlow
+```
+
+> **WinGet listing pending:** TidyFlow has been submitted to the WinGet repository. Until Microsoft approves it, `winget install` reports that no package was found; use the download instead.
+
 > **"Windows protected your PC"?** TidyFlow isn't code-signed, so SmartScreen may warn you the first time. Select **More info** → **Run anyway**. Only download TidyFlow from this repository's Releases page.
 
 **Requirements:** Windows 10 version 2004 (build 19041) or later, or Windows 11, on x64 or ARM64.
@@ -94,8 +102,8 @@ Settings, history, statistics and logs are kept in `%LOCALAPPDATA%\TidyFlow`. **
 
 ## Updating and uninstalling
 
-- **Update:** exit TidyFlow (right-click the notification-area icon → **Exit**), replace `TidyFlow.exe` with the new one, and start it again. Your settings carry over.
-- **Uninstall:** exit TidyFlow, run `TidyFlow.exe --uninstall`, then delete its folder. Delete `%LOCALAPPDATA%\TidyFlow` too if you don't want to keep your settings and history. Files TidyFlow already organized stay where they are.
+- **Update:** exit TidyFlow (right-click the notification-area icon → **Exit**), replace `TidyFlow.exe` with the new one, and start it again. With WinGet: exit TidyFlow, then `winget upgrade ElementalGenius.TidyFlow`. Your settings carry over.
+- **Uninstall:** exit TidyFlow, run `TidyFlow.exe --uninstall`, then delete its folder (with WinGet: `tidyflow --uninstall`, then `winget uninstall ElementalGenius.TidyFlow`). Delete `%LOCALAPPDATA%\TidyFlow` too if you don't want to keep your settings and history. Files TidyFlow already organized stay where they are.
 
 ## Documentation
 

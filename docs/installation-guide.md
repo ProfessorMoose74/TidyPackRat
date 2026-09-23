@@ -1,6 +1,6 @@
 # TidyFlow Installation Guide
 
-TidyFlow is distributed on [GitHub Releases](https://github.com/ProfessorMoose74/TidyPackRat/releases) as a portable app: one `TidyFlow.exe`, no installer. It isn't in the Microsoft Store or any other store, so only download it from the Releases page.
+TidyFlow is distributed on [GitHub Releases](https://github.com/ProfessorMoose74/TidyPackRat/releases) as a portable app: one `TidyFlow.exe`, no installer. You can also install it with [WinGet](#install-with-winget), Windows' built-in package manager, which fetches the same file. It isn't in the Microsoft Store.
 
 ## System requirements
 
@@ -26,6 +26,16 @@ To check your Windows version, press **Win+R**, type `winver` and press Enter.
 2. Unzip it to a folder you'll keep, for example `%LOCALAPPDATA%\Programs\TidyFlow` or `C:\Tools\TidyFlow`. (Don't run it from inside the zip or from a temporary folder.) The zip contains `TidyFlow.exe` (about 80 MB) and `LICENSE`.
 3. Run `TidyFlow.exe`.
 4. Optional: right-click `TidyFlow.exe` and choose **Pin to Start** or **Pin to taskbar** (on Windows 11, under **Show more options**).
+
+### Install with WinGet
+
+```powershell
+winget install ElementalGenius.TidyFlow
+```
+
+WinGet downloads the right zip for your PC, puts `TidyFlow.exe` in its own folder and adds a `tidyflow` command, so you can start it by typing `tidyflow` in the Run box or a terminal. Pin it to Start from there if you like.
+
+> **WinGet listing pending:** TidyFlow has been submitted to the WinGet repository. Until Microsoft approves it, `winget install` reports that no package was found; use the download instead.
 
 ### "Windows protected your PC"
 
@@ -58,6 +68,8 @@ TidyFlow doesn't update itself. To upgrade:
 2. Exit TidyFlow (right-click the notification-area icon > **Exit**).
 3. Replace `TidyFlow.exe` in your TidyFlow folder with the new one.
 4. Open TidyFlow. Your settings, history and schedule carry over.
+
+If you installed with WinGet, exit TidyFlow and run `winget upgrade ElementalGenius.TidyFlow` instead (or `winget upgrade --all`). WinGet can't replace `TidyFlow.exe` while it's running.
 
 Tip: select **Watch** > **Custom** > **Releases** on the GitHub repository to be notified of new versions.
 
@@ -100,6 +112,8 @@ Optional cleanup: 1.x may have left logs and settings in `C:\ProgramData\TidyFlo
    Confirm when asked. TidyFlow removes its scheduled task (`TidyFlow-AutoOrganize`), the start-at-sign-in entry and its notification registration, then tells you where your settings are.
 3. Optional: delete `%LOCALAPPDATA%\TidyFlow` (or your `TIDYFLOW_DATA_DIR` folder) to remove settings, history, statistics and logs. `--uninstall` keeps them in case you come back.
 4. Delete the folder that contains `TidyFlow.exe`.
+
+If you installed with WinGet, do steps 1–3 using `tidyflow --uninstall`, then run `winget uninstall ElementalGenius.TidyFlow` instead of deleting the folder. (WinGet removes the program but doesn't know about the scheduled task or startup entry, which is why `--uninstall` comes first.)
 
 Files TidyFlow organized stay in their destination folders.
 

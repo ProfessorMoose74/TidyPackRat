@@ -152,6 +152,8 @@ TidyFlow is released on [GitHub Releases](https://github.com/ProfessorMoose74/Ti
 
 The tag must match `<Version>`. The release workflow (`.github/workflows/release.yml`) then builds and tests, publishes `TidyFlow-X.Y.Z-x64-portable.zip` and `TidyFlow-X.Y.Z-arm64-portable.zip`, and creates the GitHub release with that version's CHANGELOG section as the release notes.
 
+After the release is created, the workflow's `winget` job opens a pull request at [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs) updating the `ElementalGenius.TidyFlow` package to the new version (using [WinGet Releaser](https://github.com/vedantmgoyal9/winget-releaser)). One-time setup for the repository owner: fork `microsoft/winget-pkgs` to your account, create a classic personal access token with the `public_repo` scope, and save it as the `WINGET_TOKEN` repository secret. Without the secret the job is skipped and nothing else is affected. Microsoft's bots validate the pull request; it usually merges within a day or two.
+
 CI (`.github/workflows/ci.yml`) builds, tests and uploads the portable zips as artifacts on every push to `main` and every pull request. The MSIX package isn't built by CI.
 
 ## Areas where help is welcome
